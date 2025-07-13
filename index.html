@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>Port Jeffrey</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="/assets/images/logo.png?v=1" type="image/png" />
+    <link
+      rel="shortcut icon"
+      href="/assets/images/logo.png?v=1"
+      type="image/png"
+    />
+
+    <!-- Apple Touch Icon for mobile devices -->
+    <link rel="apple-touch-icon" href="/assets/images/logo.png" />
+
+    <!-- For better mobile support -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/assets/images/logo.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/assets/images/logo.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/assets/images/logo.png"
+    />
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden; /* Prevent scrollbars from canvas */
+        /* Support for safe areas on devices with notches */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
+      #root {
+        width: 100vw;
+        height: 100vh;
+        /* Account for safe areas */
+        min-height: calc(
+          100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+        );
+      }
+
+      /* Improve touch targets for mobile */
+      button,
+      [role='button'] {
+        min-height: 44px;
+        min-width: 44px;
+      }
+
+      /* Better scrolling on iOS */
+      * {
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
