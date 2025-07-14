@@ -5,6 +5,8 @@ import path from 'path'; // Import path module
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: true, // Enable access from local network
+    port: 3000, // Set a specific port for consistency
     open: true,
     // PERFORMANCE FIX: Optimize dev server
     hmr: {

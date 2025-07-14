@@ -162,9 +162,9 @@
 /* Centered contact button - smaller */
 .pc-contact-btn {
   padding: 10px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #00ccdd 0%, #7cf5ff 100%);
   border: none;
-  border-radius: 20px;
+  border-radius: 10px;
   color: white;
   font-weight: 600;
   font-size: 14px;
@@ -193,21 +193,67 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .pc-card {
-    height: 480px;
+    height: 400px; /* Reduced height for better mobile fit */
+  }
+
+  .pc-content {
+    padding: 24px; /* Reduced padding for mobile */
   }
 
   .pc-header h3 {
-    font-size: 30px;
+    font-size: 26px; /* Slightly smaller for mobile */
+    margin-bottom: 8px;
   }
 
   .pc-header p {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .pc-contact-btn {
     padding: 8px 20px;
     font-size: 13px;
     min-width: 100px;
+  }
+}
+
+/* Landscape mobile specific adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .pc-card-wrapper {
+    max-width: 200px; /* Ultra compact for landscape */
+  }
+
+  .pc-card {
+    height: 220px; /* Even smaller height for landscape */
+  }
+
+  .pc-content {
+    padding: 8px; /* Ultra compact padding */
+  }
+
+  .pc-header h3 {
+    font-size: 16px; /* Smaller title for landscape */
+    margin-bottom: 2px; /* Reduced margin */
+  }
+
+  .pc-header p {
+    font-size: 11px; /* Smaller text */
+  }
+
+  .pc-contact-btn {
+    padding: 3px 10px; /* Smaller padding */
+    font-size: 10px; /* Smaller font */
+    min-width: 70px; /* Smaller min-width */
+  }
+}
+
+/* Portrait mobile specific adjustments */
+@media (max-width: 768px) and (orientation: portrait) {
+  .pc-card-wrapper {
+    max-width: min(350px, 85vw); /* Responsive width for portrait */
+  }
+
+  .pc-card {
+    height: 420px; /* Appropriate height for portrait */
   }
 }
 

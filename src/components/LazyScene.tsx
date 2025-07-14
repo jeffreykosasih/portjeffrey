@@ -55,7 +55,7 @@ interface LazySceneProps {
   isDarkMode: boolean;
   showIsland: boolean;
   showSea: boolean;
-  deviceInfo?: DeviceInfo;
+  deviceInfo?: any;
   onNavigateToConnect?: () => void;
   onNavigateToPage?: (page: string) => void;
   onPlayClickSound?: () => void;

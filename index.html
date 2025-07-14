@@ -4,11 +4,17 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover, interactive-widget=resizes-content"
     />
     <meta name="format-detection" content="telephone=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="theme-color" content="#00bbdc" />
+    <meta name="msapplication-navbutton-color" content="#00bbdc" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
@@ -46,6 +52,14 @@
     />
 
     <style>
+      /* Prevent FOUC and ensure consistent rendering */
+      html {
+        font-size: 16px;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+
       body {
         margin: 0;
         overflow: hidden; /* Prevent scrollbars from canvas */
@@ -54,13 +68,25 @@
         padding-bottom: env(safe-area-inset-bottom);
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
+        /* Improve font rendering */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        /* Better touch handling */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
+
       #root {
         width: 100vw;
         height: 100vh;
+        /* Use dynamic viewport on supporting browsers */
+        height: 100dvh;
         /* Account for safe areas */
         min-height: calc(
           100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+        );
+        min-height: calc(
+          100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
         );
       }
 
@@ -71,9 +97,57 @@
         min-width: 44px;
       }
 
-      /* Better scrolling on iOS */
+      /* Better scrolling on all devices */
       * {
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+      }
+
+      /* Enhanced responsive breakpoints */
+      @media screen and (max-width: 480px) {
+        /* Small mobile devices */
+        html {
+          font-size: 14px;
+        }
+      }
+
+      @media screen and (min-width: 481px) and (max-width: 768px) {
+        /* Large mobile devices */
+        html {
+          font-size: 15px;
+        }
+      }
+
+      @media screen and (min-width: 769px) and (max-width: 1024px) {
+        /* Tablet devices */
+        html {
+          font-size: 16px;
+        }
+      }
+
+      @media screen and (min-width: 1025px) {
+        /* Desktop devices */
+        html {
+          font-size: 16px;
+        }
+      }
+
+      /* Orientation-specific optimizations */
+      @media screen and (orientation: landscape) and (max-height: 500px) {
+        /* Landscape mobile with limited height */
+        #root {
+          height: 100vh;
+          min-height: 100vh;
+        }
+      }
+
+      /* High DPI display optimizations */
+      @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        /* Optimize for retina displays */
+        body {
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
+        }
       }
     </style>
   </head>

@@ -225,20 +225,27 @@ export default function ConnectPage({
               top: 0,
               left: 0,
               width: '100vw',
-              height: '100vh',
+              height: deviceInfo?.isMobile
+                ? '100dvh' // Use dynamic viewport height on mobile
+                : '100vh',
               backgroundColor: isDarkMode ? '#0f172a' : '#00bbdc',
               zIndex: 1500,
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: deviceInfo?.isMobile ? 'flex-start' : 'center',
+              justifyContent: 'flex-start', // Always start from top for better scrolling
               alignItems: 'center',
               color: '#ffffff',
               padding: deviceInfo?.isMobile
-                ? '20px 16px'
+                ? 'max(env(safe-area-inset-top), 20px) 16px max(env(safe-area-inset-bottom), 80px) 16px' // Extra bottom padding for mobile
                 : deviceInfo?.isTablet
                 ? '30px 24px'
                 : '40px',
               overflowY: 'auto',
+              overflowX: 'hidden',
+              // Improve mobile scrolling
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
             }}
           >
             {/* Back button with slide left to right effect */}
@@ -254,11 +261,27 @@ export default function ConnectPage({
               style={{
                 borderRadius: '50%',
                 position: 'absolute',
-                top: deviceInfo?.isMobile ? '16px' : '20px',
-                right: deviceInfo?.isMobile ? '16px' : '20px',
+                top: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? 'max(env(safe-area-inset-top), 8px)'
+                    : 'max(env(safe-area-inset-top), 16px)'
+                  : '20px',
+                right: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '12px'
+                    : '16px'
+                  : '20px',
                 zIndex: 1001,
-                width: deviceInfo?.isMobile ? '48px' : '50px',
-                height: deviceInfo?.isMobile ? '48px' : '50px',
+                width: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '40px'
+                    : '48px'
+                  : '50px',
+                height: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '40px'
+                    : '48px'
+                  : '50px',
                 border: 'none',
                 backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
                 color: '#ffffff',
@@ -299,14 +322,24 @@ export default function ConnectPage({
               <h1
                 style={{
                   fontSize: deviceInfo?.isMobile
-                    ? '2.5rem'
+                    ? deviceInfo?.orientation === 'landscape'
+                      ? '1.3rem' // Reduced from 1.8rem
+                      : '2.0rem' // Reduced from 2.5rem for portrait
                     : deviceInfo?.isTablet
                     ? '3rem'
                     : '4rem',
                   fontWeight: '900',
                   fontFamily: 'Lato, sans-serif',
-                  marginBottom: deviceInfo?.isMobile ? '20px' : '30px',
-                  marginTop: deviceInfo?.isMobile ? '40px' : '0px',
+                  marginBottom: deviceInfo?.isMobile
+                    ? deviceInfo?.orientation === 'landscape'
+                      ? '6px' // Reduced from 12px
+                      : '16px' // Reduced from 20px for portrait
+                    : '30px',
+                  marginTop: deviceInfo?.isMobile
+                    ? deviceInfo?.orientation === 'landscape'
+                      ? '10px' // Reduced from 20px
+                      : '30px' // Reduced from 40px for portrait
+                    : '0px',
                   background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
@@ -320,14 +353,22 @@ export default function ConnectPage({
               <p
                 style={{
                   fontSize: deviceInfo?.isMobile
-                    ? '1.1rem'
+                    ? deviceInfo?.orientation === 'landscape'
+                      ? '0.75rem' // Reduced from 0.9rem
+                      : '1.0rem' // Reduced from 1.1rem for portrait
                     : deviceInfo?.isTablet
                     ? '1.3rem'
                     : '1.5rem',
-                  lineHeight: '1.8',
+                  lineHeight:
+                    deviceInfo?.isMobile &&
+                    deviceInfo?.orientation === 'landscape'
+                      ? '1.3' // Reduced from 1.5
+                      : '1.8',
                   fontFamily: 'Lato, sans-serif',
                   marginBottom: deviceInfo?.isMobile
-                    ? '30px'
+                    ? deviceInfo?.orientation === 'portrait'
+                      ? '24px' // Reduced from 30px for portrait
+                      : '30px' // Keep landscape the same
                     : deviceInfo?.isTablet
                     ? '40px'
                     : '50px',
@@ -349,7 +390,9 @@ export default function ConnectPage({
                     ? '1fr'
                     : 'repeat(auto-fit, minmax(400px, 1fr))',
                   gap: deviceInfo?.isMobile
-                    ? '40px'
+                    ? deviceInfo?.orientation === 'portrait'
+                      ? '32px' // Reduced from 40px for portrait
+                      : '40px' // Keep landscape the same
                     : deviceInfo?.isTablet
                     ? '50px'
                     : '60px',

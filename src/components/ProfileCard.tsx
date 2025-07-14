@@ -70,7 +70,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   enableTilt = true,
   miniAvatarUrl,
   name = 'Jeffrey Kosasih',
-  title = 'Software Developer',
+  title = 'Web Developer',
   handle = 'jeffreyk',
   status = 'Online',
   contactText = 'Contact',

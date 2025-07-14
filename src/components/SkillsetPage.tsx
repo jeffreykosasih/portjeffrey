@@ -188,14 +188,40 @@ export default function SkillsetPage({
       zIndex: 1500,
       display: 'flex',
       flexDirection: 'column' as const,
-      justifyContent: 'center',
-      alignItems: 'center',
       color: '#ffffff',
       fontFamily: 'Lato, sans-serif',
-      padding: deviceInfo?.isMobile ? '20px 16px' : '40px',
+      overflowY: 'auto' as const,
     };
 
-    return baseStyles;
+    if (deviceInfo?.isMobile) {
+      if (deviceInfo.orientation === 'landscape') {
+        return {
+          ...baseStyles,
+          padding:
+            'max(env(safe-area-inset-top), 10px) 16px max(env(safe-area-inset-bottom), 20px) 16px',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          height: '100dvh',
+        };
+      } else {
+        // Portrait mobile
+        return {
+          ...baseStyles,
+          padding:
+            'max(env(safe-area-inset-top), 20px) 16px max(env(safe-area-inset-bottom), 40px) 16px',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          height: '100dvh',
+        };
+      }
+    } else {
+      return {
+        ...baseStyles,
+        padding: '40px',
+        justifyContent: 'center',
+        alignItems: 'center',
+      };
+    }
   };
 
   const getTitleStyles = () => {
@@ -212,11 +238,21 @@ export default function SkillsetPage({
     };
 
     if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        fontSize: '2.5rem',
-        marginBottom: '20px',
-      };
+      if (deviceInfo.orientation === 'landscape') {
+        return {
+          ...baseStyles,
+          fontSize: '1.2rem', // Reduced from 1.6rem
+          marginBottom: '4px', // Reduced from 10px
+          marginTop: '2px', // Reduced from 5px
+        };
+      } else {
+        return {
+          ...baseStyles,
+          fontSize: '2.2rem',
+          marginBottom: '20px',
+          marginTop: '20px',
+        };
+      }
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
@@ -234,8 +270,16 @@ export default function SkillsetPage({
   const getCategoryButtonStyles = (category: SkillCategory) => {
     const isActive = activeCategory === category;
     const baseStyles = {
-      padding: deviceInfo?.isMobile ? '12px 24px' : '15px 30px',
-      margin: deviceInfo?.isMobile ? '0 6px' : '0 10px',
+      padding: deviceInfo?.isMobile
+        ? deviceInfo?.orientation === 'landscape'
+          ? '6px 12px' // Reduced landscape padding
+          : '12px 24px'
+        : '15px 30px',
+      margin: deviceInfo?.isMobile
+        ? deviceInfo?.orientation === 'landscape'
+          ? '0 3px' // Reduced landscape margin
+          : '0 6px'
+        : '0 10px',
       borderRadius: '12px',
       border: 'none',
       backgroundColor: isActive
@@ -278,8 +322,16 @@ export default function SkillsetPage({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: deviceInfo?.isMobile ? '30px' : '50px',
-          padding: deviceInfo?.isMobile ? '20px' : '40px',
+          gap: deviceInfo?.isMobile
+            ? deviceInfo.orientation === 'landscape'
+              ? '20px'
+              : '25px'
+            : '50px',
+          padding: deviceInfo?.isMobile
+            ? deviceInfo.orientation === 'landscape'
+              ? '15px'
+              : '20px'
+            : '40px',
         }}
       >
         {skillsData.languages.map((skill, index) => (
@@ -318,10 +370,18 @@ export default function SkillsetPage({
             </div>
             <h4
               style={{
-                fontSize: deviceInfo?.isMobile ? '1.2rem' : '1.4rem',
+                fontSize: deviceInfo?.isMobile
+                  ? deviceInfo.orientation === 'landscape'
+                    ? '0.9rem'
+                    : '1rem'
+                  : '1.4rem',
                 fontWeight: '700',
                 fontFamily: 'Lato, sans-serif',
-                marginBottom: '10px',
+                marginBottom: deviceInfo?.isMobile
+                  ? deviceInfo.orientation === 'landscape'
+                    ? '4px'
+                    : '6px'
+                  : '10px',
                 color: '#ffffff',
                 textAlign: 'center',
               }}
@@ -330,13 +390,17 @@ export default function SkillsetPage({
             </h4>
             <p
               style={{
-                fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
+                fontSize: deviceInfo?.isMobile
+                  ? deviceInfo.orientation === 'landscape'
+                    ? '0.7rem'
+                    : '0.8rem'
+                  : '1rem',
                 fontFamily: 'Lato, sans-serif',
                 fontWeight: '300',
                 color: 'rgba(255, 255, 255, 0.8)',
                 textAlign: 'center',
                 margin: 0,
-                lineHeight: '1.4',
+                lineHeight: '1.3',
               }}
             >
               {skill.description}
@@ -360,12 +424,21 @@ export default function SkillsetPage({
         style={{
           display: 'grid',
           gridTemplateColumns: deviceInfo?.isMobile
-            ? 'repeat(2, 1fr)'
+            ? deviceInfo.orientation === 'landscape'
+              ? 'repeat(3, 1fr)'
+              : 'repeat(2, 1fr)'
             : 'repeat(3, 1fr)',
-          gridTemplateRows: 'repeat(2, 1fr)',
-          gap: deviceInfo?.isMobile ? '20px' : '30px',
+          gridTemplateRows:
+            deviceInfo?.isMobile && deviceInfo.orientation === 'landscape'
+              ? 'repeat(2, 1fr)'
+              : 'auto',
+          gap: deviceInfo?.isMobile
+            ? deviceInfo.orientation === 'landscape'
+              ? '8px' // Reduced from 15px
+              : '16px'
+            : '30px',
           width: '100%',
-          maxWidth: deviceInfo?.isMobile ? '400px' : '600px',
+          maxWidth: deviceInfo?.isMobile ? '380px' : '600px',
           justifyItems: 'center',
           alignContent: 'center',
         }}
@@ -388,26 +461,50 @@ export default function SkillsetPage({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: deviceInfo?.isMobile ? '20px 12px' : '28px 20px',
-              borderRadius: '20px',
+              padding: deviceInfo?.isMobile
+                ? deviceInfo.orientation === 'landscape'
+                  ? '8px 6px' // Reduced from 12px 8px
+                  : '16px 10px'
+                : '28px 20px',
+              borderRadius: '16px',
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(15px)',
               cursor: 'pointer',
               width: '100%',
-              maxWidth: deviceInfo?.isMobile ? '160px' : '180px',
-              minHeight: deviceInfo?.isMobile ? '140px' : '160px',
+              maxWidth: deviceInfo?.isMobile
+                ? deviceInfo.orientation === 'landscape'
+                  ? '100px' // Reduced from 120px
+                  : '140px'
+                : '180px',
+              minHeight: deviceInfo?.isMobile
+                ? deviceInfo.orientation === 'landscape'
+                  ? '80px' // Reduced from 100px
+                  : '120px'
+                : '160px',
             }}
           >
             <div
               style={{
-                width: deviceInfo?.isMobile ? '50px' : '60px',
-                height: deviceInfo?.isMobile ? '50px' : '60px',
-                borderRadius: '16px',
+                width: deviceInfo?.isMobile
+                  ? deviceInfo.orientation === 'landscape'
+                    ? '28px' // Reduced from 35px
+                    : '42px'
+                  : '60px',
+                height: deviceInfo?.isMobile
+                  ? deviceInfo.orientation === 'landscape'
+                    ? '28px' // Reduced from 35px
+                    : '42px'
+                  : '60px',
+                borderRadius: '12px',
                 backgroundColor: skill.color,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '14px',
+                marginBottom: deviceInfo?.isMobile
+                  ? deviceInfo.orientation === 'landscape'
+                    ? '4px' // Reduced from 8px
+                    : '10px'
+                  : '14px',
               }}
             >
               {typeof skill.icon === 'object' ? (
@@ -429,10 +526,17 @@ export default function SkillsetPage({
             </div>
             <h4
               style={{
-                fontSize: deviceInfo?.isMobile ? '0.85rem' : '1rem',
+                fontSize: deviceInfo?.isMobile
+                  ? deviceInfo.orientation === 'landscape'
+                    ? '0.7rem' // Reduced for landscape
+                    : '0.85rem'
+                  : '1rem',
                 fontWeight: '700',
                 fontFamily: 'Lato, sans-serif',
-                marginBottom: '6px',
+                marginBottom:
+                  deviceInfo?.isMobile && deviceInfo.orientation === 'landscape'
+                    ? '3px'
+                    : '6px',
                 color: '#ffffff',
                 textAlign: 'center',
               }}
@@ -441,13 +545,17 @@ export default function SkillsetPage({
             </h4>
             <p
               style={{
-                fontSize: deviceInfo?.isMobile ? '0.7rem' : '0.8rem',
+                fontSize: deviceInfo?.isMobile
+                  ? deviceInfo.orientation === 'landscape'
+                    ? '0.6rem' // Reduced for landscape
+                    : '0.7rem'
+                  : '0.8rem',
                 fontFamily: 'Lato, sans-serif',
                 fontWeight: '300',
                 color: 'rgba(255, 255, 255, 0.8)',
                 textAlign: 'center',
                 margin: 0,
-                lineHeight: '1.3',
+                lineHeight: '1.2', // Tighter line height
               }}
             >
               {skill.description}
@@ -727,11 +835,27 @@ export default function SkillsetPage({
             style={{
               borderRadius: '50%',
               position: 'absolute',
-              top: '20px',
-              right: '20px',
+              top: deviceInfo?.isMobile
+                ? deviceInfo?.orientation === 'landscape'
+                  ? 'max(env(safe-area-inset-top), 8px)'
+                  : 'max(env(safe-area-inset-top), 16px)'
+                : '20px',
+              right: deviceInfo?.isMobile
+                ? deviceInfo?.orientation === 'landscape'
+                  ? '12px'
+                  : '16px'
+                : '20px',
               zIndex: 1001,
-              width: '50px',
-              height: '50px',
+              width: deviceInfo?.isMobile
+                ? deviceInfo?.orientation === 'landscape'
+                  ? '40px'
+                  : '48px'
+                : '50px',
+              height: deviceInfo?.isMobile
+                ? deviceInfo?.orientation === 'landscape'
+                  ? '40px'
+                  : '48px'
+                : '50px',
               border: 'none',
               backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
               color: '#ffffff',

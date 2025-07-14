@@ -1121,23 +1121,39 @@ function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
   const cameraRef = useRef<any>(null);
   const [mounted, setMounted] = useState(false);
 
-  // Responsive camera positioning based on device
+  // Responsive camera positioning based on device and orientation
   const getCameraSettings = () => {
     if (deviceInfo?.isMobile) {
-      return {
-        position: [-10, 70, -380] as [number, number, number], // Zoom out more for mobile
-        startFov: 70,
-        endFov: 60,
-      };
+      if (deviceInfo.orientation === 'portrait') {
+        return {
+          position: [-10, 85, -550] as [number, number, number], // Zoomed out more for iPhone portrait
+          startFov: 80,
+          endFov: 70,
+        };
+      } else {
+        return {
+          position: [-10, 65, -350] as [number, number, number],
+          startFov: 65,
+          endFov: 55,
+        };
+      }
     } else if (deviceInfo?.isTablet) {
-      return {
-        position: [-10, 60, -340] as [number, number, number], // Medium zoom for tablet
-        startFov: 65,
-        endFov: 55,
-      };
+      if (deviceInfo.orientation === 'portrait') {
+        return {
+          position: [-10, 65, -360] as [number, number, number],
+          startFov: 70,
+          endFov: 60,
+        };
+      } else {
+        return {
+          position: [-10, 60, -340] as [number, number, number],
+          startFov: 65,
+          endFov: 55,
+        };
+      }
     } else {
       return {
-        position: [-10, 55, -300] as [number, number, number], // Original desktop position
+        position: [-10, 55, -300] as [number, number, number],
         startFov: 60,
         endFov: 50,
       };

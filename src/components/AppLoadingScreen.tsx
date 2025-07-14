@@ -117,22 +117,26 @@ export default function AppLoadingScreen({
     fontWeight: 600,
     padding: '0.875rem 2rem',
     borderRadius: '9999px',
-    backgroundColor: '#ffffff',
-    color: '#00bbdc',
+    backgroundColor: isDarkMode ? colors.text : '#ffffff', // Use yellow in dark mode, white in light mode
+    color: isDarkMode ? '#0a182e' : '#00bbdc', // Dark text in dark mode, blue in light mode
     border: 'none',
-    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
+    boxShadow: isDarkMode
+      ? '0 8px 20px rgba(232, 230, 130, 0.3)'
+      : '0 8px 20px rgba(0, 0, 0, 0.1)',
     transition: 'all 0.3s ease',
     cursor: 'pointer',
   };
 
   const handleButtonMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.transform = 'translateY(-2px)';
-    e.currentTarget.style.backgroundColor = '#f0f0f0';
+    e.currentTarget.style.backgroundColor = isDarkMode ? '#f0f0a0' : '#f0f0f0'; // Lighter yellow/gray on hover
   };
 
   const handleButtonMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.transform = 'translateY(0)';
-    e.currentTarget.style.backgroundColor = '#ffffff';
+    e.currentTarget.style.backgroundColor = isDarkMode
+      ? colors.text
+      : '#ffffff'; // Back to original colors
   };
 
   const handleButtonMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {

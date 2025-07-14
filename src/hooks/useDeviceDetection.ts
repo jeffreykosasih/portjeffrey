@@ -92,7 +92,7 @@ const useDeviceDetection = (): DeviceInfo => {
       screenHeight: height,
       devicePixelRatio: pixelRatio,
       orientation: width > height ? 'landscape' : 'portrait',
-      isRetinaDisplay: pixelRatio > 1,
+      isRetinaDisplay: pixelRatio > 1.5, // More accurate retina detection
       supportsWebGL,
     });
   };

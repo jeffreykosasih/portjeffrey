@@ -144,21 +144,41 @@ function App(): React.JSX.Element {
         : '0 2px 8px rgba(0, 0, 0, 0.2)',
     };
 
-    // Responsive positioning and sizing with better mobile optimizations
+    // Enhanced mobile positioning with orientation awareness
     if (deviceInfo.isMobile) {
-      return {
-        ...baseStyles,
-        top: 'env(safe-area-inset-top, 16px)',
-        left: 'env(safe-area-inset-left, 16px)',
-        fontSize: '1.25rem', // Smaller on mobile
-      };
+      if (deviceInfo.orientation === 'landscape') {
+        // Landscape mobile - smaller top margin, adjust for limited height
+        return {
+          ...baseStyles,
+          top: 'max(env(safe-area-inset-top), 12px)',
+          left: 'max(env(safe-area-inset-left), 20px)',
+          fontSize: '1.1rem', // Smaller for landscape
+        };
+      } else {
+        // Portrait mobile - more standard positioning
+        return {
+          ...baseStyles,
+          top: 'max(env(safe-area-inset-top), 20px)',
+          left: 'max(env(safe-area-inset-left), 20px)',
+          fontSize: '1.3rem', // Slightly larger for portrait
+        };
+      }
     } else if (deviceInfo.isTablet) {
-      return {
-        ...baseStyles,
-        top: 'env(safe-area-inset-top, 20px)',
-        left: 'env(safe-area-inset-left, 20px)',
-        fontSize: '1.375rem',
-      };
+      if (deviceInfo.orientation === 'landscape') {
+        return {
+          ...baseStyles,
+          top: 'max(env(safe-area-inset-top), 16px)',
+          left: 'max(env(safe-area-inset-left), 24px)',
+          fontSize: '1.25rem',
+        };
+      } else {
+        return {
+          ...baseStyles,
+          top: 'max(env(safe-area-inset-top), 24px)',
+          left: 'max(env(safe-area-inset-left), 24px)',
+          fontSize: '1.4rem',
+        };
+      }
     } else {
       return {
         ...baseStyles,
@@ -167,7 +187,12 @@ function App(): React.JSX.Element {
         fontSize: '1.5rem',
       };
     }
-  }, [isDarkMode, deviceInfo.isMobile, deviceInfo.isTablet]);
+  }, [
+    isDarkMode,
+    deviceInfo.isMobile,
+    deviceInfo.isTablet,
+    deviceInfo.orientation,
+  ]);
 
   // Memoized click spark props for performance
   const clickSparkProps = React.useMemo(

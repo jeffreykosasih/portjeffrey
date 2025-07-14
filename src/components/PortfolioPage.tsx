@@ -74,7 +74,7 @@ export default function PortfolioPage({
             top: 0,
             left: 0,
             width: '100vw',
-            height: '100vh',
+            height: deviceInfo?.isMobile ? '100dvh' : '100vh', // Use dynamic viewport height
             backgroundColor: isDarkMode ? '#0f172a' : '#00bbdc',
             zIndex: 1500,
             display: 'flex',
@@ -84,11 +84,14 @@ export default function PortfolioPage({
             visibility: isVisible ? 'visible' : 'hidden',
             color: '#ffffff',
             padding: deviceInfo?.isMobile
-              ? '20px 16px'
+              ? deviceInfo?.orientation === 'landscape'
+                ? 'max(env(safe-area-inset-top), 10px) 16px max(env(safe-area-inset-bottom), 20px) 16px'
+                : 'max(env(safe-area-inset-top), 20px) 16px max(env(safe-area-inset-bottom), 40px) 16px'
               : deviceInfo?.isTablet
               ? '30px 24px'
               : '40px',
-            overflow: 'hidden',
+            overflowY: 'auto' as const, // Enable scrolling
+            overflowX: 'hidden' as const, // Prevent horizontal scroll
             pointerEvents: isVisible ? 'auto' : 'none',
           }}
         >
@@ -105,11 +108,27 @@ export default function PortfolioPage({
             style={{
               borderRadius: '50%',
               position: 'absolute',
-              top: deviceInfo?.isMobile ? '16px' : '20px',
-              right: deviceInfo?.isMobile ? '16px' : '20px',
+              top: deviceInfo?.isMobile
+                ? deviceInfo?.orientation === 'landscape'
+                  ? 'max(env(safe-area-inset-top), 8px)'
+                  : 'max(env(safe-area-inset-top), 16px)'
+                : '20px',
+              right: deviceInfo?.isMobile
+                ? deviceInfo?.orientation === 'landscape'
+                  ? '12px'
+                  : '16px'
+                : '20px',
               zIndex: 1001,
-              width: deviceInfo?.isMobile ? '48px' : '50px',
-              height: deviceInfo?.isMobile ? '48px' : '50px',
+              width: deviceInfo?.isMobile
+                ? deviceInfo?.orientation === 'landscape'
+                  ? '40px'
+                  : '48px'
+                : '50px',
+              height: deviceInfo?.isMobile
+                ? deviceInfo?.orientation === 'landscape'
+                  ? '40px'
+                  : '48px'
+                : '50px',
               border: 'none',
               backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
               color: '#ffffff',
@@ -143,29 +162,35 @@ export default function PortfolioPage({
             }
             style={{
               width: '100%',
-              height: '100%',
               maxWidth: '1200px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: deviceInfo?.isMobile ? 'flex-start' : 'center',
+              minHeight: deviceInfo?.isMobile ? 'calc(100vh - 120px)' : 'auto',
+              paddingTop: deviceInfo?.isMobile ? '80px' : '20px', // Space for back button
             }}
           >
             {/* Header */}
             <h1
               style={{
                 fontSize: deviceInfo?.isMobile
-                  ? '2rem'
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '1.3rem' // Reduced from 1.8rem
+                    : '2.2rem'
                   : deviceInfo?.isTablet
                   ? '2.5rem'
                   : '3rem',
                 fontWeight: '700',
                 fontFamily: 'Lato, sans-serif',
                 marginBottom: deviceInfo?.isMobile
-                  ? '15px'
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '6px' // Reduced from 12px
+                    : '16px'
                   : deviceInfo?.isTablet
                   ? '20px'
                   : '25px',
+                marginTop: deviceInfo?.isMobile ? '0' : '20px',
                 background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
@@ -174,7 +199,7 @@ export default function PortfolioPage({
                 textAlign: 'center',
               }}
             >
-              List of Projects
+              Portfolio
             </h1>
 
             {/* Projects List */}
@@ -192,11 +217,19 @@ export default function PortfolioPage({
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'stretch',
-                gap: deviceInfo?.isMobile ? '20px' : '30px',
+                gap: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '8px' // Reduced from 15px
+                    : '16px'
+                  : '30px',
                 padding: deviceInfo?.isMobile ? '0 10px' : '0 20px',
                 flexWrap: 'wrap',
-                flex: 1,
-                marginTop: deviceInfo?.isMobile ? '20px' : '30px',
+                marginTop: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '8px' // Reduced from 15px
+                    : '20px'
+                  : '30px',
+                marginBottom: deviceInfo?.isMobile ? '40px' : '20px', // Extra bottom margin for mobile scrolling
               }}
             >
               {projects.map((project, index) => (
@@ -226,14 +259,26 @@ export default function PortfolioPage({
                     flexDirection: 'column',
                     alignItems: 'center',
                     padding: 0,
-                    borderRadius: '20px',
+                    borderRadius: '16px',
                     backgroundColor: 'rgba(255, 255, 255, 0.15)',
                     backdropFilter: 'blur(20px)',
                     cursor: project.link ? 'pointer' : 'default',
                     flex: '1',
-                    minWidth: deviceInfo?.isMobile ? '175px' : '225px',
-                    maxWidth: deviceInfo?.isMobile ? '200px' : '250px',
-                    height: deviceInfo?.isMobile ? '420px' : '520px',
+                    minWidth: deviceInfo?.isMobile
+                      ? deviceInfo?.orientation === 'landscape'
+                        ? '110px'
+                        : '160px'
+                      : '225px',
+                    maxWidth: deviceInfo?.isMobile
+                      ? deviceInfo?.orientation === 'landscape'
+                        ? '140px'
+                        : '190px'
+                      : '250px',
+                    height: deviceInfo?.isMobile
+                      ? deviceInfo?.orientation === 'landscape'
+                        ? '220px'
+                        : '360px'
+                      : '520px',
                     opacity: project.link ? 1 : 0.7,
                     position: 'relative',
                     overflow: 'hidden',

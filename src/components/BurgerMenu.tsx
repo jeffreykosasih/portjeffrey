@@ -215,19 +215,24 @@ export default function BurgerMenu({
       top: 0,
       right: 0,
       width: baseWidth,
-      height: '100vh',
+      height: '100dvh', // Use dynamic viewport height for better mobile support
       backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
       backdropFilter: 'blur(10px)',
       zIndex: 9999,
       display: 'flex',
       flexDirection: 'column' as const,
-      alignItems: 'flex-start', // Back to left alignment
-      justifyContent: 'flex-start', // Back to top alignment
-      gap: deviceInfo?.isMobile ? '15px' : '20px', // Reduced gap back to original
-      paddingTop: deviceInfo?.isMobile ? '100px' : '120px', // Original top padding
-      paddingBottom: '40px',
-      paddingLeft: deviceInfo?.isMobile ? '30px' : '40px', // Original left padding
+      alignItems: 'flex-start',
+      justifyContent: 'flex-start',
+      gap: deviceInfo?.isMobile ? '15px' : '20px',
+      paddingTop: deviceInfo?.isMobile ? '100px' : '120px',
+      paddingBottom: deviceInfo?.isMobile
+        ? deviceInfo?.orientation === 'portrait'
+          ? '120px' // More bottom padding on portrait to ensure button visibility
+          : '80px'
+        : '40px',
+      paddingLeft: deviceInfo?.isMobile ? '30px' : '40px',
       paddingRight: deviceInfo?.isMobile ? '20px' : '30px',
+      minHeight: deviceInfo?.isMobile ? '100dvh' : '100vh', // Ensure minimum height
     };
   };
 
@@ -373,7 +378,7 @@ export default function BurgerMenu({
               </motion.button>
             ))}
 
-            {/* Connect section - back to original styling */}
+            {/* Connect section - improved positioning for iPhone portrait */}
             <motion.div
               initial={
                 shouldAnimate ? { opacity: 1, y: 20 } : { opacity: 1, y: 0 }
@@ -390,8 +395,22 @@ export default function BurgerMenu({
               }
               style={{
                 position: 'absolute',
-                bottom: deviceInfo?.isMobile ? '40px' : '50px',
-                left: deviceInfo?.isMobile ? '30px' : '40px',
+                bottom: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'portrait'
+                    ? 'max(env(safe-area-inset-bottom), 40px)' // Increased for iPhone portrait
+                    : deviceInfo?.orientation === 'landscape'
+                    ? 'max(env(safe-area-inset-bottom), 12px)' // Reduced from 15px
+                    : 'max(env(safe-area-inset-bottom), 30px)'
+                  : '50px',
+                left: deviceInfo?.isMobile ? '30px' : '40px', // Align with menu padding
+                right: deviceInfo?.isMobile ? '20px' : 'auto',
+                width: deviceInfo?.isMobile ? 'calc(100% - 50px)' : 'auto', // Account for new left padding
+                zIndex: 100,
+                maxWidth: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '120px' // Further reduced from 160px for landscape
+                    : '220px'
+                  : 'auto', // Prevent button from being too wide
               }}
             >
               <button
@@ -400,15 +419,23 @@ export default function BurgerMenu({
                 onMouseLeave={() => setConnectHovered(false)}
                 style={{
                   position: 'relative',
-                  padding: deviceInfo?.isMobile ? '10px 18px' : '12px 20px', // Responsive padding
+                  padding: deviceInfo?.isMobile
+                    ? deviceInfo?.orientation === 'landscape'
+                      ? '3px 6px' // Further reduced from 4px 8px
+                      : '10px 18px'
+                    : '12px 20px',
                   cursor: 'pointer',
-                  fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem', // Responsive font
+                  fontSize: deviceInfo?.isMobile
+                    ? deviceInfo?.orientation === 'landscape'
+                      ? '0.55rem' // Further reduced from 0.65rem
+                      : '0.9rem'
+                    : '1rem',
                   fontWeight: '900',
                   fontFamily: 'Lato, sans-serif',
                   letterSpacing: '0.02em',
                   color: isDarkMode ? '#0f172a' : '#00bbdc',
                   textAlign: 'center' as const,
-                  borderRadius: '8px',
+                  borderRadius: '6px', // Reduced from 8px for more compact look
                   border: 'none',
                   background: '#FAF1E6',
                   transition: 'all 0.3s ease',
@@ -416,9 +443,17 @@ export default function BurgerMenu({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 3px 12px rgba(250, 241, 230, 0.3)',
-                  minHeight: '44px', // Touch target
-                  minWidth: '44px',
+                  boxShadow: '0 2px 8px rgba(250, 241, 230, 0.25)', // Reduced shadow
+                  minHeight: deviceInfo?.isMobile
+                    ? deviceInfo?.orientation === 'landscape'
+                      ? '24px' // Further reduced from 28px
+                      : '44px'
+                    : '44px',
+                  minWidth: deviceInfo?.isMobile
+                    ? deviceInfo?.orientation === 'landscape'
+                      ? '24px' // Further reduced from 28px
+                      : '44px'
+                    : '44px',
                 }}
                 className='touch-target'
               >
@@ -438,7 +473,10 @@ export default function BurgerMenu({
 
                 {/* Button content */}
                 <span style={{ position: 'relative', zIndex: 1 }}>
-                  Let's Connect!
+                  {deviceInfo?.isMobile &&
+                  deviceInfo?.orientation === 'landscape'
+                    ? 'Connect!'
+                    : "Let's Connect!"}
                 </span>
               </button>
             </motion.div>

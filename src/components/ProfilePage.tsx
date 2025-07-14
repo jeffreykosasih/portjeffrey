@@ -58,24 +58,32 @@ export default function ProfilePage({
       justifyContent: 'center',
       alignItems: 'center',
       color: '#ffffff',
+      padding: '40px 20px',
+      overflowY: 'auto' as const,
     };
 
+    // Enhanced mobile-specific styling with orientation awareness
     if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        padding: '20px 16px',
-      };
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        padding: '30px 24px',
-      };
-    } else {
-      return {
-        ...baseStyles,
-        padding: '40px',
-      };
+      if (deviceInfo.orientation === 'landscape') {
+        return {
+          ...baseStyles,
+          padding:
+            'max(env(safe-area-inset-top), 10px) 20px max(env(safe-area-inset-bottom), 10px) 20px',
+          justifyContent: 'flex-start', // Better layout for landscape
+          height: '100dvh', // Use dynamic viewport height
+        };
+      } else {
+        // Portrait mobile
+        return {
+          ...baseStyles,
+          padding:
+            'max(env(safe-area-inset-top), 30px) 16px max(env(safe-area-inset-bottom), 20px) 16px', // Increased top padding
+          height: '100dvh', // Use dynamic viewport height
+        };
+      }
     }
+
+    return baseStyles;
   };
 
   const getContentStyles = () => {
@@ -88,12 +96,25 @@ export default function ProfilePage({
     };
 
     if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        flexDirection: 'column' as const,
-        gap: '32px',
-        alignItems: 'center',
-      };
+      if (deviceInfo.orientation === 'landscape') {
+        // Landscape mobile - horizontal layout with smaller components
+        return {
+          ...baseStyles,
+          flexDirection: 'row' as const,
+          gap: '20px',
+          alignItems: 'center',
+          height: 'fit-content',
+          maxHeight: '90vh',
+        };
+      } else {
+        // Portrait mobile - vertical layout
+        return {
+          ...baseStyles,
+          flexDirection: 'column' as const,
+          gap: '24px',
+          alignItems: 'center',
+        };
+      }
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
@@ -121,15 +142,30 @@ export default function ProfilePage({
     };
 
     if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        flex: 'none',
-        minWidth: 'auto',
-        fontSize: '1.1rem',
-        lineHeight: '1.6',
-        paddingRight: '0px',
-        textAlign: 'center' as const,
-      };
+      if (deviceInfo.orientation === 'landscape') {
+        // Landscape mobile - ultra compact text for minimal height
+        return {
+          ...baseStyles,
+          flex: 1,
+          fontSize: '0.75rem', // Reduced from 0.85rem
+          lineHeight: '1.3', // Reduced from 1.4
+          paddingRight: '12px', // Reduced from 16px
+          textAlign: 'left' as const,
+          maxWidth: '50%',
+        };
+      } else {
+        // Portrait mobile - larger text, centered (reduced size)
+        return {
+          ...baseStyles,
+          flex: 'none',
+          minWidth: 'auto',
+          fontSize: '1.0rem', // Reduced from 1.1rem
+          lineHeight: '1.6',
+          paddingRight: '0px',
+          textAlign: 'center' as const,
+          maxWidth: '100%',
+        };
+      }
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
@@ -163,11 +199,24 @@ export default function ProfilePage({
     };
 
     if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        fontSize: '2.5rem',
-        marginBottom: '20px',
-      };
+      if (deviceInfo.orientation === 'landscape') {
+        // Landscape mobile - much smaller title and spacing
+        return {
+          ...baseStyles,
+          fontSize: '1.4rem', // Reduced from 1.8rem
+          marginBottom: '6px', // Reduced from 12px
+          lineHeight: '1.1', // Tighter line height
+        };
+      } else {
+        // Portrait mobile
+        return {
+          ...baseStyles,
+          fontSize: '1.8rem', // Reduced from 2.2rem
+          marginBottom: '20px', // Increased from 16px
+          marginTop: '20px', // Added top margin to push down
+          lineHeight: '1.2',
+        };
+      }
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
@@ -184,13 +233,27 @@ export default function ProfilePage({
 
   const getProfileCardStyles = () => {
     if (deviceInfo?.isMobile) {
-      return {
-        flex: 'none',
-        minWidth: '300px',
-        maxWidth: '350px',
-        display: 'flex',
-        justifyContent: 'center',
-      };
+      if (deviceInfo.orientation === 'landscape') {
+        // Landscape mobile - much smaller card for minimal height usage
+        return {
+          flex: 'none',
+          minWidth: '160px', // Reduced from 200px
+          maxWidth: '180px', // Reduced from 240px
+          display: 'flex',
+          justifyContent: 'center',
+          width: '180px', // Reduced from 240px
+        };
+      } else {
+        // Portrait mobile - responsive width (reduced size)
+        return {
+          flex: 'none',
+          minWidth: '240px', // Reduced from 280px
+          maxWidth: 'min(300px, 80vw)', // Reduced from 350px and 85vw
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%',
+        };
+      }
     } else if (deviceInfo?.isTablet) {
       return {
         flex: 'none',
@@ -210,38 +273,39 @@ export default function ProfilePage({
     }
   };
 
-  const getBackButtonStyles = () => {
-    const baseStyles = {
-      borderRadius: '50%',
-      position: 'absolute' as const,
-      zIndex: 1001,
-      width: '50px',
-      height: '50px',
-      border: 'none',
-      backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
-      color: '#ffffff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-    };
-
-    if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        top: '16px',
-        right: '16px',
-        width: '48px',
-        height: '48px',
-      };
-    } else {
-      return {
-        ...baseStyles,
-        top: '20px',
-        right: '20px',
-      };
-    }
-  };
+  // Using inline styles to match Portfolio and Connect pages exactly
+  const getBackButtonStyles = () => ({
+    borderRadius: '50%',
+    position: 'absolute' as const,
+    top: deviceInfo?.isMobile
+      ? deviceInfo?.orientation === 'landscape'
+        ? 'max(env(safe-area-inset-top), 8px)'
+        : 'max(env(safe-area-inset-top), 16px)'
+      : '20px',
+    right: deviceInfo?.isMobile
+      ? deviceInfo?.orientation === 'landscape'
+        ? '12px'
+        : '16px'
+      : '20px',
+    zIndex: 1001,
+    width: deviceInfo?.isMobile
+      ? deviceInfo?.orientation === 'landscape'
+        ? '40px'
+        : '48px'
+      : '50px',
+    height: deviceInfo?.isMobile
+      ? deviceInfo?.orientation === 'landscape'
+        ? '40px'
+        : '48px'
+      : '50px',
+    border: 'none',
+    backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
+    color: '#ffffff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  });
 
   return (
     <>
@@ -273,7 +337,7 @@ export default function ProfilePage({
                 icon={faArrowLeft}
                 style={{
                   color: '#ffffff',
-                  fontSize: deviceInfo?.isMobile ? '18px' : '20px',
+                  fontSize: '20px',
                 }}
               />
             </motion.button>
