@@ -30,7 +30,7 @@ import { SlCursor } from 'react-icons/sl';
 interface SkillsetPageProps {
   isVisible: boolean;
   onClose: () => void;
-  onOpenBurgerMenu: () => void;
+  onOpenBurgerMenu: (slideDirection?: 'left' | 'right') => void;
   isDarkMode: boolean;
   shouldAnimateText?: boolean;
   deviceInfo?: DeviceInfo;
@@ -184,7 +184,12 @@ export default function SkillsetPage({
       left: 0,
       width: '100vw',
       height: '100vh',
-      backgroundColor: isDarkMode ? '#0f172a' : '#00bbdc',
+      backgroundColor: isDarkMode
+        ? 'rgba(22, 37, 66, 0.4)'
+        : 'rgba(0, 97, 97, 0.4)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      opacity: 0.95,
       zIndex: 1500,
       display: 'flex',
       flexDirection: 'column' as const,
@@ -226,7 +231,7 @@ export default function SkillsetPage({
 
   const getTitleStyles = () => {
     const baseStyles = {
-      fontWeight: '700',
+      fontWeight: '900',
       fontFamily: 'Lato, sans-serif',
       marginBottom: '30px',
       background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
@@ -303,7 +308,7 @@ export default function SkillsetPage({
       fontSize: deviceInfo?.isMobile ? '0.8rem' : '0.9rem',
       lineHeight: '1.6',
       fontFamily: 'Lato, sans-serif',
-      fontWeight: '300',
+      fontWeight: '400',
       color: 'rgba(255, 255, 255, 0.7)',
       textAlign: 'center' as const,
       padding: deviceInfo?.isMobile ? '20px 16px' : '20px 40px',
@@ -396,7 +401,7 @@ export default function SkillsetPage({
                     : '0.8rem'
                   : '1rem',
                 fontFamily: 'Lato, sans-serif',
-                fontWeight: '300',
+                fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.8)',
                 textAlign: 'center',
                 margin: 0,
@@ -551,11 +556,11 @@ export default function SkillsetPage({
                     : '0.7rem'
                   : '0.8rem',
                 fontFamily: 'Lato, sans-serif',
-                fontWeight: '300',
+                fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.8)',
                 textAlign: 'center',
                 margin: 0,
-                lineHeight: '1.2', // Tighter line height
+                lineHeight: '1.3',
               }}
             >
               {skill.description}
@@ -607,7 +612,7 @@ export default function SkillsetPage({
               style={{
                 fontSize: deviceInfo?.isMobile ? '0.7rem' : '0.8rem',
                 fontFamily: 'Lato, sans-serif',
-                fontWeight: '300',
+                fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.6)',
                 textAlign: 'center',
                 margin: 0,
@@ -658,7 +663,7 @@ export default function SkillsetPage({
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.2 }}
               style={{
-                backgroundColor: isDarkMode ? '#0f172a' : '#00bbdc',
+                backgroundColor: isDarkMode ? '#162542' : '#084CA6',
                 borderRadius: '24px',
                 padding: deviceInfo?.isMobile ? '30px 20px' : '40px 30px',
                 maxWidth: '600px',
@@ -777,7 +782,7 @@ export default function SkillsetPage({
                       style={{
                         fontSize: '0.8rem',
                         fontFamily: 'Lato, sans-serif',
-                        fontWeight: '300',
+                        fontWeight: '400',
                         color: 'rgba(255, 255, 255, 0.8)',
                         textAlign: 'center',
                         margin: 0,
@@ -795,7 +800,7 @@ export default function SkillsetPage({
                 style={{
                   fontSize: deviceInfo?.isMobile ? '0.8rem' : '0.9rem',
                   fontFamily: 'Lato, sans-serif',
-                  fontWeight: '300',
+                  fontWeight: '400',
                   color: 'rgba(255, 255, 255, 0.6)',
                   textAlign: 'center',
                   margin: 0,
@@ -826,7 +831,7 @@ export default function SkillsetPage({
           <motion.button
             onClick={() => {
               onClose(); // Close current page
-              onOpenBurgerMenu(); // Open burger menu
+              onOpenBurgerMenu('right'); // Open burger menu sliding from right corner
             }}
             initial={{ x: 20 }}
             animate={{ x: 0 }}
@@ -857,7 +862,7 @@ export default function SkillsetPage({
                   : '48px'
                 : '50px',
               border: 'none',
-              backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
+              backgroundColor: isDarkMode ? '#162542' : '#084CA6',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
@@ -897,7 +902,35 @@ export default function SkillsetPage({
             }}
           >
             {/* Title */}
-            <h1 style={getTitleStyles()}>Skills</h1>
+            <h1
+              style={{
+                fontSize: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '1.3rem'
+                    : '2.2rem'
+                  : deviceInfo?.isTablet
+                  ? '2.5rem'
+                  : '3rem',
+                fontWeight: '900',
+                fontFamily: 'Lato, sans-serif',
+                marginBottom: deviceInfo?.isMobile
+                  ? deviceInfo?.orientation === 'landscape'
+                    ? '6px'
+                    : '16px'
+                  : deviceInfo?.isTablet
+                  ? '20px'
+                  : '25px',
+                marginTop: deviceInfo?.isMobile ? '0' : '20px',
+                background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+                letterSpacing: '-0.02em',
+                textAlign: 'center',
+              }}
+            >
+              Skills
+            </h1>
 
             {/* Category buttons */}
             <div

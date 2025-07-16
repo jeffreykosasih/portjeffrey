@@ -42,7 +42,12 @@ export default function LongStoryPage({
       left: 0,
       width: '100vw',
       height: '100vh',
-      backgroundColor: isDarkMode ? '#0f172a' : '#00bbdc',
+      backgroundColor: isDarkMode
+        ? 'rgba(22, 37, 66, 0.4)'
+        : 'rgba(0, 97, 97, 0.4)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      opacity: 0.95,
       zIndex: 1500,
       display: 'flex',
       flexDirection: 'column' as const,
@@ -148,7 +153,7 @@ export default function LongStoryPage({
       width: '50px',
       height: '50px',
       border: 'none',
-      backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
+      backgroundColor: isDarkMode ? '#162542' : '#006161',
       color: '#ffffff',
       display: 'flex',
       alignItems: 'center',

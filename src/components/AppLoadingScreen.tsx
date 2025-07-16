@@ -27,7 +27,7 @@ export default function AppLoadingScreen({
 
   // Theme colors
   const colors = {
-    background: isDarkMode ? '#0a182e' : '#00bbdc',
+    background: isDarkMode ? '#162542' : '#006161',
     text: isDarkMode ? '#e8e682' : '#ffffff',
     dots: isDarkMode ? '#e8e682' : '#ffffff',
     transition: isDarkMode ? '#000000' : '#ffffff',
@@ -71,7 +71,7 @@ export default function AppLoadingScreen({
     // Start the transition sequence
     setTimeout(() => {
       onExploreClick();
-      onLoadingComplete();
+      // onLoadingComplete(); // Removed duplicate call since both functions do the same thing
     }, TRANSITION_DURATION);
   };
 
@@ -118,7 +118,7 @@ export default function AppLoadingScreen({
     padding: '0.875rem 2rem',
     borderRadius: '9999px',
     backgroundColor: isDarkMode ? colors.text : '#ffffff', // Use yellow in dark mode, white in light mode
-    color: isDarkMode ? '#0a182e' : '#00bbdc', // Dark text in dark mode, blue in light mode
+    color: isDarkMode ? '#162542' : '#0B60B0', // Dark text in dark mode, blue in light mode
     border: 'none',
     boxShadow: isDarkMode
       ? '0 8px 20px rgba(232, 230, 130, 0.3)'

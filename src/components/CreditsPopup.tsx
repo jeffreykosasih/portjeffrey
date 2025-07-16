@@ -11,34 +11,19 @@ interface CreditsPopupProps {
 
 const creditsData = [
   {
-    name: 'Aku Aku',
-    url: 'https://skfb.ly/opwWF',
-    author: 'danielsive',
+    name: 'Low Poly Surfboards',
+    url: 'https://skfb.ly/otRoz',
+    author: 'gabrielmendesm',
   },
   {
-    name: 'Boat',
-    url: 'https://skfb.ly/oqIXw',
-    author: 'Arsen.Krityan',
+    name: 'Moai Stone Head 🗿🗿🗿  Low Poly Stylized',
+    url: 'https://skfb.ly/oQSEC',
+    author: 'Shaz',
   },
   {
-    name: 'Beach cafe',
-    url: 'https://skfb.ly/6WFwL',
-    author: 'Lubov_Gladkova',
-  },
-  {
-    name: 'Car House',
-    url: 'https://skfb.ly/o9Voq',
-    author: 'Baydinman',
-  },
-  {
-    name: 'Low-poly Fantasy Island (Medieval)',
-    url: 'https://skfb.ly/oWzwp',
-    author: 'Sohaib Ahmad',
-  },
-  {
-    name: 'Printable Fire Pit',
-    url: 'https://skfb.ly/6C8on',
-    author: 'TheCaitasaurus',
+    name: 'Beach House 3D Model',
+    url: 'https://skfb.ly/opUtZ',
+    author: 'Unknown 3D',
   },
 ];
 
@@ -90,8 +75,8 @@ export default function CreditsPopup({
   // Responsive popup styles
   const getPopupStyles = (): React.CSSProperties => {
     const baseStyles: React.CSSProperties = {
-      backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
-      borderRadius: '20px',
+      backgroundColor: isDarkMode ? '#162542' : '#006161',
+      borderRadius: '15px',
       boxShadow: isDarkMode
         ? '0 25px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 255, 255, 0.1)'
         : '0 25px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 255, 255, 0.1)',
@@ -119,7 +104,7 @@ export default function CreditsPopup({
         ...baseStyles,
         width: '70vw',
         maxWidth: '600px',
-        padding: '50px 45px',
+        padding: '40px 45px',
       };
     }
   };

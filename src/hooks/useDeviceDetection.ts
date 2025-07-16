@@ -12,6 +12,7 @@ interface DeviceInfo {
   orientation: 'portrait' | 'landscape';
   isRetinaDisplay: boolean;
   supportsWebGL: boolean;
+  isLandscapeMobile: boolean;
 }
 
 const useDeviceDetection = (): DeviceInfo => {
@@ -24,16 +25,24 @@ const useDeviceDetection = (): DeviceInfo => {
     const initialPixelRatio =
       typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
+    const isMobileWidth = initialWidth < 768;
+    const isLandscape = initialWidth > initialHeight;
+    const aspectRatio = initialWidth / initialHeight;
+
+    // Landscape mobile: mobile width but in landscape with significant aspect ratio difference
+    const isLandscapeMobile = isMobileWidth && isLandscape && aspectRatio > 1.5;
+
     return {
-      isMobile: initialWidth < 768,
+      isMobile: isMobileWidth && !isLandscapeMobile, // Regular mobile excludes landscape mobile
       isTablet: initialWidth >= 768 && initialWidth < 1024,
       isDesktop: initialWidth >= 1024,
+      isLandscapeMobile,
       isTouchDevice: false,
       isLowPerformance: false,
       screenWidth: initialWidth,
       screenHeight: initialHeight,
       devicePixelRatio: initialPixelRatio,
-      orientation: initialWidth > initialHeight ? 'landscape' : 'portrait',
+      orientation: isLandscape ? 'landscape' : 'portrait',
       isRetinaDisplay: initialPixelRatio > 1,
       supportsWebGL: false,
     };
@@ -82,16 +91,24 @@ const useDeviceDetection = (): DeviceInfo => {
       }
     })();
 
+    const isMobileWidth = width < 768;
+    const isLandscape = width > height;
+    const aspectRatio = width / height;
+
+    // Landscape mobile: mobile width but in landscape with significant aspect ratio difference
+    const isLandscapeMobile = isMobileWidth && isLandscape && aspectRatio > 1.5;
+
     setDeviceInfo({
-      isMobile: width < 768,
+      isMobile: isMobileWidth && !isLandscapeMobile, // Regular mobile excludes landscape mobile
       isTablet: width >= 768 && width < 1024,
       isDesktop: width >= 1024,
+      isLandscapeMobile,
       isTouchDevice,
       isLowPerformance,
       screenWidth: width,
       screenHeight: height,
       devicePixelRatio: pixelRatio,
-      orientation: width > height ? 'landscape' : 'portrait',
+      orientation: isLandscape ? 'landscape' : 'portrait',
       isRetinaDisplay: pixelRatio > 1.5, // More accurate retina detection
       supportsWebGL,
     });

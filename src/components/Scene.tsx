@@ -18,6 +18,7 @@ interface SceneProps {
   onNavigateToConnect?: () => void;
   onNavigateToPage?: (page: string) => void;
   onPlayClickSound?: () => void;
+  showExploreNotification?: boolean;
 }
 
 // ============================================
@@ -155,14 +156,7 @@ function InteractiveObject({
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
-      <group ref={objectRef}>
-        <ObjectBrightness
-          object={objectRef.current}
-          isHovered={isHovered}
-          isDarkMode={isDarkMode}
-        />
-        {children}
-      </group>
+      <group ref={objectRef}>{children}</group>
     </group>
   );
 }
@@ -377,7 +371,9 @@ function SimpleIsland({
 
   // Adjust island scale based on device to maintain proportions with zoomed camera
   const getIslandScale = () => {
-    if (deviceInfo?.isMobile) {
+    if (deviceInfo?.isLandscapeMobile) {
+      return [0.51, 0.51, 0.51] as [number, number, number]; // Between desktop and mobile scaling
+    } else if (deviceInfo?.isMobile) {
       return [0.55, 0.55, 0.55] as [number, number, number]; // Slightly larger for mobile
     } else if (deviceInfo?.isTablet) {
       return [0.52, 0.52, 0.52] as [number, number, number]; // Slightly larger for tablet
@@ -387,32 +383,38 @@ function SimpleIsland({
   };
 
   const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    const nodeName = node.name?.toLowerCase() || '';
-    const materialName = material.name?.toLowerCase() || '';
+    // Store original color if not already stored
+    if (!material.userData) material.userData = {};
+    if (!material.userData.originalColor) {
+      const brightness = material.color.r + material.color.g + material.color.b;
+      const isOverBright =
+        brightness > 2.8 ||
+        (material.color.r > 0.95 &&
+          material.color.g > 0.95 &&
+          material.color.b > 0.95);
 
-    const isLampLight =
-      material.color.r > 0.9 &&
-      material.color.g > 0.9 &&
-      material.color.b > 0.7;
-
-    const isFence =
-      nodeName.includes('fence') ||
-      nodeName.includes('rail') ||
-      nodeName.includes('post') ||
-      materialName.includes('fence') ||
-      materialName.includes('rail');
-
-    if (isLampLight) {
-      applyMaterialSettings(material, isDarkMode, {
-        isLight: true,
-        fallbackColor: { r: 1.5, g: 1.0, b: 0.6 },
-      });
-    } else if (isFence) {
-      applyMaterialSettings(material, isDarkMode, {
-        isWood: true,
-        fallbackColor: { r: 0.8, g: 0.6, b: 0.4 },
-      });
+      material.userData.originalColor = isOverBright
+        ? { r: 0.6, g: 0.5, b: 0.4 } // Fallback color for overbright materials
+        : {
+            r: material.color.r,
+            g: material.color.g,
+            b: material.color.b,
+          };
     }
+
+    const { r, g, b } = material.userData.originalColor;
+    material.color.setRGB(r, g, b);
+
+    if (isDarkMode) {
+      material.color.multiplyScalar(0.05);
+    } else {
+      material.color.multiplyScalar(1.4);
+    }
+
+    // Set material properties for natural terrain
+    if ('roughness' in material) material.roughness = 0.8;
+    if ('metalness' in material) material.metalness = 0.0;
+    material.needsUpdate = true;
   });
 
   // Handle case where scene processing failed
@@ -552,9 +554,23 @@ function SimpleClouds({
   isDarkMode: boolean;
   deviceInfo?: any;
 }) {
-  // Adjust cloud positioning and scale based on device
+  // Enhanced cloud settings with landscape mobile support
   const getCloudSettings = () => {
-    if (deviceInfo?.isMobile) {
+    if (deviceInfo?.isLandscapeMobile) {
+      return {
+        // Desktop-like positioning but slightly adjusted for landscape mobile
+        scale1: 4.2,
+        scale2: 3.7,
+        scale3: 4.0,
+        scale4: 4.4,
+        positions: {
+          cloud1: [0, 31, 145] as [number, number, number],
+          cloud2: [0, 31, 48] as [number, number, number],
+          cloud3: [-98, 36, 145] as [number, number, number],
+          cloud4: [-98, 36, 72] as [number, number, number],
+        },
+      };
+    } else if (deviceInfo?.isMobile) {
       return {
         // Bring clouds slightly closer and make them bigger for mobile visibility
         scale1: 5,
@@ -639,59 +655,6 @@ function SimpleClouds({
   );
 }
 
-function SimpleBonfire({ isDarkMode }: { isDarkMode: boolean }) {
-  const { scene } = useGLTF('/models/object_bonfire.glb?v=1');
-  const fireRef = useRef<any>(null);
-
-  const fallbackBonfire = (
-    <group ref={fireRef} position={[0, 2, 0]}>
-      <mesh>
-        <cylinderGeometry args={[1, 1, 0.5]} />
-        <meshStandardMaterial color='#D2691E' roughness={0.7} metalness={0.1} />
-      </mesh>
-    </group>
-  );
-
-  if (!scene) return fallbackBonfire;
-
-  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    const nodeName = node.name?.toLowerCase() || '';
-    const materialName = material.name?.toLowerCase() || '';
-
-    // Make bonfire extra distinctive as SKILLSET object
-    const isFireElement = ['fire', 'flame', 'ember', 'glow'].some(
-      (term) => nodeName.includes(term) || materialName.includes(term)
-    );
-
-    if (isFireElement) {
-      // Enhanced fire effects for skillset identification
-      applyMaterialSettings(material, isDarkMode, {
-        isLight: true,
-        emissiveColor: '#ff4400',
-        emissiveIntensity: isDarkMode ? 2.5 : 1.0,
-      });
-      material.color.multiplyScalar(isDarkMode ? 7.5 : 5.0);
-    }
-  });
-
-  if (!clonedScene) return fallbackBonfire;
-
-  const bonfirePosition: [number, number, number] = [-15, 1, -17.5];
-  const bonfireScale: [number, number, number] = [2, 2, 2];
-  const bonfireRotation: [number, number, number] = [0, 5, 0];
-
-  return (
-    <group
-      ref={fireRef}
-      position={bonfirePosition}
-      scale={bonfireScale}
-      rotation={bonfireRotation}
-    >
-      <primitive object={clonedScene} />
-    </group>
-  );
-}
-
 function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
   const { scene } = useGLTF('/models/object_boat.glb');
   const boatRef = useRef<any>(null);
@@ -719,48 +682,11 @@ function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
   }
 
   const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    const nodeName = node.name?.toLowerCase() || '';
-    const materialName = material.name?.toLowerCase() || '';
-
-    const isWhiteWindow =
-      material.color.r > 0.8 &&
-      material.color.g > 0.8 &&
-      material.color.b > 0.8 &&
-      (nodeName.includes('window') ||
-        nodeName.includes('circle') ||
-        materialName.includes('window') ||
-        materialName.includes('circle'));
-
-    const isWoodElement =
-      nodeName.includes('wood') ||
-      nodeName.includes('plank') ||
-      materialName.includes('wood') ||
-      materialName.includes('plank');
-
-    if (isWhiteWindow && isDarkMode) {
-      applyMaterialSettings(material, isDarkMode, {
-        isLight: true,
-        emissiveColor: '#88ccff',
-        emissiveIntensity: 3.0,
-        fallbackColor: { r: 1.0, g: 1.0, b: 1.0 },
-      });
-      if (material.emissive?.setRGB) {
-        material.emissive.setRGB(0.6, 0.8, 1.0);
-      }
-      if ('roughness' in material) {
-        material.roughness = 0.05;
-      }
-    } else if (isWoodElement) {
-      applyMaterialSettings(material, isDarkMode, {
-        isWood: true,
-        fallbackColor: { r: 0.6, g: 0.4, b: 0.2 },
-      });
-      // Maintain brightness in both modes
+    if (!material.userData) material.userData = {};
+    if (isDarkMode) {
+      material.color.multiplyScalar(0.1);
     } else {
-      applyMaterialSettings(material, isDarkMode, {
-        fallbackColor: { r: 0.5, g: 0.35, b: 0.25 },
-      });
-      // Maintain brightness in both modes
+      material.color.multiplyScalar(1.5);
     }
   });
 
@@ -792,23 +718,14 @@ function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
   );
 }
 
-function SimpleAkuAku({ isDarkMode }: { isDarkMode: boolean }) {
-  const { scene } = useGLTF('/models/object_aku_aku.glb');
-  const maskRef = useRef<any>(null);
-
-  useFrame(({ clock }) => {
-    if (maskRef.current) {
-      const time = clock.getElapsedTime();
-      // Only up and down movement, no rotation
-      maskRef.current.position.y = 3 + Math.sin(time * 1.5) * 1;
-    }
-  });
+function SimpleTwoChairs({ isDarkMode }: { isDarkMode: boolean }) {
+  const { scene } = useGLTF('/models/object_two_chairs.glb');
 
   if (!scene) {
     return (
-      <group ref={maskRef} position={[15, 3, 8]}>
+      <group position={[0, 0, 0]}>
         <mesh>
-          <boxGeometry args={[2, 2.5, 0.5]} />
+          <boxGeometry args={[4, 3, 4]} />
           <meshStandardMaterial
             color={isDarkMode ? '#8B4513' : '#D2691E'}
             roughness={0.7}
@@ -820,25 +737,45 @@ function SimpleAkuAku({ isDarkMode }: { isDarkMode: boolean }) {
   }
 
   const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    const nodeName = node.name?.toLowerCase() || '';
-    const materialName = material.name?.toLowerCase() || '';
+    // Store original color if not already stored
+    if (!material.userData) material.userData = {};
+    if (!material.userData.originalColor) {
+      const brightness = material.color.r + material.color.g + material.color.b;
+      const isOverBright =
+        brightness > 2.8 ||
+        (material.color.r > 0.95 &&
+          material.color.g > 0.95 &&
+          material.color.b > 0.95);
 
-    applyMaterialSettings(material, isDarkMode);
+      material.userData.originalColor = isOverBright
+        ? { r: 0.6, g: 0.4, b: 0.2 } // Fallback color for overbright materials
+        : {
+            r: material.color.r,
+            g: material.color.g,
+            b: material.color.b,
+          };
+    }
+
+    const { r, g, b } = material.userData.originalColor;
+    material.color.setRGB(r, g, b);
+
     if (isDarkMode) {
-      // Make other Aku Aku parts shine bright in dark mode
-      material.color.multiplyScalar(12.0);
+      material.color.multiplyScalar(0.1);
     } else {
-      // Enhanced sunlight brightness for other parts
-      material.color.multiplyScalar(7);
+      material.color.multiplyScalar(1);
     }
+
+    // Set material properties for wood
+    if ('roughness' in material) material.roughness = 0.7;
+    if ('metalness' in material) material.metalness = 0.1;
+    material.needsUpdate = true;
   });
 
-  // Handle case where scene processing failed
   if (!clonedScene) {
     return (
-      <group ref={maskRef} position={[15, 3, 8]}>
+      <group position={[0, 0, 0]}>
         <mesh>
-          <boxGeometry args={[2, 2.5, 0.5]} />
+          <boxGeometry args={[4, 3, 4]} />
           <meshStandardMaterial
             color={isDarkMode ? '#8B4513' : '#D2691E'}
             roughness={0.7}
@@ -847,203 +784,225 @@ function SimpleAkuAku({ isDarkMode }: { isDarkMode: boolean }) {
         </mesh>
       </group>
     );
-  }
-
-  return (
-    <group ref={maskRef} position={[22.5, 0, 0]} scale={[65, 65, 65]}>
-      <primitive object={clonedScene} rotation={[0, 3.5, 0]} />
-    </group>
-  );
-}
-
-function SimpleCar({ isDarkMode }: { isDarkMode: boolean }) {
-  const { scene } = useGLTF('/models/object_car_house.glb');
-
-  if (!scene) {
-    return null;
-  }
-
-  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    const nodeName = node.name?.toLowerCase() || '';
-    const materialName = material.name?.toLowerCase() || '';
-
-    const isCarLight =
-      nodeName.includes('light') ||
-      nodeName.includes('headlight') ||
-      materialName.includes('light') ||
-      materialName.includes('headlight');
-
-    const isCarMetal =
-      nodeName.includes('metal') ||
-      nodeName.includes('body') ||
-      materialName.includes('metal') ||
-      materialName.includes('body');
-
-    const isPinkSmoke =
-      nodeName.includes('smoke') ||
-      nodeName.includes('chimney') ||
-      materialName.includes('smoke') ||
-      materialName.includes('chimney') ||
-      (material.color &&
-        material.color.r > 0.7 &&
-        material.color.g < 0.5 &&
-        material.color.b > 0.7); // Pink-ish colors
-
-    if (isCarLight) {
-      applyMaterialSettings(material, isDarkMode, {
-        isLight: true,
-        emissiveColor: '#ffffff',
-        emissiveIntensity: isDarkMode ? 1.2 : 0.3,
-        fallbackColor: { r: 1.0, g: 1.0, b: 0.9 },
-      });
-    } else if (isPinkSmoke) {
-      applyMaterialSettings(material, isDarkMode, {
-        fallbackColor: { r: 1.0, g: 0.5, b: 0.8 },
-      });
-      if (isDarkMode) {
-        // Same brightness as light mode
-        material.color.multiplyScalar(1.8);
-      } else {
-        // Enhanced sunlight brightness
-        material.color.multiplyScalar(1.8);
-      }
-    } else if (isCarMetal) {
-      applyMaterialSettings(material, isDarkMode, {
-        isMetal: true,
-        fallbackColor: { r: 0.8, g: 0.1, b: 0.1 },
-      });
-      if (isDarkMode) {
-        // Same brightness as light mode
-        material.color.multiplyScalar(1.6);
-      } else {
-        // Enhanced sunlight brightness for car metal
-        material.color.multiplyScalar(1.6);
-      }
-    } else {
-      applyMaterialSettings(material, isDarkMode);
-      if (isDarkMode) {
-        // Same brightness as light mode
-        material.color.multiplyScalar(2.8);
-      } else {
-        // Enhanced sunlight brightness for other car parts
-        material.color.multiplyScalar(2.8);
-      }
-    }
-  });
-
-  // Handle case where scene processing failed
-  if (!clonedScene) {
-    return null;
   }
 
   return (
     <primitive
       object={clonedScene}
-      position={[10.5, 0, 15]}
-      scale={[5.5, 5.5, 5.5]}
-      rotation={[0, 2, 0]}
+      position={[-23, 0.5, -15]}
+      scale={[2, 2, 2]}
+      rotation={[0, 2.5, 0]}
     />
   );
 }
 
-function SimpleCafe({ isDarkMode }: { isDarkMode: boolean }) {
-  const { scene } = useGLTF('/models/object_cafe_beach.glb');
+function SimpleHouse({ isDarkMode }: { isDarkMode: boolean }) {
+  const { scene } = useGLTF('/models/object_house.glb');
 
   if (!scene) {
-    return null;
+    return (
+      <group position={[0, 0, 0]}>
+        <mesh>
+          <boxGeometry args={[6, 8, 6]} />
+          <meshStandardMaterial
+            color={isDarkMode ? '#654321' : '#8B4513'}
+            roughness={0.7}
+            metalness={0.1}
+          />
+        </mesh>
+      </group>
+    );
   }
 
   const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    const nodeName = node.name?.toLowerCase() || '';
-    const materialName = material.name?.toLowerCase() || '';
+    // Store original color if not already stored
+    if (!material.userData) material.userData = {};
+    if (!material.userData.originalColor) {
+      const brightness = material.color.r + material.color.g + material.color.b;
+      const isOverBright =
+        brightness > 2.8 ||
+        (material.color.r > 0.95 &&
+          material.color.g > 0.95 &&
+          material.color.b > 0.95);
 
-    const isWindowLight =
-      nodeName.includes('window') ||
-      nodeName.includes('light') ||
-      materialName.includes('window') ||
-      materialName.includes('light');
-
-    const isWoodStructure =
-      nodeName.includes('wood') ||
-      nodeName.includes('frame') ||
-      materialName.includes('wood') ||
-      materialName.includes('frame');
-
-    const isSignElement =
-      nodeName.includes('sign') ||
-      nodeName.includes('logo') ||
-      materialName.includes('sign') ||
-      materialName.includes('logo');
-
-    // Make cafe extra distinctive as PORTFOLIO object
-    const isPortfolioDisplay =
-      isSignElement ||
-      isWindowLight ||
-      nodeName.includes('display') ||
-      materialName.includes('display');
-
-    if (isWindowLight) {
-      // Enhanced window effects for portfolio identification
-      applyMaterialSettings(material, isDarkMode, {
-        isLight: true,
-        emissiveColor: isDarkMode ? '#88ccff' : '#ffdd88',
-        emissiveIntensity: isDarkMode ? 1.8 : 0.5,
-        fallbackColor: { r: 1.0, g: 0.9, b: 0.7 },
-      });
-      if (isDarkMode && material.emissive?.setRGB) {
-        material.emissive.setRGB(0.5, 0.8, 1.0); // Blue portfolio glow
-      }
-    } else if (isSignElement) {
-      // Enhanced signs for portfolio branding
-      applyMaterialSettings(material, isDarkMode, {
-        isLight: isDarkMode, // Make signs glow in dark mode
-        emissiveColor: '#4488ff',
-        emissiveIntensity: isDarkMode ? 1.0 : 0,
-        fallbackColor: { r: 0.9, g: 0.7, b: 0.4 },
-      });
-      if (isDarkMode) {
-        material.color.multiplyScalar(1.8); // Reduced to prevent disappearing
-        if (material.emissive?.setRGB) {
-          material.emissive.setRGB(0.3, 0.5, 1.0); // Blue glow for portfolio
-        }
-      } else {
-        material.color.multiplyScalar(1.8); // Reduced for portfolio
-      }
-    } else if (isWoodStructure) {
-      applyMaterialSettings(material, isDarkMode, {
-        isWood: true,
-        fallbackColor: { r: 0.6, g: 0.4, b: 0.2 },
-      });
-      if (isDarkMode) {
-        // Same brightness as light mode
-        material.color.multiplyScalar(2.8);
-      } else {
-        // Enhanced sunlight brightness for wood structure
-        material.color.multiplyScalar(2.8);
-      }
-    } else {
-      applyMaterialSettings(material, isDarkMode);
-      if (isDarkMode) {
-        // Same brightness as light mode
-        material.color.multiplyScalar(2.5);
-      } else {
-        // Enhanced sunlight brightness for other cafe parts
-        material.color.multiplyScalar(2.5);
-      }
+      material.userData.originalColor = isOverBright
+        ? { r: 0.5, g: 0.3, b: 0.2 } // Fallback color for overbright materials
+        : {
+            r: material.color.r,
+            g: material.color.g,
+            b: material.color.b,
+          };
     }
+
+    const { r, g, b } = material.userData.originalColor;
+    material.color.setRGB(r, g, b);
+
+    if (isDarkMode) {
+      material.color.multiplyScalar(0.2);
+    } else {
+      material.color.multiplyScalar(2.6);
+    }
+
+    // Set material properties for house materials
+    if ('roughness' in material) material.roughness = 0.7;
+    if ('metalness' in material) material.metalness = 0.1;
+    material.needsUpdate = true;
   });
 
-  // Handle case where scene processing failed
   if (!clonedScene) {
-    return null;
+    return (
+      <group position={[0, 0, 0]}>
+        <mesh>
+          <boxGeometry args={[6, 8, 6]} />
+          <meshStandardMaterial
+            color={isDarkMode ? '#654321' : '#8B4513'}
+            roughness={0.7}
+            metalness={0.1}
+          />
+        </mesh>
+      </group>
+    );
   }
 
   return (
     <primitive
       object={clonedScene}
-      position={[-17.5, 3, 10]}
-      scale={[0.25, 0.25, 0.25]}
-      rotation={[0, 2, 0]}
+      position={[15, 0, 15]}
+      scale={[2.5, 2.5, 2.5]}
+      rotation={[0, 3.75, 0]}
+    />
+  );
+}
+
+function SimpleStoneHead({ isDarkMode }: { isDarkMode: boolean }) {
+  const { scene } = useGLTF('/models/object_stone_head.glb');
+  const stoneRef = useRef<any>(null);
+
+  if (!scene) {
+    return (
+      <group ref={stoneRef} position={[0, 0, 0]}>
+        <mesh>
+          <boxGeometry args={[3, 4, 3]} />
+          <meshStandardMaterial
+            color={isDarkMode ? '#444444' : '#888888'}
+            roughness={0.9}
+            metalness={0.1}
+          />
+        </mesh>
+      </group>
+    );
+  }
+
+  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
+    // Store original color if not already stored
+    if (!material.userData) material.userData = {};
+
+    // Apply high contrast settings for stone head
+    if (isDarkMode) {
+      material.color.multiplyScalar(0.3);
+    } else {
+      material.color.multiplyScalar(1);
+    }
+  });
+
+  if (!clonedScene) {
+    return (
+      <group ref={stoneRef} position={[0, 0, 0]}>
+        <mesh>
+          <boxGeometry args={[3, 4, 3]} />
+          <meshStandardMaterial
+            color={isDarkMode ? '#444444' : '#888888'}
+            roughness={0.9}
+            metalness={0.1}
+          />
+        </mesh>
+      </group>
+    );
+  }
+
+  return (
+    <primitive
+      object={clonedScene}
+      scale={[5, 5, 5]}
+      rotation={[0, 4.5, 0]}
+      position={[20, -1, -10]}
+    />
+  );
+}
+
+function SimpleSurfboard({ isDarkMode }: { isDarkMode: boolean }) {
+  const { scene } = useGLTF('/models/object_surfboard.glb');
+
+  if (!scene) {
+    return (
+      <group position={[0, 0, 0]}>
+        <mesh>
+          <boxGeometry args={[0.5, 0.1, 3]} />
+          <meshStandardMaterial
+            color='#FF6B35'
+            roughness={0.3}
+            metalness={0.1}
+          />
+        </mesh>
+      </group>
+    );
+  }
+
+  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
+    // Store original color if not already stored
+    if (!material.userData) material.userData = {};
+    if (!material.userData.originalColor) {
+      material.userData.originalColor = {
+        r: material.color.r,
+        g: material.color.g,
+        b: material.color.b,
+      };
+    }
+
+    // Reset to original color
+    const { r, g, b } = material.userData.originalColor;
+    material.color.setRGB(r, g, b);
+
+    // Apply high contrast settings for surfboard
+    if (isDarkMode) {
+      // Dark mode: Make surfboard much darker for high contrast
+      material.color.multiplyScalar(0.15); // Much darker than default
+
+      // Remove any emissive lighting
+      if (material.emissive?.setHex) material.emissive.setHex(0x000000);
+      if ('emissiveIntensity' in material) material.emissiveIntensity = 0;
+    } else {
+      // Bright mode: Make surfboard much brighter and more vibrant for high contrast
+      material.color.multiplyScalar(2.5); // Much brighter than default
+    }
+
+    // Set material properties
+    if ('roughness' in material) material.roughness = 0.3;
+    if ('metalness' in material) material.metalness = 0.1;
+    material.needsUpdate = true;
+  });
+
+  if (!clonedScene) {
+    return (
+      <group position={[0, 0, 0]}>
+        <mesh>
+          <boxGeometry args={[0.5, 0.1, 3]} />
+          <meshStandardMaterial
+            color='#FF6B35'
+            roughness={0.3}
+            metalness={0.1}
+          />
+        </mesh>
+      </group>
+    );
+  }
+
+  return (
+    <primitive
+      object={clonedScene}
+      position={[-16, 5, 12]}
+      scale={[6.5, 5, 5]}
+      rotation={[0, 5.5, 0]}
     />
   );
 }
@@ -1051,52 +1010,18 @@ function SimpleCafe({ isDarkMode }: { isDarkMode: boolean }) {
 // Environment (Sky, Sea, Camera)
 
 function SimpleSky({ isDarkMode }: { isDarkMode: boolean }) {
-  const skyColors = isDarkMode
-    ? { top: '#162542', bottom: '#020918' }
-    : { top: '#00bbdc', bottom: '#00bbdc' };
+  const skyColor = isDarkMode ? '#0a1322' : '#02bbdc';
 
   return (
     <mesh scale={[1000, 1000, 1000]}>
       <sphereGeometry args={[1, 64, 32]} />
-      <shaderMaterial
-        key={isDarkMode ? 'dark-sky' : 'light-sky'}
-        vertexShader={`
-          varying vec3 vWorldPosition;
-          void main() {
-            vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-            vWorldPosition = worldPosition.xyz;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `}
-        fragmentShader={`
-          varying vec3 vWorldPosition;
-          void main() {
-            float height = normalize(vWorldPosition).y;
-            float t = smoothstep(-0.5, 0.8, height);
-            
-            vec3 topColor = vec3(${
-              parseInt(skyColors.top.slice(1, 3), 16) / 255
-            }, ${parseInt(skyColors.top.slice(3, 5), 16) / 255}, ${
-          parseInt(skyColors.top.slice(5, 7), 16) / 255
-        });
-            vec3 bottomColor = vec3(${
-              parseInt(skyColors.bottom.slice(1, 3), 16) / 255
-            }, ${parseInt(skyColors.bottom.slice(3, 5), 16) / 255}, ${
-          parseInt(skyColors.bottom.slice(5, 7), 16) / 255
-        });
-            
-            vec3 color = mix(bottomColor, topColor, t);
-            gl_FragColor = vec4(color, 1.0);
-          }
-        `}
-        side={2}
-      />
+      <meshBasicMaterial color={skyColor} side={2} />
     </mesh>
   );
 }
 
 function SimpleSea({ isDarkMode }: { isDarkMode: boolean }) {
-  const seaColor = isDarkMode ? '#010819' : '#56ffff';
+  const seaColor = isDarkMode ? '#010f19' : '#56ffff';
 
   return (
     <mesh
@@ -1104,14 +1029,8 @@ function SimpleSea({ isDarkMode }: { isDarkMode: boolean }) {
       rotation={[-Math.PI / 2, 0, 0]}
       scale={[2000, 1000, 1]}
     >
-      <planeGeometry args={[1, 1, 1, 1]} />
-      <meshBasicMaterial
-        color={isDarkMode ? 0x010819 : 0x56ffff}
-        transparent={false}
-        opacity={1.0}
-        side={2}
-        toneMapped={false}
-      />
+      <planeGeometry args={[1, 1, 64, 64]} />
+      <meshBasicMaterial color={seaColor} side={2} />
     </mesh>
   );
 }
@@ -1121,16 +1040,24 @@ function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
   const cameraRef = useRef<any>(null);
   const [mounted, setMounted] = useState(false);
 
-  // Responsive camera positioning based on device and orientation
+  // Enhanced camera settings with landscape mobile support
   const getCameraSettings = () => {
-    if (deviceInfo?.isMobile) {
+    if (deviceInfo?.isLandscapeMobile) {
+      // Landscape mobile - desktop-like camera positioning with appropriate scaling
+      return {
+        position: [-10, 58, -320] as [number, number, number], // Similar to desktop but slightly closer
+        startFov: 62, // Between mobile and desktop FOV
+        endFov: 52,
+      };
+    } else if (deviceInfo?.isMobile) {
       if (deviceInfo.orientation === 'portrait') {
         return {
-          position: [-10, 85, -550] as [number, number, number], // Zoomed out more for iPhone portrait
+          position: [-10, 70, -380] as [number, number, number],
           startFov: 80,
           endFov: 70,
         };
       } else {
+        // Regular mobile landscape - legacy support
         return {
           position: [-10, 65, -350] as [number, number, number],
           startFov: 65,
@@ -1152,6 +1079,7 @@ function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
         };
       }
     } else {
+      // Desktop
       return {
         position: [-10, 55, -300] as [number, number, number],
         startFov: 60,
@@ -1204,13 +1132,14 @@ function SceneComponent({
   onNavigateToConnect,
   onNavigateToPage,
   onPlayClickSound,
+  showExploreNotification,
 }: SceneProps) {
   const [sceneLoaded, setSceneLoaded] = useState(false);
   const [hoveredObject, setHoveredObject] = useState<string | null>(null);
-  const [hoveredBonfire, setHoveredBonfire] = useState(false);
-  const [hoveredCarHouse, setHoveredCarHouse] = useState(false);
-  const [hoveredAkuAku, setHoveredAkuAku] = useState(false);
-  const [hoveredCafe, setHoveredCafe] = useState(false);
+  const [hoveredTwoChairs, setHoveredTwoChairs] = useState(false);
+  const [hoveredHouse, setHoveredHouse] = useState(false);
+  const [hoveredStoneHead, setHoveredStoneHead] = useState(false);
+  const [hoveredSurfboard, setHoveredSurfboard] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setSceneLoaded(true), 300);
@@ -1247,13 +1176,19 @@ function SceneComponent({
     []
   );
 
-  const handleBonfireHover = createHoverHandler('bonfire', setHoveredBonfire);
-  const handleCarHouseHover = createHoverHandler(
-    'carhouse',
-    setHoveredCarHouse
+  const handleTwoChairsHover = createHoverHandler(
+    'twochairs',
+    setHoveredTwoChairs
   );
-  const handleAkuAkuHover = createHoverHandler('akuaku', setHoveredAkuAku);
-  const handleCafeHover = createHoverHandler('cafe', setHoveredCafe);
+  const handleHouseHover = createHoverHandler('house', setHoveredHouse);
+  const handleStoneHeadHover = createHoverHandler(
+    'stonehead',
+    setHoveredStoneHead
+  );
+  const handleSurfboardHover = createHoverHandler(
+    'surfboard',
+    setHoveredSurfboard
+  );
 
   // Helper function to get responsive bounding boxes for better mobile interaction
   const getBoundingBox = (
@@ -1289,20 +1224,20 @@ function SceneComponent({
 
       {/* Bottom Center Title Display for Objects */}
       <AnimatePresence mode='wait'>
-        {(hoveredBonfire ||
-          hoveredCarHouse ||
-          hoveredAkuAku ||
-          hoveredCafe) && (
+        {(hoveredTwoChairs ||
+          hoveredHouse ||
+          hoveredStoneHead ||
+          hoveredSurfboard) && (
           <motion.div
             key={`object-title-${
-              hoveredBonfire
-                ? 'Skillset'
-                : hoveredCarHouse
+              hoveredTwoChairs
                 ? 'Connect'
-                : hoveredAkuAku
-                ? 'Profile'
-                : hoveredCafe
+                : hoveredHouse
                 ? 'Portfolio'
+                : hoveredStoneHead
+                ? 'Profile'
+                : hoveredSurfboard
+                ? 'Skillset'
                 : ''
             }`}
             style={{
@@ -1326,7 +1261,9 @@ function SceneComponent({
               style={{
                 fontFamily: 'Lato, sans-serif',
                 fontWeight: '700',
-                fontSize: deviceInfo?.isMobile
+                fontSize: deviceInfo?.isLandscapeMobile
+                  ? '1.25rem' // Good size for landscape mobile readability
+                  : deviceInfo?.isMobile
                   ? '1.2rem'
                   : deviceInfo?.isTablet
                   ? '1.35rem'
@@ -1334,17 +1271,21 @@ function SceneComponent({
                 color: isDarkMode ? '#FFFFFF' : '#FFFFFF',
                 textShadow:
                   '0 4px 12px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6)',
-                padding: deviceInfo?.isMobile ? '8px 16px' : '10px 20px',
+                padding: deviceInfo?.isLandscapeMobile
+                  ? '6px 14px' // Compact padding for landscape mobile
+                  : deviceInfo?.isMobile
+                  ? '8px 16px'
+                  : '10px 20px',
               }}
             >
-              {hoveredBonfire
-                ? 'Skillset'
-                : hoveredCarHouse
+              {hoveredTwoChairs
                 ? 'Connect'
-                : hoveredAkuAku
-                ? 'Profile'
-                : hoveredCafe
+                : hoveredHouse
                 ? 'Portfolio'
+                : hoveredStoneHead
+                ? 'Profile'
+                : hoveredSurfboard
+                ? 'Skillset'
                 : ''}
             </div>
           </motion.div>
@@ -1360,6 +1301,8 @@ function SceneComponent({
           height: '100%',
           zIndex: 1,
           background: 'transparent',
+          filter: showExploreNotification ? 'blur(2px)' : 'none',
+          transition: 'filter 0.3s ease-in-out',
         }}
         onCreated={({ gl }) => {
           // Better performance on mobile devices
@@ -1367,15 +1310,19 @@ function SceneComponent({
             ? Math.min(window.devicePixelRatio, 1.5)
             : Math.min(window.devicePixelRatio, 2);
           gl.setPixelRatio(pixelRatio);
+
+          // Ensure accurate color rendering
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.toneMapping = THREE.NoToneMapping;
         }}
         onPointerMissed={() => {
           setTimeout(() => {
             document.body.style.cursor = 'default';
             setHoveredObject(null);
-            setHoveredBonfire(false);
-            setHoveredCarHouse(false);
-            setHoveredAkuAku(false);
-            setHoveredCafe(false);
+            setHoveredTwoChairs(false);
+            setHoveredHouse(false);
+            setHoveredStoneHead(false);
+            setHoveredSurfboard(false);
           }, 100);
         }}
       >
@@ -1427,56 +1374,58 @@ function SceneComponent({
             deviceInfo={deviceInfo}
           />
 
-          {/* Buildings & Structures */}
+          {/* New Interactive Objects positioned above the island */}
           <InteractiveObject
-            onHover={handleCafeHover}
-            onClick={() => handleNavigation('portfolio')}
-            boundingBox={getBoundingBox([12, 15, 8])}
-            position={[-15, 8, 10]}
-            isDarkMode={isDarkMode}
-          >
-            <SimpleCafe key={`cafe-${isDarkMode}`} isDarkMode={isDarkMode} />
-          </InteractiveObject>
-
-          {/* Vehicles */}
-          <InteractiveObject
-            onHover={handleCarHouseHover}
+            onHover={handleTwoChairsHover}
             onClick={() => handleNavigation('connect')}
-            boundingBox={getBoundingBox([15, 12, 15])}
-            position={[10.5, 6, 15]}
+            boundingBox={getBoundingBox([8, 6, 8])}
+            position={[-20, 3, -15]}
             isDarkMode={isDarkMode}
           >
-            <SimpleCar key={`car-${isDarkMode}`} isDarkMode={isDarkMode} />
-          </InteractiveObject>
-          <SimpleBoat key={`boat-${isDarkMode}`} isDarkMode={isDarkMode} />
-
-          {/* Decorative Objects */}
-          <InteractiveObject
-            onHover={handleBonfireHover}
-            onClick={() => handleNavigation('skillset')}
-            boundingBox={getBoundingBox([4, 6, 4])}
-            position={[-15, 3, -17.5]}
-            isDarkMode={isDarkMode}
-          >
-            <SimpleBonfire
-              key={`bonfire-${isDarkMode}`}
+            <SimpleTwoChairs
+              key={`twochairs-${isDarkMode}`}
               isDarkMode={isDarkMode}
             />
           </InteractiveObject>
 
-          {/* Animated Characters */}
           <InteractiveObject
-            onHover={handleAkuAkuHover}
+            onHover={handleHouseHover}
+            onClick={() => handleNavigation('portfolio')}
+            boundingBox={getBoundingBox([12, 15, 12])}
+            position={[18, 6, 15]}
+            isDarkMode={isDarkMode}
+          >
+            <SimpleHouse key={`house-${isDarkMode}`} isDarkMode={isDarkMode} />
+          </InteractiveObject>
+
+          <InteractiveObject
+            onHover={handleStoneHeadHover}
             onClick={() => handleNavigation('profile')}
-            boundingBox={getBoundingBox([10, 12, 8])}
-            position={[20, 6, 0]}
+            boundingBox={getBoundingBox([8, 10, 8])}
+            position={[22, 5, -18]}
             isDarkMode={isDarkMode}
           >
-            <SimpleAkuAku
-              key={`akuaku-${isDarkMode}`}
+            <SimpleStoneHead
+              key={`stonehead-${isDarkMode}`}
               isDarkMode={isDarkMode}
             />
           </InteractiveObject>
+
+          <InteractiveObject
+            onHover={handleSurfboardHover}
+            onClick={() => handleNavigation('skillset')}
+            boundingBox={getBoundingBox([6, 4, 8])}
+            position={[-18, 2, 12]}
+            isDarkMode={isDarkMode}
+          >
+            <SimpleSurfboard
+              key={`surfboard-${isDarkMode}`}
+              isDarkMode={isDarkMode}
+            />
+          </InteractiveObject>
+
+          {/* Boat (non-interactive) */}
+          <SimpleBoat key={`boat-${isDarkMode}`} isDarkMode={isDarkMode} />
 
           {/* Environmental Elements */}
           <SimpleClouds
@@ -1490,13 +1439,26 @@ function SceneComponent({
         <OrbitControls
           enablePan={false}
           enableZoom={false}
-          enableRotate={false}
+          // enableRotate={false} // Commented out for easier object positioning during development
+          enableRotate={true}
           target={[0, 0, 0]}
           maxDistance={
-            deviceInfo?.isMobile ? 120 : deviceInfo?.isTablet ? 100 : 80
+            deviceInfo?.isLandscapeMobile
+              ? 90 // Between desktop and mobile for landscape mobile
+              : deviceInfo?.isMobile
+              ? 120
+              : deviceInfo?.isTablet
+              ? 100
+              : 80
           }
           minDistance={
-            deviceInfo?.isMobile ? 60 : deviceInfo?.isTablet ? 50 : 40
+            deviceInfo?.isLandscapeMobile
+              ? 45 // Between desktop and mobile for landscape mobile
+              : deviceInfo?.isMobile
+              ? 60
+              : deviceInfo?.isTablet
+              ? 50
+              : 40
           }
         />
       </Canvas>
@@ -1506,11 +1468,11 @@ function SceneComponent({
 
 // Preload 3D models for better performance
 useGLTF.preload('/models/object_island.glb');
-useGLTF.preload('/models/object_bonfire.glb');
-useGLTF.preload('/models/object_aku_aku.glb');
 useGLTF.preload('/models/object_boat.glb');
-useGLTF.preload('/models/object_car_house.glb');
-useGLTF.preload('/models/object_cafe_beach.glb');
+useGLTF.preload('/models/object_two_chairs.glb');
+useGLTF.preload('/models/object_house.glb');
+useGLTF.preload('/models/object_stone_head.glb');
+useGLTF.preload('/models/object_surfboard.glb');
 useGLTF.preload('/models/object_cloud1.glb');
 useGLTF.preload('/models/object_cloud2.glb');
 useGLTF.preload('/models/object_cloud3.glb');

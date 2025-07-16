@@ -14,6 +14,7 @@ import PortfolioPage from './components/PortfolioPage';
 import ConnectPage from './components/ConnectPage';
 import AppLoadingScreen from './components/AppLoadingScreen';
 import ClickSpark from './components/ClickSpark';
+import ExploreNotification from './components/ExploreNotification';
 
 import OceanAudio from './components/OceanAudio';
 import useDeviceDetection from './hooks/useDeviceDetection';
@@ -28,6 +29,7 @@ const MemoizedThemeToggle = React.memo(ThemeToggle);
 const MemoizedBurgerMenu = React.memo(BurgerMenu);
 const MemoizedCreditsButton = React.memo(CreditsButton);
 const MemoizedCreditsPopup = React.memo(CreditsPopup);
+const MemoizedExploreNotification = React.memo(ExploreNotification);
 
 function App(): React.JSX.Element {
   const deviceInfo = useDeviceDetection();
@@ -54,6 +56,11 @@ function App(): React.JSX.Element {
     useState<boolean>(false);
   const [isCreditsPopupVisible, setIsCreditsPopupVisible] =
     useState<boolean>(false);
+  const [showExploreNotification, setShowExploreNotification] =
+    useState<boolean>(false);
+  const [burgerMenuSlideDirection, setBurgerMenuSlideDirection] = useState<
+    'left' | 'right'
+  >('right');
 
   const toggleTheme = (): void => {
     setIsDarkMode((prevMode) => !prevMode);
@@ -72,10 +79,11 @@ function App(): React.JSX.Element {
     setActivePage(null);
   };
 
-  const openBurgerMenu = (): void => {
+  const openBurgerMenu = (slideDirection: 'left' | 'right' = 'right'): void => {
     // When opening burger menu from a page, don't animate burger menu or page text
     setShouldAnimateBurgerMenu(false);
     setShouldAnimatePageText(false);
+    setBurgerMenuSlideDirection(slideDirection);
     setIsBurgerMenuOpen(true);
     // Reset animation flags after a brief delay
     setTimeout(() => {
@@ -88,6 +96,10 @@ function App(): React.JSX.Element {
     setShowMainApp(true);
     setTimeout(() => {
       setIsLoading(false);
+      // Show notification after camera zoom completes (3 seconds + small buffer)
+      setTimeout(() => {
+        setShowExploreNotification(true);
+      }, 3500); // Wait for camera zoom to complete (3s) + 0.5s buffer
     }, 100);
   };
 
@@ -95,6 +107,10 @@ function App(): React.JSX.Element {
     setShowMainApp(true);
     setTimeout(() => {
       setIsLoading(false);
+      // Show notification after camera zoom completes (3 seconds + small buffer)
+      setTimeout(() => {
+        setShowExploreNotification(true);
+      }, 3500); // Wait for camera zoom to complete (3s) + 0.5s buffer
     }, 100);
   };
 
@@ -112,7 +128,7 @@ function App(): React.JSX.Element {
       width: '100vw',
       height: '100vh',
       position: 'relative' as const,
-      backgroundColor: isDarkMode ? '#05073b' : '#c0d8e0',
+      backgroundColor: isDarkMode ? '#162542' : '#006161',
     };
 
     // Add safe area padding for mobile devices
@@ -144,15 +160,23 @@ function App(): React.JSX.Element {
         : '0 2px 8px rgba(0, 0, 0, 0.2)',
     };
 
-    // Enhanced mobile positioning with orientation awareness
-    if (deviceInfo.isMobile) {
+    // Enhanced mobile positioning with landscape mobile support
+    if (deviceInfo.isLandscapeMobile) {
+      // Landscape mobile - optimized for limited height, desktop-like proportions
+      return {
+        ...baseStyles,
+        top: 'max(env(safe-area-inset-top), 8px)', // Minimal top margin
+        left: 'max(env(safe-area-inset-left), 16px)',
+        fontSize: '1.0rem', // Smaller than mobile for landscape
+      };
+    } else if (deviceInfo.isMobile) {
       if (deviceInfo.orientation === 'landscape') {
-        // Landscape mobile - smaller top margin, adjust for limited height
+        // Regular mobile landscape - legacy support
         return {
           ...baseStyles,
           top: 'max(env(safe-area-inset-top), 12px)',
           left: 'max(env(safe-area-inset-left), 20px)',
-          fontSize: '1.1rem', // Smaller for landscape
+          fontSize: '1.1rem',
         };
       } else {
         // Portrait mobile - more standard positioning
@@ -160,7 +184,7 @@ function App(): React.JSX.Element {
           ...baseStyles,
           top: 'max(env(safe-area-inset-top), 20px)',
           left: 'max(env(safe-area-inset-left), 20px)',
-          fontSize: '1.3rem', // Slightly larger for portrait
+          fontSize: '1.3rem',
         };
       }
     } else if (deviceInfo.isTablet) {
@@ -191,21 +215,38 @@ function App(): React.JSX.Element {
     isDarkMode,
     deviceInfo.isMobile,
     deviceInfo.isTablet,
+    deviceInfo.isLandscapeMobile,
     deviceInfo.orientation,
   ]);
 
-  // Memoized click spark props for performance
+  // ClickSpark configuration with landscape mobile support
   const clickSparkProps = React.useMemo(
     () => ({
       sparkColor: '#FFFFFF', // Consistently white for all themes
-      sparkSize: deviceInfo.isMobile ? 8 : 12,
-      sparkRadius: deviceInfo.isMobile ? 20 : 25,
-      sparkCount: deviceInfo.isLowPerformance ? 6 : 10,
+      sparkSize: deviceInfo.isLandscapeMobile
+        ? 10 // Slightly larger than desktop for touch, smaller than mobile
+        : deviceInfo.isMobile
+        ? 8
+        : 12,
+      sparkRadius: deviceInfo.isLandscapeMobile
+        ? 22 // Medium radius for landscape mobile
+        : deviceInfo.isMobile
+        ? 20
+        : 25,
+      sparkCount: deviceInfo.isLowPerformance
+        ? 6
+        : deviceInfo.isLandscapeMobile
+        ? 8
+        : 10,
       duration: 600,
       easing: 'ease-out' as const,
       extraScale: 1.2,
     }),
-    [deviceInfo.isMobile, deviceInfo.isLowPerformance]
+    [
+      deviceInfo.isMobile,
+      deviceInfo.isLandscapeMobile,
+      deviceInfo.isLowPerformance,
+    ]
   );
 
   return (
@@ -233,7 +274,7 @@ function App(): React.JSX.Element {
                 position: 'relative',
                 background: isDarkMode
                   ? 'linear-gradient(to bottom, #162542 0%, #020918 100%)'
-                  : 'linear-gradient(to bottom, #00bbdc 0%, #87ceeb 100%)',
+                  : 'linear-gradient(to bottom, #006161 0%, #006161 100%)',
               }}
             >
               {/* Jefri text in top left corner */}
@@ -241,7 +282,11 @@ function App(): React.JSX.Element {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
-                style={jefriTextStyles}
+                style={{
+                  ...jefriTextStyles,
+                  filter: showExploreNotification ? 'blur(2px)' : 'none',
+                  transition: 'filter 0.3s ease-in-out',
+                }}
               >
                 Jefri
               </motion.div>
@@ -254,59 +299,77 @@ function App(): React.JSX.Element {
                 onNavigateToConnect={() => openPage('connect')}
                 onNavigateToPage={(page: string) => openPage(page as PageName)}
                 onPlayClickSound={playClickSound}
+                showExploreNotification={showExploreNotification}
               />
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none', // Allow clicks to pass through to 3D scene
+                  filter: showExploreNotification ? 'blur(2px)' : 'none',
+                  transition: 'filter 0.3s ease-in-out',
+                }}
               >
-                <MemoizedThemeToggle
-                  isDarkMode={isDarkMode}
-                  onToggle={() => {
-                    playClickSound();
-                    toggleTheme();
-                  }}
-                  isHidden={isThemeToggleHidden}
-                  deviceInfo={deviceInfo}
-                  onPlayHoverSound={playHoverSound}
-                />
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  <MemoizedThemeToggle
+                    isDarkMode={isDarkMode}
+                    onToggle={() => {
+                      playClickSound();
+                      toggleTheme();
+                    }}
+                    isHidden={isThemeToggleHidden}
+                    deviceInfo={deviceInfo}
+                    onPlayHoverSound={playHoverSound}
+                  />
+                </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.9 }}
-              >
-                <MemoizedCreditsButton
-                  isDarkMode={isDarkMode}
-                  onToggle={() => {
-                    playClickSound();
-                    toggleCreditsPopup();
-                  }}
-                  isHidden={isThemeToggleHidden}
-                  deviceInfo={deviceInfo}
-                />
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.9 }}
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  <MemoizedCreditsButton
+                    isDarkMode={isDarkMode}
+                    onToggle={() => {
+                      playClickSound();
+                      toggleCreditsPopup();
+                    }}
+                    isHidden={isThemeToggleHidden}
+                    deviceInfo={deviceInfo}
+                  />
+                </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 1.0 }}
-              >
-                <MemoizedBurgerMenu
-                  isDarkMode={isDarkMode}
-                  onNavigate={openPage}
-                  isOpen={isBurgerMenuOpen}
-                  onOpenChange={setIsBurgerMenuOpen}
-                  activePage={activePage}
-                  onHideThemeToggle={setIsThemeToggleHidden}
-                  shouldAnimate={shouldAnimateBurgerMenu}
-                  deviceInfo={deviceInfo}
-                  onPlayClickSound={playClickSound}
-                  onPlayHoverSound={playHoverSound}
-                />
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 1.0 }}
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  <MemoizedBurgerMenu
+                    isDarkMode={isDarkMode}
+                    onNavigate={openPage}
+                    isOpen={isBurgerMenuOpen}
+                    onOpenChange={setIsBurgerMenuOpen}
+                    activePage={activePage}
+                    onHideThemeToggle={setIsThemeToggleHidden}
+                    shouldAnimate={shouldAnimateBurgerMenu}
+                    deviceInfo={deviceInfo}
+                    onPlayClickSound={playClickSound}
+                    onPlayHoverSound={playHoverSound}
+                    slideDirection={burgerMenuSlideDirection}
+                  />
+                </motion.div>
+              </div>
 
               {/* Page Components */}
               <ProfilePage
@@ -355,6 +418,14 @@ function App(): React.JSX.Element {
           </ClickSpark>
         </motion.div>
       )}
+
+      {/* Explore Notification - Outside main app to avoid blur effects */}
+      <MemoizedExploreNotification
+        isVisible={showExploreNotification}
+        onHide={() => setShowExploreNotification(false)}
+        isDarkMode={isDarkMode}
+        deviceInfo={deviceInfo}
+      />
 
       {/* Loading Screen - Overlaid on top */}
       <AnimatePresence>

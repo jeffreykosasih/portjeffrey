@@ -3,6 +3,7 @@ import { DeviceInfo } from './types';
 import {
   getButtonSize,
   getPositioning,
+  getBottomPositioning,
   getIconSize,
   getButtonColors,
   ResponsiveValues,
@@ -35,10 +36,11 @@ export const getButtonStyles = ({
 }: ButtonConfig): React.CSSProperties => {
   const size = getButtonSize(deviceInfo);
   const offset = getPositioning(deviceInfo);
+  const bottomOffset = getBottomPositioning(deviceInfo);
   const colors = getButtonColors(isDarkMode, isHovered);
 
-  // Position-specific styles
-  const positionStyles = getPositionStyles(position, offset);
+  // Position-specific styles - use special bottom positioning for visual balance
+  const positionStyles = getPositionStyles(position, offset, bottomOffset);
 
   return {
     borderRadius: ResponsiveValues.borderRadius.button,
@@ -60,9 +62,11 @@ export const getButtonStyles = ({
 // Get position-specific CSS properties
 const getPositionStyles = (
   position: ButtonPosition,
-  offset: number
+  offset: number,
+  bottomOffset: number
 ): React.CSSProperties => {
   const offsetPx = `${offset}px`;
+  const bottomOffsetPx = `${bottomOffset}px`;
 
   switch (position) {
     case 'top-left':
@@ -70,9 +74,9 @@ const getPositionStyles = (
     case 'top-right':
       return { top: offsetPx, right: offsetPx };
     case 'bottom-left':
-      return { bottom: offsetPx, left: offsetPx };
+      return { bottom: bottomOffsetPx, left: offsetPx };
     case 'bottom-right':
-      return { bottom: offsetPx, right: offsetPx };
+      return { bottom: bottomOffsetPx, right: offsetPx };
     default:
       return {};
   }

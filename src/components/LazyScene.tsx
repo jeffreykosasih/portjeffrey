@@ -59,6 +59,7 @@ interface LazySceneProps {
   onNavigateToConnect?: () => void;
   onNavigateToPage?: (page: string) => void;
   onPlayClickSound?: () => void;
+  showExploreNotification?: boolean;
 }
 
 // Simple loading fallback to prevent layout shift
@@ -73,7 +74,7 @@ function SceneLoadingFallback({ isDarkMode }: { isDarkMode: boolean }) {
         height: '100%',
         background: isDarkMode
           ? 'linear-gradient(to bottom, #162542 0%, #020918 100%)'
-          : 'linear-gradient(to bottom, #00bbdc 0%, #87ceeb 100%)',
+          : 'linear-gradient(to bottom, #006161 0%, #006161 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -102,6 +103,7 @@ export default function LazyScene({
   onNavigateToConnect,
   onNavigateToPage,
   onPlayClickSound,
+  showExploreNotification,
 }: LazySceneProps): React.JSX.Element {
   return (
     <SceneErrorBoundary>
@@ -114,6 +116,7 @@ export default function LazyScene({
           onNavigateToConnect={onNavigateToConnect}
           onNavigateToPage={onNavigateToPage}
           onPlayClickSound={onPlayClickSound}
+          showExploreNotification={showExploreNotification}
         />
       </Suspense>
     </SceneErrorBoundary>

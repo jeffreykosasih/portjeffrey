@@ -19,7 +19,7 @@ const GmailIcon = ({ style }: { style?: React.CSSProperties }) => (
 interface ConnectPageProps {
   isVisible: boolean;
   onClose: () => void;
-  onOpenBurgerMenu: () => void;
+  onOpenBurgerMenu: (slideDirection?: 'left' | 'right') => void;
   isDarkMode: boolean;
   shouldAnimateText?: boolean;
   deviceInfo?: any;
@@ -228,7 +228,12 @@ export default function ConnectPage({
               height: deviceInfo?.isMobile
                 ? '100dvh' // Use dynamic viewport height on mobile
                 : '100vh',
-              backgroundColor: isDarkMode ? '#0f172a' : '#00bbdc',
+              backgroundColor: isDarkMode
+                ? 'rgba(22, 37, 66, 0.4)'
+                : 'rgba(0, 97, 97, 0.4)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              opacity: 0.95,
               zIndex: 1500,
               display: 'flex',
               flexDirection: 'column',
@@ -252,7 +257,7 @@ export default function ConnectPage({
             <motion.button
               onClick={() => {
                 onClose();
-                onOpenBurgerMenu();
+                onOpenBurgerMenu('right'); // Open burger menu sliding from right corner
               }}
               initial={{ x: 20 }}
               animate={{ x: 0 }}
@@ -283,7 +288,7 @@ export default function ConnectPage({
                     : '48px'
                   : '50px',
                 border: 'none',
-                backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
+                backgroundColor: isDarkMode ? '#162542' : '#084CA6',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
@@ -323,28 +328,27 @@ export default function ConnectPage({
                 style={{
                   fontSize: deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
-                      ? '1.3rem' // Reduced from 1.8rem
-                      : '2.0rem' // Reduced from 2.5rem for portrait
+                      ? '1.3rem'
+                      : '2.2rem'
                     : deviceInfo?.isTablet
-                    ? '3rem'
-                    : '4rem',
+                    ? '2.5rem'
+                    : '3rem',
                   fontWeight: '900',
                   fontFamily: 'Lato, sans-serif',
                   marginBottom: deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
-                      ? '6px' // Reduced from 12px
-                      : '16px' // Reduced from 20px for portrait
-                    : '30px',
-                  marginTop: deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'landscape'
-                      ? '10px' // Reduced from 20px
-                      : '30px' // Reduced from 40px for portrait
-                    : '0px',
+                      ? '6px'
+                      : '16px'
+                    : deviceInfo?.isTablet
+                    ? '20px'
+                    : '25px',
+                  marginTop: deviceInfo?.isMobile ? '0' : '20px',
                   background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
                   color: 'transparent',
                   letterSpacing: '-0.02em',
+                  textAlign: 'center',
                 }}
               >
                 Let's Connect!
@@ -718,18 +722,18 @@ export default function ConnectPage({
                         backgroundColor: isSubmitting
                           ? 'rgba(255, 255, 255, 0.9)'
                           : isDarkMode
-                          ? '#131D4F'
-                          : '#00bbdc',
+                          ? '#162542'
+                          : '#084CA6',
                         color: isSubmitting
                           ? isDarkMode
-                            ? '#0f172a'
-                            : '#00bbdc'
+                            ? '#162542'
+                            : '#084CA6'
                           : '#ffffff',
                         fontSize: deviceInfo?.isMobile ? '1rem' : '1.1rem',
                         fontWeight: '600',
                         fontFamily: 'Lato, sans-serif',
                         cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.3s ease',
+                        transition: 'all 0.2s ease',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -745,7 +749,7 @@ export default function ConnectPage({
                             e.target as HTMLButtonElement
                           ).style.backgroundColor = '#FFFFFF';
                           (e.target as HTMLButtonElement).style.color =
-                            isDarkMode ? '#0f172a' : '#00bbdc';
+                            isDarkMode ? '#162542' : '#084CA6';
                           (e.target as HTMLButtonElement).style.transform =
                             'translateY(-2px)';
                         }
@@ -755,8 +759,8 @@ export default function ConnectPage({
                           (
                             e.target as HTMLButtonElement
                           ).style.backgroundColor = isDarkMode
-                            ? '#131D4F'
-                            : '#00bbdc';
+                            ? '#162542'
+                            : '#084CA6';
                           (e.target as HTMLButtonElement).style.color =
                             '#ffffff';
                           (e.target as HTMLButtonElement).style.transform =

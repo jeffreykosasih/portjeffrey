@@ -10,7 +10,7 @@ import {
 interface PortfolioPageProps {
   isVisible: boolean;
   onClose: () => void;
-  onOpenBurgerMenu: () => void;
+  onOpenBurgerMenu: (slideDirection?: 'left' | 'right') => void;
   isDarkMode: boolean;
   shouldAnimateText?: boolean;
   deviceInfo?: any;
@@ -39,7 +39,7 @@ export default function PortfolioPage({
       title: 'Port Jeffrey',
       description:
         'Main site with island theme where I learn some three.js and movement!',
-      link: 'https://jefri.me',
+      link: 'https://jefri.dev',
       status: 'Completed',
       image: '/assets/images/profile.jpg',
       tech: ['Node.js', 'Three.js', 'Motion', 'React', 'Tailwind'],
@@ -75,7 +75,12 @@ export default function PortfolioPage({
             left: 0,
             width: '100vw',
             height: deviceInfo?.isMobile ? '100dvh' : '100vh', // Use dynamic viewport height
-            backgroundColor: isDarkMode ? '#0f172a' : '#00bbdc',
+            backgroundColor: isDarkMode
+              ? 'rgba(22, 37, 66, 0.4)'
+              : 'rgba(0, 97, 97, 0.4)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            opacity: 0.95,
             zIndex: 1500,
             display: 'flex',
             flexDirection: 'column',
@@ -99,7 +104,7 @@ export default function PortfolioPage({
           <motion.button
             onClick={() => {
               onClose(); // Close current page
-              onOpenBurgerMenu(); // Open burger menu
+              onOpenBurgerMenu('right'); // Open burger menu sliding from right corner
             }}
             initial={{ x: 20 }}
             animate={{ x: 0 }}
@@ -130,7 +135,7 @@ export default function PortfolioPage({
                   : '48px'
                 : '50px',
               border: 'none',
-              backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
+              backgroundColor: isDarkMode ? '#162542' : '#084CA6',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
@@ -181,7 +186,7 @@ export default function PortfolioPage({
                   : deviceInfo?.isTablet
                   ? '2.5rem'
                   : '3rem',
-                fontWeight: '700',
+                fontWeight: '900',
                 fontFamily: 'Lato, sans-serif',
                 marginBottom: deviceInfo?.isMobile
                   ? deviceInfo?.orientation === 'landscape'

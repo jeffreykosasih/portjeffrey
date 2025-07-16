@@ -33,6 +33,7 @@ interface BurgerMenuProps {
   deviceInfo?: DeviceInfo;
   onPlayClickSound?: () => void;
   onPlayHoverSound?: () => void;
+  slideDirection?: 'left' | 'right';
 }
 
 // Custom Burger Menu Icon Component (3 stripes)
@@ -113,6 +114,7 @@ export default function BurgerMenu({
   deviceInfo,
   onPlayClickSound,
   onPlayHoverSound,
+  slideDirection = 'right',
 }: BurgerMenuProps): React.JSX.Element {
   // Use external state if provided, otherwise use internal state
   const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -146,15 +148,24 @@ export default function BurgerMenu({
     // Store that menu was open when navigating to a page (except home)
     if (page !== 'home' && menuIsOpen) {
       setWasOpenBehindPage(true);
-      // Don't actually close the menu when navigating to a page - just hide theme toggle
+      // Actually close the menu when navigating to a page
+      setMenuIsOpen(false);
       if (onHideThemeToggle) {
         onHideThemeToggle(true);
       }
     } else {
-      // Close menu when navigating to home
-      setMenuIsOpen(false);
-      if (onHideThemeToggle) {
-        onHideThemeToggle(false);
+      // When returning to home, reopen menu if it was open before
+      if (page === 'home' && wasOpenBehindPage) {
+        setMenuIsOpen(true);
+        if (onHideThemeToggle) {
+          onHideThemeToggle(true);
+        }
+      } else {
+        // Close menu when navigating to home normally
+        setMenuIsOpen(false);
+        if (onHideThemeToggle) {
+          onHideThemeToggle(false);
+        }
       }
       // Reset the flag when navigating back to home
       setWasOpenBehindPage(false);
@@ -181,7 +192,7 @@ export default function BurgerMenu({
 
   const hoverStyles = {
     backgroundColor: '#ffffff',
-    color: isDarkMode ? '#0f172a' : '#00bbdc',
+    color: isDarkMode ? '#162542' : '#006161',
   };
 
   // Icon configuration using utilities
@@ -202,13 +213,19 @@ export default function BurgerMenu({
     }),
   };
 
-  // Revert to original menu styling but keep responsive width
+  // Updated menu styling with landscape mobile support
   const getMenuStyles = () => {
-    const baseWidth = deviceInfo?.isMobile
-      ? '280px'
-      : deviceInfo?.isTablet
-      ? '300px'
-      : '25vw';
+    let baseWidth;
+
+    if (deviceInfo?.isLandscapeMobile) {
+      baseWidth = '220px'; // Much narrower for landscape mobile to preserve horizontal space
+    } else if (deviceInfo?.isMobile) {
+      baseWidth = '280px';
+    } else if (deviceInfo?.isTablet) {
+      baseWidth = '300px';
+    } else {
+      baseWidth = '25vw';
+    }
 
     return {
       position: 'fixed' as const,
@@ -216,27 +233,48 @@ export default function BurgerMenu({
       right: 0,
       width: baseWidth,
       height: '100dvh', // Use dynamic viewport height for better mobile support
-      backgroundColor: isDarkMode ? '#131D4F' : '#00bbdc',
+      backgroundColor: isDarkMode ? '#162542' : '#006161',
       backdropFilter: 'blur(10px)',
       zIndex: 9999,
       display: 'flex',
       flexDirection: 'column' as const,
       alignItems: 'flex-start',
       justifyContent: 'flex-start',
-      gap: deviceInfo?.isMobile ? '15px' : '20px',
-      paddingTop: deviceInfo?.isMobile ? '100px' : '120px',
-      paddingBottom: deviceInfo?.isMobile
+      gap: deviceInfo?.isLandscapeMobile
+        ? '8px' // Tighter spacing for landscape mobile
+        : deviceInfo?.isMobile
+        ? '15px'
+        : '20px',
+      paddingTop: deviceInfo?.isLandscapeMobile
+        ? '60px' // Much smaller top padding for landscape mobile
+        : deviceInfo?.isMobile
+        ? '100px'
+        : '120px',
+      paddingBottom: deviceInfo?.isLandscapeMobile
+        ? '40px' // Smaller bottom padding for landscape mobile
+        : deviceInfo?.isMobile
         ? deviceInfo?.orientation === 'portrait'
           ? '120px' // More bottom padding on portrait to ensure button visibility
           : '80px'
         : '40px',
-      paddingLeft: deviceInfo?.isMobile ? '30px' : '40px',
-      paddingRight: deviceInfo?.isMobile ? '20px' : '30px',
-      minHeight: deviceInfo?.isMobile ? '100dvh' : '100vh', // Ensure minimum height
+      paddingLeft: deviceInfo?.isLandscapeMobile
+        ? '20px' // Tighter left padding for landscape mobile
+        : deviceInfo?.isMobile
+        ? '30px'
+        : '40px',
+      paddingRight: deviceInfo?.isLandscapeMobile
+        ? '16px' // Tighter right padding for landscape mobile
+        : deviceInfo?.isMobile
+        ? '20px'
+        : '30px',
+      minHeight:
+        deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile
+          ? '100dvh'
+          : '100vh', // Ensure minimum height
     };
   };
 
-  // Revert to original menu item styling
+  // Updated menu item styling with landscape mobile support
   const getMenuItemStyles = (isHovered: boolean, itemKey: PageName) => {
     const isSpecificItemHovered = hoveredMenuItem === itemKey;
     const shouldHighlight = isHovered || isSpecificItemHovered;
@@ -248,18 +286,22 @@ export default function BurgerMenu({
       fontWeight: '900',
       fontFamily: 'Lato, sans-serif',
       cursor: 'pointer',
-      borderRadius: '15px',
       transition: 'all 0.3s ease',
       textAlign: 'left' as const,
       width: '100%',
       maxWidth: '900px',
       letterSpacing: '-0.02em',
       transform: shouldHighlight ? 'scale(1.05)' : 'scale(1)',
-      padding: '8px 0px', // Original padding
+      padding: deviceInfo?.isLandscapeMobile ? '4px 0px' : '8px 0px', // Tighter padding for landscape mobile
     };
 
-    // Responsive font sizes but keep original styling
-    if (deviceInfo?.isMobile) {
+    // Enhanced responsive font sizes with landscape mobile support
+    if (deviceInfo?.isLandscapeMobile) {
+      return {
+        ...baseStyles,
+        fontSize: '1.1rem', // Much smaller for landscape mobile height constraints
+      };
+    } else if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
         fontSize: '1.5rem', // Smaller for mobile but still substantial
@@ -325,7 +367,13 @@ export default function BurgerMenu({
       <AnimatePresence>
         {(!activePage || activePage === 'home') && menuIsOpen && (
           <motion.div
-            initial={{ x: !shouldAnimate ? '30%' : '100%' }}
+            initial={{
+              x: !shouldAnimate
+                ? '30%'
+                : slideDirection === 'left'
+                ? '-100%'
+                : '100%',
+            }}
             animate={{
               x: '30%', // Back to original positioning
               transition: !shouldAnimate
@@ -333,12 +381,12 @@ export default function BurgerMenu({
                 : {
                     type: 'tween',
                     ease: 'easeOut',
-                    duration: 0.3, // Original animation timing
+                    duration: 0.6, // Slower animation (was 0.3)
                   },
             }}
             exit={{
               x: '100%',
-              transition: { duration: 0.3, ease: 'easeInOut' },
+              transition: { duration: 0.6, ease: 'easeInOut' }, // Slower exit too
             }}
             onAnimationComplete={() => {
               // Reset the flag once animation is complete
@@ -395,18 +443,34 @@ export default function BurgerMenu({
               }
               style={{
                 position: 'absolute',
-                bottom: deviceInfo?.isMobile
+                bottom: deviceInfo?.isLandscapeMobile
+                  ? 'max(env(safe-area-inset-bottom), 20px)' // Higher for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo?.orientation === 'portrait'
                     ? 'max(env(safe-area-inset-bottom), 40px)' // Increased for iPhone portrait
                     : deviceInfo?.orientation === 'landscape'
                     ? 'max(env(safe-area-inset-bottom), 12px)' // Reduced from 15px
                     : 'max(env(safe-area-inset-bottom), 30px)'
                   : '50px',
-                left: deviceInfo?.isMobile ? '30px' : '40px', // Align with menu padding
-                right: deviceInfo?.isMobile ? '20px' : 'auto',
-                width: deviceInfo?.isMobile ? 'calc(100% - 50px)' : 'auto', // Account for new left padding
+                left: deviceInfo?.isLandscapeMobile
+                  ? '20px' // Align with tighter menu padding
+                  : deviceInfo?.isMobile
+                  ? '30px'
+                  : '40px', // Align with menu padding
+                right: deviceInfo?.isLandscapeMobile
+                  ? '16px' // Align with tighter menu padding
+                  : deviceInfo?.isMobile
+                  ? '20px'
+                  : 'auto',
+                width: deviceInfo?.isLandscapeMobile
+                  ? 'calc(100% - 36px)' // Account for tighter padding
+                  : deviceInfo?.isMobile
+                  ? 'calc(100% - 50px)'
+                  : 'auto', // Account for new left padding
                 zIndex: 100,
-                maxWidth: deviceInfo?.isMobile
+                maxWidth: deviceInfo?.isLandscapeMobile
+                  ? '140px' // Compact for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo?.orientation === 'landscape'
                     ? '120px' // Further reduced from 160px for landscape
                     : '220px'
@@ -419,13 +483,17 @@ export default function BurgerMenu({
                 onMouseLeave={() => setConnectHovered(false)}
                 style={{
                   position: 'relative',
-                  padding: deviceInfo?.isMobile
+                  padding: deviceInfo?.isLandscapeMobile
+                    ? '4px 8px' // Compact padding for landscape mobile
+                    : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
                       ? '3px 6px' // Further reduced from 4px 8px
                       : '10px 18px'
                     : '12px 20px',
                   cursor: 'pointer',
-                  fontSize: deviceInfo?.isMobile
+                  fontSize: deviceInfo?.isLandscapeMobile
+                    ? '0.7rem' // Compact for landscape mobile
+                    : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
                       ? '0.55rem' // Further reduced from 0.65rem
                       : '0.9rem'
@@ -433,7 +501,7 @@ export default function BurgerMenu({
                   fontWeight: '900',
                   fontFamily: 'Lato, sans-serif',
                   letterSpacing: '0.02em',
-                  color: isDarkMode ? '#0f172a' : '#00bbdc',
+                  color: isDarkMode ? '#162542' : '#084CA6',
                   textAlign: 'center' as const,
                   borderRadius: '6px', // Reduced from 8px for more compact look
                   border: 'none',
@@ -444,12 +512,16 @@ export default function BurgerMenu({
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: '0 2px 8px rgba(250, 241, 230, 0.25)', // Reduced shadow
-                  minHeight: deviceInfo?.isMobile
+                  minHeight: deviceInfo?.isLandscapeMobile
+                    ? '32px' // Good size for landscape mobile touch targets
+                    : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
                       ? '24px' // Further reduced from 28px
                       : '44px'
                     : '44px',
-                  minWidth: deviceInfo?.isMobile
+                  minWidth: deviceInfo?.isLandscapeMobile
+                    ? '32px' // Good size for landscape mobile touch targets
+                    : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
                       ? '24px' // Further reduced from 28px
                       : '44px'
@@ -473,8 +545,10 @@ export default function BurgerMenu({
 
                 {/* Button content */}
                 <span style={{ position: 'relative', zIndex: 1 }}>
-                  {deviceInfo?.isMobile &&
-                  deviceInfo?.orientation === 'landscape'
+                  {deviceInfo?.isLandscapeMobile
+                    ? 'Connect!'
+                    : deviceInfo?.isMobile &&
+                      deviceInfo?.orientation === 'landscape'
                     ? 'Connect!'
                     : "Let's Connect!"}
                 </span>
