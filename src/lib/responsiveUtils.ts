@@ -141,7 +141,7 @@ export const getSpacing = (
 export const ColorSchemes = {
   primary: {
     dark: '#162542',
-    light: '#006161',
+    light: '#005E80',
   },
   accent: {
     yellow: '#FFEEA9',

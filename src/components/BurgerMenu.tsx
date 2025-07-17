@@ -40,29 +40,33 @@ interface BurgerMenuProps {
 const BurgerIcon = ({
   color = 'white',
 }: BurgerIconProps): React.JSX.Element => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+  <div
+    style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}
+  >
+    {' '}
+    {/* Using CSS custom property */}
     <div
       style={{
-        width: '18px',
-        height: '2px',
+        width: '1.125rem', // Converted from 18px to rem
+        height: '2px', // Keep 2px for precision
         backgroundColor: color,
-        borderRadius: '1px',
+        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
       }}
     ></div>
     <div
       style={{
-        width: '18px',
-        height: '2px',
+        width: '1.125rem', // Converted from 18px to rem
+        height: '2px', // Keep 2px for precision
         backgroundColor: color,
-        borderRadius: '1px',
+        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
       }}
     ></div>
     <div
       style={{
-        width: '18px',
-        height: '2px',
+        width: '1.125rem', // Converted from 18px to rem
+        height: '2px', // Keep 2px for precision
         backgroundColor: color,
-        borderRadius: '1px',
+        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
       }}
     ></div>
   </div>
@@ -74,17 +78,21 @@ const CloseIcon = ({
   size = 14,
 }: CloseIconProps): React.JSX.Element => (
   <div
-    style={{ position: 'relative', width: `${size}px`, height: `${size}px` }}
+    style={{
+      position: 'relative',
+      width: `${size / 16}rem`,
+      height: `${size / 16}rem`,
+    }} // Convert px to rem
   >
     <div
       style={{
         position: 'absolute',
         top: '50%',
         left: '50%',
-        width: `${size}px`,
-        height: '2px',
+        width: `${size / 16}rem`, // Convert px to rem
+        height: '2px', // Keep 2px for precision
         backgroundColor: color,
-        borderRadius: '1px',
+        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
         transform: 'translate(-50%, -50%) rotate(45deg)',
       }}
     ></div>
@@ -93,10 +101,10 @@ const CloseIcon = ({
         position: 'absolute',
         top: '50%',
         left: '50%',
-        width: `${size}px`,
-        height: '2px',
+        width: `${size / 16}rem`, // Convert px to rem
+        height: '2px', // Keep 2px for precision
         backgroundColor: color,
-        borderRadius: '1px',
+        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
         transform: 'translate(-50%, -50%) rotate(-45deg)',
       }}
     ></div>
@@ -156,10 +164,15 @@ export default function BurgerMenu({
     } else {
       // When returning to home, reopen menu if it was open before
       if (page === 'home' && wasOpenBehindPage) {
-        setMenuIsOpen(true);
-        if (onHideThemeToggle) {
-          onHideThemeToggle(true);
-        }
+        // First ensure menu is closed, then reopen with proper animation
+        setMenuIsOpen(false);
+        // Use a small delay to ensure the menu state resets before reopening
+        setTimeout(() => {
+          setMenuIsOpen(true);
+          if (onHideThemeToggle) {
+            onHideThemeToggle(true);
+          }
+        }, 50); // Small delay to trigger proper animation
       } else {
         // Close menu when navigating to home normally
         setMenuIsOpen(false);
@@ -192,7 +205,7 @@ export default function BurgerMenu({
 
   const hoverStyles = {
     backgroundColor: '#ffffff',
-    color: isDarkMode ? '#162542' : '#006161',
+    color: isDarkMode ? '#162542' : '#005E80',
   };
 
   // Icon configuration using utilities
@@ -200,11 +213,11 @@ export default function BurgerMenu({
   const iconSizes = {
     burger: {
       width: getResponsiveValue(deviceInfo, {
-        mobile: '16px',
-        tablet: '17px',
-        desktop: '18px',
+        mobile: 'var(--text-base)', // Using CSS custom property
+        tablet: 'calc(var(--text-base) + 0.0625rem)', // Using CSS custom property with calc
+        desktop: 'var(--text-lg)', // Using CSS custom property
       }),
-      height: '2px',
+      height: '2px', // Keep 2px for precision
     },
     close: getResponsiveValue(deviceInfo, {
       mobile: 14,
@@ -218,11 +231,11 @@ export default function BurgerMenu({
     let baseWidth;
 
     if (deviceInfo?.isLandscapeMobile) {
-      baseWidth = '220px'; // Much narrower for landscape mobile to preserve horizontal space
+      baseWidth = '13.75rem'; // Converted from 220px to rem
     } else if (deviceInfo?.isMobile) {
-      baseWidth = '280px';
+      baseWidth = '17.5rem'; // Converted from 280px to rem
     } else if (deviceInfo?.isTablet) {
-      baseWidth = '300px';
+      baseWidth = '18.75rem'; // Converted from 300px to rem
     } else {
       baseWidth = '25vw';
     }
@@ -233,40 +246,40 @@ export default function BurgerMenu({
       right: 0,
       width: baseWidth,
       height: '100dvh', // Use dynamic viewport height for better mobile support
-      backgroundColor: isDarkMode ? '#162542' : '#006161',
-      backdropFilter: 'blur(10px)',
+      backgroundColor: isDarkMode ? '#162542' : '#005E80',
+      backdropFilter: 'blur(0.625rem)', // Converted from 10px to rem
       zIndex: 9999,
       display: 'flex',
       flexDirection: 'column' as const,
       alignItems: 'flex-start',
       justifyContent: 'flex-start',
       gap: deviceInfo?.isLandscapeMobile
-        ? '8px' // Tighter spacing for landscape mobile
+        ? 'var(--space-xs)' // Using CSS custom property for tighter spacing
         : deviceInfo?.isMobile
-        ? '15px'
-        : '20px',
+        ? 'calc(var(--space-base) - 0.0625rem)' // Using CSS custom property with calc
+        : 'var(--space-lg)', // Using CSS custom property
       paddingTop: deviceInfo?.isLandscapeMobile
-        ? '60px' // Much smaller top padding for landscape mobile
+        ? 'var(--space-5xl)' // Using CSS custom property (smaller top padding)
         : deviceInfo?.isMobile
-        ? '100px'
-        : '120px',
+        ? 'var(--space-6xl)' // Using CSS custom property
+        : '7.5rem', // Converted from 120px to rem
       paddingBottom: deviceInfo?.isLandscapeMobile
-        ? '40px' // Smaller bottom padding for landscape mobile
+        ? 'calc(var(--space-xl) + 0.375rem)' // Using CSS custom property with calc
         : deviceInfo?.isMobile
         ? deviceInfo?.orientation === 'portrait'
-          ? '120px' // More bottom padding on portrait to ensure button visibility
-          : '80px'
-        : '40px',
+          ? '7.5rem' // Converted from 120px to rem (more bottom padding on portrait)
+          : 'var(--space-6xl)' // Using CSS custom property
+        : 'var(--space-3xl)', // Using CSS custom property
       paddingLeft: deviceInfo?.isLandscapeMobile
-        ? '20px' // Tighter left padding for landscape mobile
+        ? 'var(--space-lg)' // Using CSS custom property (tighter left padding)
         : deviceInfo?.isMobile
-        ? '30px'
-        : '40px',
+        ? 'calc(var(--space-xl) + 0.375rem)' // Using CSS custom property with calc
+        : 'var(--space-3xl)', // Using CSS custom property
       paddingRight: deviceInfo?.isLandscapeMobile
-        ? '16px' // Tighter right padding for landscape mobile
+        ? 'var(--space-base)' // Using CSS custom property (tighter right padding)
         : deviceInfo?.isMobile
-        ? '20px'
-        : '30px',
+        ? 'var(--space-lg)' // Using CSS custom property
+        : 'calc(var(--space-xl) + 0.375rem)', // Using CSS custom property with calc
       minHeight:
         deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile
           ? '100dvh'
@@ -289,32 +302,34 @@ export default function BurgerMenu({
       transition: 'all 0.3s ease',
       textAlign: 'left' as const,
       width: '100%',
-      maxWidth: '900px',
+      maxWidth: '56.25rem', // Converted from 900px to rem
       letterSpacing: '-0.02em',
       transform: shouldHighlight ? 'scale(1.05)' : 'scale(1)',
-      padding: deviceInfo?.isLandscapeMobile ? '4px 0px' : '8px 0px', // Tighter padding for landscape mobile
+      padding: deviceInfo?.isLandscapeMobile
+        ? '0.125rem 0'
+        : 'var(--space-sm) 0', // Using CSS custom properties
     };
 
     // Enhanced responsive font sizes with landscape mobile support
     if (deviceInfo?.isLandscapeMobile) {
       return {
         ...baseStyles,
-        fontSize: '1.1rem', // Much smaller for landscape mobile height constraints
+        fontSize: 'var(--text-sm)', // Using CSS custom property (much smaller)
       };
     } else if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
-        fontSize: '1.5rem', // Smaller for mobile but still substantial
+        fontSize: 'var(--text-2xl)', // Using CSS custom property (smaller for mobile)
       };
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
-        fontSize: '1.7rem',
+        fontSize: 'calc(var(--text-2xl) + 0.2rem)', // Using CSS custom property with calc
       };
     } else {
       return {
         ...baseStyles,
-        fontSize: '1.875rem', // Original size
+        fontSize: 'var(--text-3xl)', // Using CSS custom property (original size)
       };
     }
   };
@@ -328,7 +343,15 @@ export default function BurgerMenu({
 
   // Updated Burger Icon with responsive sizing
   const ResponsiveBurgerIcon = ({ color = 'white' }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-xs)',
+      }}
+    >
+      {' '}
+      {/* Using CSS custom property */}
       {[...Array(3)].map((_, i) => (
         <div
           key={i}
@@ -336,7 +359,7 @@ export default function BurgerMenu({
             width: iconSizes.burger.width,
             height: iconSizes.burger.height,
             backgroundColor: color,
-            borderRadius: '1px',
+            borderRadius: 'var(--space-xs)', // Using CSS custom property
           }}
         />
       ))}
@@ -444,36 +467,36 @@ export default function BurgerMenu({
               style={{
                 position: 'absolute',
                 bottom: deviceInfo?.isLandscapeMobile
-                  ? 'max(env(safe-area-inset-bottom), 20px)' // Higher for landscape mobile
+                  ? 'max(env(safe-area-inset-bottom), var(--space-lg))' // Using CSS custom property
                   : deviceInfo?.isMobile
                   ? deviceInfo?.orientation === 'portrait'
-                    ? 'max(env(safe-area-inset-bottom), 40px)' // Increased for iPhone portrait
+                    ? 'max(env(safe-area-inset-bottom), var(--space-3xl))' // Using CSS custom property
                     : deviceInfo?.orientation === 'landscape'
-                    ? 'max(env(safe-area-inset-bottom), 12px)' // Reduced from 15px
-                    : 'max(env(safe-area-inset-bottom), 30px)'
-                  : '50px',
+                    ? 'max(env(safe-area-inset-bottom), var(--space-md))' // Using CSS custom property
+                    : 'max(env(safe-area-inset-bottom), calc(var(--space-xl) + 0.375rem))' // Using CSS custom property with calc
+                  : 'var(--space-4xl)', // Using CSS custom property (converted from 50px)
                 left: deviceInfo?.isLandscapeMobile
-                  ? '20px' // Align with tighter menu padding
+                  ? 'var(--space-lg)' // Using CSS custom property (align with tighter menu padding)
                   : deviceInfo?.isMobile
-                  ? '30px'
-                  : '40px', // Align with menu padding
+                  ? 'calc(var(--space-xl) + 0.375rem)' // Using CSS custom property with calc
+                  : 'var(--space-3xl)', // Using CSS custom property (align with menu padding)
                 right: deviceInfo?.isLandscapeMobile
-                  ? '16px' // Align with tighter menu padding
+                  ? 'var(--space-base)' // Using CSS custom property (align with tighter menu padding)
                   : deviceInfo?.isMobile
-                  ? '20px'
+                  ? 'var(--space-lg)' // Using CSS custom property
                   : 'auto',
                 width: deviceInfo?.isLandscapeMobile
-                  ? 'calc(100% - 36px)' // Account for tighter padding
+                  ? 'calc(100% - var(--space-2xl) - var(--space-xs))' // Using CSS custom properties (account for tighter padding)
                   : deviceInfo?.isMobile
-                  ? 'calc(100% - 50px)'
+                  ? 'calc(100% - var(--space-4xl) + 0.125rem)' // Using CSS custom properties
                   : 'auto', // Account for new left padding
                 zIndex: 100,
                 maxWidth: deviceInfo?.isLandscapeMobile
-                  ? '140px' // Compact for landscape mobile
+                  ? '8.75rem' // Converted from 140px to rem (compact for landscape mobile)
                   : deviceInfo?.isMobile
                   ? deviceInfo?.orientation === 'landscape'
-                    ? '120px' // Further reduced from 160px for landscape
-                    : '220px'
+                    ? '7.5rem' // Converted from 120px to rem
+                    : '13.75rem' // Converted from 220px to rem
                   : 'auto', // Prevent button from being too wide
               }}
             >
@@ -484,26 +507,26 @@ export default function BurgerMenu({
                 style={{
                   position: 'relative',
                   padding: deviceInfo?.isLandscapeMobile
-                    ? '4px 8px' // Compact padding for landscape mobile
+                    ? 'var(--space-xs) var(--space-sm)' // Using CSS custom properties (compact padding)
                     : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
-                      ? '3px 6px' // Further reduced from 4px 8px
-                      : '10px 18px'
-                    : '12px 20px',
+                      ? 'calc(var(--space-xs) - 0.0625rem) calc(var(--space-sm) - 0.125rem)' // Using CSS custom properties with calc
+                      : 'calc(var(--space-sm) + 0.125rem) calc(var(--space-lg) - 0.125rem)' // Using CSS custom properties with calc
+                    : 'var(--space-md) var(--space-lg)', // Using CSS custom properties
                   cursor: 'pointer',
                   fontSize: deviceInfo?.isLandscapeMobile
-                    ? '0.7rem' // Compact for landscape mobile
+                    ? 'calc(var(--text-xs) + 0.05rem)' // Using CSS custom property with calc (compact)
                     : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
-                      ? '0.55rem' // Further reduced from 0.65rem
-                      : '0.9rem'
-                    : '1rem',
+                      ? 'calc(var(--text-xs) - 0.125rem)' // Using CSS custom property with calc
+                      : 'var(--text-sm)' // Using CSS custom property
+                    : 'var(--text-base)', // Using CSS custom property
                   fontWeight: '900',
                   fontFamily: 'Lato, sans-serif',
                   letterSpacing: '0.02em',
-                  color: isDarkMode ? '#162542' : '#084CA6',
+                  color: isDarkMode ? '#162542' : '#005E80',
                   textAlign: 'center' as const,
-                  borderRadius: '6px', // Reduced from 8px for more compact look
+                  borderRadius: 'calc(var(--radius-sm) + 0.0625rem)', // Using CSS custom property with calc (reduced for compact look)
                   border: 'none',
                   background: '#FAF1E6',
                   transition: 'all 0.3s ease',
@@ -511,21 +534,21 @@ export default function BurgerMenu({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(250, 241, 230, 0.25)', // Reduced shadow
+                  boxShadow: '0 0.125rem 0.5rem rgba(250, 241, 230, 0.25)', // Converted to rem (reduced shadow)
                   minHeight: deviceInfo?.isLandscapeMobile
-                    ? '32px' // Good size for landscape mobile touch targets
+                    ? 'var(--space-2xl)' // Using CSS custom property (good size for landscape mobile touch targets)
                     : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
-                      ? '24px' // Further reduced from 28px
-                      : '44px'
-                    : '44px',
+                      ? 'var(--space-xl)' // Using CSS custom property
+                      : 'var(--touch-target-sm)' // Using CSS custom property
+                    : 'var(--touch-target-sm)', // Using CSS custom property
                   minWidth: deviceInfo?.isLandscapeMobile
-                    ? '32px' // Good size for landscape mobile touch targets
+                    ? 'var(--space-2xl)' // Using CSS custom property (good size for landscape mobile touch targets)
                     : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
-                      ? '24px' // Further reduced from 28px
-                      : '44px'
-                    : '44px',
+                      ? 'var(--space-xl)' // Using CSS custom property
+                      : 'var(--touch-target-sm)' // Using CSS custom property
+                    : 'var(--touch-target-sm)', // Using CSS custom property
                 }}
                 className='touch-target'
               >

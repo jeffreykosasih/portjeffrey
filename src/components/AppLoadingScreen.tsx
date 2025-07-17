@@ -27,7 +27,7 @@ export default function AppLoadingScreen({
 
   // Theme colors
   const colors = {
-    background: isDarkMode ? '#162542' : '#006161',
+    background: isDarkMode ? '#162542' : '#005E80',
     text: isDarkMode ? '#e8e682' : '#ffffff',
     dots: isDarkMode ? '#e8e682' : '#ffffff',
     transition: isDarkMode ? '#000000' : '#ffffff',
@@ -102,33 +102,33 @@ export default function AppLoadingScreen({
 
   const titleStyles: React.CSSProperties = {
     fontFamily: "'Lato', sans-serif",
-    fontSize: 'clamp(3rem, 8vw, 8rem)',
+    fontSize: 'clamp(var(--text-5xl), 8vw, var(--text-6xl))', // Using CSS custom properties with clamp
     fontWeight: 800,
     letterSpacing: '-0.05em',
     lineHeight: 1,
     color: colors.text,
-    marginBottom: '3rem',
+    marginBottom: 'var(--space-4xl)', // Using CSS custom property
   };
 
   const buttonStyles: React.CSSProperties = {
     fontFamily: "'Lato', sans-serif",
-    fontSize: '1.5rem',
+    fontSize: 'var(--text-2xl)', // Using CSS custom property
     lineHeight: 1.2,
     fontWeight: 600,
-    padding: '0.875rem 2rem',
-    borderRadius: '9999px',
+    padding: 'calc(var(--space-md) + 0.125rem) var(--space-2xl)', // Using CSS custom properties
+    borderRadius: 'var(--radius-full)', // Using CSS custom property
     backgroundColor: isDarkMode ? colors.text : '#ffffff', // Use yellow in dark mode, white in light mode
-    color: isDarkMode ? '#162542' : '#0B60B0', // Dark text in dark mode, blue in light mode
+    color: isDarkMode ? '#162542' : '#005E80', // Dark text in dark mode, blue in light mode
     border: 'none',
     boxShadow: isDarkMode
-      ? '0 8px 20px rgba(232, 230, 130, 0.3)'
-      : '0 8px 20px rgba(0, 0, 0, 0.1)',
+      ? '0 0.5rem 1.25rem rgba(232, 230, 130, 0.3)' // Converted to rem
+      : '0 0.5rem 1.25rem rgba(0, 0, 0, 0.1)', // Converted to rem
     transition: 'all 0.3s ease',
     cursor: 'pointer',
   };
 
   const handleButtonMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.transform = 'translateY(-2px)';
+    e.currentTarget.style.transform = 'translateY(-0.125rem)'; // Converted to rem
     e.currentTarget.style.backgroundColor = isDarkMode ? '#f0f0a0' : '#f0f0f0'; // Lighter yellow/gray on hover
   };
 
@@ -140,11 +140,11 @@ export default function AppLoadingScreen({
   };
 
   const handleButtonMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.transform = 'translateY(1px)';
+    e.currentTarget.style.transform = 'translateY(0.0625rem)'; // Converted to rem
   };
 
   const handleButtonMouseUp = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.transform = 'translateY(-2px)';
+    e.currentTarget.style.transform = 'translateY(-0.125rem)'; // Converted to rem
   };
 
   // Jumping dots animation variants
@@ -183,13 +183,13 @@ export default function AppLoadingScreen({
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3rem',
+            gap: 'var(--space-4xl)', // Using CSS custom property
           }}
         >
           {/* Dots or Title Area */}
           <div
             style={{
-              height: '280px', // Fixed height to ensure consistent positioning
+              height: '17.5rem', // Converted from 280px to rem
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -206,7 +206,7 @@ export default function AppLoadingScreen({
                   exit='exit'
                   style={{
                     display: 'flex',
-                    gap: '0.75rem',
+                    gap: 'var(--space-md)', // Using CSS custom property
                   }}
                 >
                   {[0, 1, 2].map((index) => (
@@ -217,8 +217,8 @@ export default function AppLoadingScreen({
                         y: [0, -30, 0],
                       }}
                       style={{
-                        width: '20px',
-                        height: '20px',
+                        width: 'var(--space-lg)', // Using CSS custom property (20px equivalent)
+                        height: 'var(--space-lg)', // Using CSS custom property (20px equivalent)
                         borderRadius: '50%',
                         backgroundColor: colors.dots,
                       }}
@@ -249,7 +249,10 @@ export default function AppLoadingScreen({
                     stiffness: 80,
                   }}
                 >
-                  <div style={{ marginBottom: '0.5rem' }}>Welcome to</div>
+                  <div style={{ marginBottom: 'var(--space-sm)' }}>
+                    Welcome to
+                  </div>{' '}
+                  {/* Using CSS custom property */}
                   <div>Port Jeffrey</div>
                 </motion.div>
               )}
@@ -259,7 +262,7 @@ export default function AppLoadingScreen({
           {/* Button Area */}
           <div
             style={{
-              height: '80px', // Fixed height instead of minHeight to prevent layout shifts
+              height: 'var(--space-6xl)', // Converted from 80px to rem (5rem)
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

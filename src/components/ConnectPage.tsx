@@ -169,7 +169,9 @@ export default function ConnectPage({
   const contactMethods = [
     {
       title: 'Gmail',
-      icon: <GmailIcon style={{ color: '#ffffff', fontSize: '1.5rem' }} />,
+      icon: (
+        <GmailIcon style={{ color: '#ffffff', fontSize: 'var(--text-2xl)' }} />
+      ), // Using CSS custom property
       description: 'workwithjefri@gmail.com',
       hoverColor: '#EA4335', // Gmail red
       link: 'mailto:workwithjefri@gmail.com',
@@ -215,11 +217,7 @@ export default function ConnectPage({
 
       <AnimatePresence>
         {isVisible && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
+          <div
             style={{
               position: 'fixed',
               top: 0,
@@ -231,8 +229,8 @@ export default function ConnectPage({
               backgroundColor: isDarkMode
                 ? 'rgba(22, 37, 66, 0.4)'
                 : 'rgba(0, 97, 97, 0.4)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
+              backdropFilter: 'blur(0.5rem)', // Converted to rem
+              WebkitBackdropFilter: 'blur(0.5rem)', // Converted to rem
               opacity: 0.95,
               zIndex: 1500,
               display: 'flex',
@@ -240,11 +238,13 @@ export default function ConnectPage({
               justifyContent: 'flex-start', // Always start from top for better scrolling
               alignItems: 'center',
               color: '#ffffff',
-              padding: deviceInfo?.isMobile
-                ? 'max(env(safe-area-inset-top), 20px) 16px max(env(safe-area-inset-bottom), 80px) 16px' // Extra bottom padding for mobile
+              padding: deviceInfo?.isLandscapeMobile
+                ? 'max(env(safe-area-inset-top), calc(var(--space-xl) + 0.375rem)) var(--space-xl) max(env(safe-area-inset-bottom), calc(var(--space-xl) + 0.375rem)) var(--space-xl)' // Using CSS custom properties
+                : deviceInfo?.isMobile
+                ? 'max(env(safe-area-inset-top), var(--space-lg)) var(--space-base) max(env(safe-area-inset-bottom), var(--space-6xl)) var(--space-base)' // Using CSS custom properties
                 : deviceInfo?.isTablet
-                ? '30px 24px'
-                : '40px',
+                ? 'calc(var(--space-xl) + 0.375rem) var(--space-xl)' // Using CSS custom properties
+                : 'var(--space-3xl)', // Using CSS custom property
               overflowY: 'auto',
               overflowX: 'hidden',
               // Improve mobile scrolling
@@ -266,29 +266,37 @@ export default function ConnectPage({
               style={{
                 borderRadius: '50%',
                 position: 'absolute',
-                top: deviceInfo?.isMobile
+                top: deviceInfo?.isLandscapeMobile
+                  ? 'max(env(safe-area-inset-top), var(--space-lg))' // Using CSS custom property
+                  : deviceInfo?.isMobile
                   ? deviceInfo?.orientation === 'landscape'
-                    ? 'max(env(safe-area-inset-top), 8px)'
-                    : 'max(env(safe-area-inset-top), 16px)'
-                  : '20px',
-                right: deviceInfo?.isMobile
+                    ? 'max(env(safe-area-inset-top), var(--space-sm))' // Using CSS custom property
+                    : 'max(env(safe-area-inset-top), var(--space-base))' // Using CSS custom property
+                  : 'var(--space-lg)', // Using CSS custom property
+                right: deviceInfo?.isLandscapeMobile
+                  ? 'var(--space-lg)' // Using CSS custom property
+                  : deviceInfo?.isMobile
                   ? deviceInfo?.orientation === 'landscape'
-                    ? '12px'
-                    : '16px'
-                  : '20px',
+                    ? 'var(--space-md)' // Using CSS custom property
+                    : 'var(--space-base)' // Using CSS custom property
+                  : 'var(--space-lg)', // Using CSS custom property
                 zIndex: 1001,
-                width: deviceInfo?.isMobile
+                width: deviceInfo?.isLandscapeMobile
+                  ? 'var(--space-4xl)' // Using CSS custom property
+                  : deviceInfo?.isMobile
                   ? deviceInfo?.orientation === 'landscape'
-                    ? '40px'
-                    : '48px'
-                  : '50px',
-                height: deviceInfo?.isMobile
+                    ? 'var(--space-3xl)' // Using CSS custom property
+                    : 'var(--touch-target-md)' // Using CSS custom property
+                  : 'var(--space-4xl)', // Using CSS custom property
+                height: deviceInfo?.isLandscapeMobile
+                  ? 'var(--space-4xl)' // Using CSS custom property
+                  : deviceInfo?.isMobile
                   ? deviceInfo?.orientation === 'landscape'
-                    ? '40px'
-                    : '48px'
-                  : '50px',
+                    ? 'var(--space-3xl)' // Using CSS custom property
+                    : 'var(--touch-target-md)' // Using CSS custom property
+                  : 'var(--space-4xl)', // Using CSS custom property
                 border: 'none',
-                backgroundColor: isDarkMode ? '#162542' : '#084CA6',
+                backgroundColor: isDarkMode ? '#162542' : '#005E80',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
@@ -313,6 +321,7 @@ export default function ConnectPage({
                 shouldAnimateText ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }
               }
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
               transition={
                 shouldAnimateText
                   ? { duration: 0.8, delay: 0.2 }
@@ -326,7 +335,9 @@ export default function ConnectPage({
             >
               <h1
                 style={{
-                  fontSize: deviceInfo?.isMobile
+                  fontSize: deviceInfo?.isLandscapeMobile
+                    ? '2.5rem' // Desktop-like title size for landscape mobile
+                    : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
                       ? '1.3rem'
                       : '2.2rem'
@@ -335,14 +346,20 @@ export default function ConnectPage({
                     : '3rem',
                   fontWeight: '900',
                   fontFamily: 'Lato, sans-serif',
-                  marginBottom: deviceInfo?.isMobile
+                  marginBottom: deviceInfo?.isLandscapeMobile
+                    ? '20px' // Desktop-like spacing for landscape mobile
+                    : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
                       ? '6px'
                       : '16px'
                     : deviceInfo?.isTablet
                     ? '20px'
                     : '25px',
-                  marginTop: deviceInfo?.isMobile ? '0' : '20px',
+                  marginTop: deviceInfo?.isLandscapeMobile
+                    ? '10px' // Desktop-like top margin for landscape mobile
+                    : deviceInfo?.isMobile
+                    ? '0'
+                    : '20px',
                   background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
@@ -356,20 +373,25 @@ export default function ConnectPage({
 
               <p
                 style={{
-                  fontSize: deviceInfo?.isMobile
+                  fontSize: deviceInfo?.isLandscapeMobile
+                    ? '1.2rem' // Desktop-like font size for landscape mobile
+                    : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'landscape'
                       ? '0.75rem' // Reduced from 0.9rem
                       : '1.0rem' // Reduced from 1.1rem for portrait
                     : deviceInfo?.isTablet
                     ? '1.3rem'
                     : '1.5rem',
-                  lineHeight:
-                    deviceInfo?.isMobile &&
-                    deviceInfo?.orientation === 'landscape'
-                      ? '1.3' // Reduced from 1.5
-                      : '1.8',
+                  lineHeight: deviceInfo?.isLandscapeMobile
+                    ? '1.6' // Desktop-like line height for landscape mobile
+                    : deviceInfo?.isMobile &&
+                      deviceInfo?.orientation === 'landscape'
+                    ? '1.3' // Reduced from 1.5
+                    : '1.8',
                   fontFamily: 'Lato, sans-serif',
-                  marginBottom: deviceInfo?.isMobile
+                  marginBottom: deviceInfo?.isLandscapeMobile
+                    ? '35px' // Desktop-like spacing for landscape mobile
+                    : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'portrait'
                       ? '24px' // Reduced from 30px for portrait
                       : '30px' // Keep landscape the same
@@ -388,12 +410,16 @@ export default function ConnectPage({
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: deviceInfo?.isMobile
+                  gridTemplateColumns: deviceInfo?.isLandscapeMobile
+                    ? 'repeat(auto-fit, minmax(350px, 1fr))' // Desktop-like two-column layout for landscape mobile
+                    : deviceInfo?.isMobile
                     ? '1fr'
                     : deviceInfo?.isTablet
                     ? '1fr'
                     : 'repeat(auto-fit, minmax(400px, 1fr))',
-                  gap: deviceInfo?.isMobile
+                  gap: deviceInfo?.isLandscapeMobile
+                    ? '50px' // Desktop-like gap for landscape mobile
+                    : deviceInfo?.isMobile
                     ? deviceInfo?.orientation === 'portrait'
                       ? '32px' // Reduced from 40px for portrait
                       : '40px' // Keep landscape the same
@@ -419,16 +445,26 @@ export default function ConnectPage({
                 >
                   <h2
                     style={{
-                      fontSize: deviceInfo?.isMobile
+                      fontSize: deviceInfo?.isLandscapeMobile
+                        ? '1.8rem' // Desktop-like font size for landscape mobile
+                        : deviceInfo?.isMobile
                         ? '1.5rem'
                         : deviceInfo?.isTablet
                         ? '1.75rem'
                         : '2rem',
                       fontWeight: '700',
                       fontFamily: 'Lato, sans-serif',
-                      marginBottom: deviceInfo?.isMobile ? '20px' : '30px',
+                      marginBottom: deviceInfo?.isLandscapeMobile
+                        ? '25px' // Desktop-like spacing for landscape mobile
+                        : deviceInfo?.isMobile
+                        ? '20px'
+                        : '30px',
                       color: '#ffffff',
-                      textAlign: deviceInfo?.isMobile ? 'center' : 'left',
+                      textAlign: deviceInfo?.isLandscapeMobile
+                        ? 'left' // Desktop-like alignment for landscape mobile
+                        : deviceInfo?.isMobile
+                        ? 'center'
+                        : 'left',
                     }}
                   >
                     Links
@@ -455,9 +491,13 @@ export default function ConnectPage({
                           background:
                             hoveredCardIndex === index
                               ? method.hoverColor
-                              : 'rgba(255, 255, 255, 0.1)',
+                              : isDarkMode
+                              ? 'rgba(255, 255, 255, 0.1)'
+                              : 'rgba(255, 255, 255, 0.04)',
                           borderRadius: deviceInfo?.isMobile ? '12px' : '15px',
-                          padding: deviceInfo?.isMobile
+                          padding: deviceInfo?.isLandscapeMobile
+                            ? '12px 20px 15px 20px' // Desktop-like padding for landscape mobile
+                            : deviceInfo?.isMobile
                             ? '12px 16px 15px 16px'
                             : '12px 20px 15px 20px',
                           backdropFilter: 'blur(10px)',
@@ -472,7 +512,11 @@ export default function ConnectPage({
                           alignItems: 'center',
                           textAlign: 'left',
                           width: '100%',
-                          gap: deviceInfo?.isMobile ? '16px' : '20px',
+                          gap: deviceInfo?.isLandscapeMobile
+                            ? '18px' // Desktop-like gap for landscape mobile
+                            : deviceInfo?.isMobile
+                            ? '16px'
+                            : '20px',
                           willChange: 'transform, background-color, opacity',
                         }}
                         onMouseEnter={() => setHoveredCardIndex(index)}
@@ -480,7 +524,9 @@ export default function ConnectPage({
                       >
                         <div
                           style={{
-                            fontSize: deviceInfo?.isMobile
+                            fontSize: deviceInfo?.isLandscapeMobile
+                              ? '1.4rem' // Desktop-like icon size for landscape mobile
+                              : deviceInfo?.isMobile
                               ? '1.25rem'
                               : '1.5rem',
                             flexShrink: 0,
@@ -491,7 +537,9 @@ export default function ConnectPage({
                         <div>
                           <h3
                             style={{
-                              fontSize: deviceInfo?.isMobile
+                              fontSize: deviceInfo?.isLandscapeMobile
+                                ? '1.1rem' // Desktop-like title font size for landscape mobile
+                                : deviceInfo?.isMobile
                                 ? '1rem'
                                 : deviceInfo?.isTablet
                                 ? '1.1rem'
@@ -506,7 +554,9 @@ export default function ConnectPage({
                           </h3>
                           <p
                             style={{
-                              fontSize: deviceInfo?.isMobile
+                              fontSize: deviceInfo?.isLandscapeMobile
+                                ? '0.85rem' // Desktop-like description font size for landscape mobile
+                                : deviceInfo?.isMobile
                                 ? '0.8rem'
                                 : '0.9rem',
                               color: 'rgba(255, 255, 255, 0.7)',
@@ -572,7 +622,9 @@ export default function ConnectPage({
                           border: formErrors.name
                             ? '2px solid #ef4444'
                             : '2px solid rgba(255, 255, 255, 0.2)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          backgroundColor: isDarkMode
+                            ? 'rgba(255, 255, 255, 0.1)'
+                            : 'rgba(255, 255, 255, 0.04)',
                           backdropFilter: 'blur(10px)',
                           color: '#ffffff',
                           fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
@@ -622,7 +674,9 @@ export default function ConnectPage({
                           border: formErrors.email
                             ? '2px solid #ef4444'
                             : '2px solid rgba(255, 255, 255, 0.2)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          backgroundColor: isDarkMode
+                            ? 'rgba(255, 255, 255, 0.1)'
+                            : 'rgba(255, 255, 255, 0.04)',
                           backdropFilter: 'blur(10px)',
                           color: '#ffffff',
                           fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
@@ -672,7 +726,9 @@ export default function ConnectPage({
                           border: formErrors.message
                             ? '2px solid #ef4444'
                             : '2px solid rgba(255, 255, 255, 0.2)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          backgroundColor: isDarkMode
+                            ? 'rgba(255, 255, 255, 0.1)'
+                            : 'rgba(255, 255, 255, 0.04)',
                           backdropFilter: 'blur(10px)',
                           color: '#ffffff',
                           fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
@@ -723,11 +779,11 @@ export default function ConnectPage({
                           ? 'rgba(255, 255, 255, 0.9)'
                           : isDarkMode
                           ? '#162542'
-                          : '#084CA6',
+                          : '#005E80',
                         color: isSubmitting
                           ? isDarkMode
                             ? '#162542'
-                            : '#084CA6'
+                            : '#005E80'
                           : '#ffffff',
                         fontSize: deviceInfo?.isMobile ? '1rem' : '1.1rem',
                         fontWeight: '600',
@@ -749,7 +805,7 @@ export default function ConnectPage({
                             e.target as HTMLButtonElement
                           ).style.backgroundColor = '#FFFFFF';
                           (e.target as HTMLButtonElement).style.color =
-                            isDarkMode ? '#162542' : '#084CA6';
+                            isDarkMode ? '#162542' : '#005E80';
                           (e.target as HTMLButtonElement).style.transform =
                             'translateY(-2px)';
                         }
@@ -760,7 +816,7 @@ export default function ConnectPage({
                             e.target as HTMLButtonElement
                           ).style.backgroundColor = isDarkMode
                             ? '#162542'
-                            : '#084CA6';
+                            : '#005E80';
                           (e.target as HTMLButtonElement).style.color =
                             '#ffffff';
                           (e.target as HTMLButtonElement).style.transform =
@@ -814,7 +870,7 @@ export default function ConnectPage({
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>

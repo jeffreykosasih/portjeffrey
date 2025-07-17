@@ -75,7 +75,7 @@ export default function CreditsPopup({
   // Responsive popup styles
   const getPopupStyles = (): React.CSSProperties => {
     const baseStyles: React.CSSProperties = {
-      backgroundColor: isDarkMode ? '#162542' : '#006161',
+      backgroundColor: isDarkMode ? '#162542' : '#005E80',
       borderRadius: '15px',
       boxShadow: isDarkMode
         ? '0 25px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 255, 255, 0.1)'

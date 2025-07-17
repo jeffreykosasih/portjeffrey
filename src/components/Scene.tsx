@@ -739,36 +739,11 @@ function SimpleTwoChairs({ isDarkMode }: { isDarkMode: boolean }) {
   const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
     // Store original color if not already stored
     if (!material.userData) material.userData = {};
-    if (!material.userData.originalColor) {
-      const brightness = material.color.r + material.color.g + material.color.b;
-      const isOverBright =
-        brightness > 2.8 ||
-        (material.color.r > 0.95 &&
-          material.color.g > 0.95 &&
-          material.color.b > 0.95);
-
-      material.userData.originalColor = isOverBright
-        ? { r: 0.6, g: 0.4, b: 0.2 } // Fallback color for overbright materials
-        : {
-            r: material.color.r,
-            g: material.color.g,
-            b: material.color.b,
-          };
-    }
-
-    const { r, g, b } = material.userData.originalColor;
-    material.color.setRGB(r, g, b);
-
     if (isDarkMode) {
       material.color.multiplyScalar(0.1);
     } else {
-      material.color.multiplyScalar(1);
+      material.color.multiplyScalar(2);
     }
-
-    // Set material properties for wood
-    if ('roughness' in material) material.roughness = 0.7;
-    if ('metalness' in material) material.metalness = 0.1;
-    material.needsUpdate = true;
   });
 
   if (!clonedScene) {
@@ -949,37 +924,13 @@ function SimpleSurfboard({ isDarkMode }: { isDarkMode: boolean }) {
   }
 
   const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    // Store original color if not already stored
     if (!material.userData) material.userData = {};
-    if (!material.userData.originalColor) {
-      material.userData.originalColor = {
-        r: material.color.r,
-        g: material.color.g,
-        b: material.color.b,
-      };
-    }
 
-    // Reset to original color
-    const { r, g, b } = material.userData.originalColor;
-    material.color.setRGB(r, g, b);
-
-    // Apply high contrast settings for surfboard
     if (isDarkMode) {
-      // Dark mode: Make surfboard much darker for high contrast
-      material.color.multiplyScalar(0.15); // Much darker than default
-
-      // Remove any emissive lighting
-      if (material.emissive?.setHex) material.emissive.setHex(0x000000);
-      if ('emissiveIntensity' in material) material.emissiveIntensity = 0;
+      material.color.multiplyScalar(0.15);
     } else {
-      // Bright mode: Make surfboard much brighter and more vibrant for high contrast
-      material.color.multiplyScalar(2.5); // Much brighter than default
+      material.color.multiplyScalar(4);
     }
-
-    // Set material properties
-    if ('roughness' in material) material.roughness = 0.3;
-    if ('metalness' in material) material.metalness = 0.1;
-    material.needsUpdate = true;
   });
 
   if (!clonedScene) {
@@ -1043,11 +994,11 @@ function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
   // Enhanced camera settings with landscape mobile support
   const getCameraSettings = () => {
     if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like camera positioning with appropriate scaling
+      // Landscape mobile - bring camera much closer for better visibility
       return {
-        position: [-10, 58, -320] as [number, number, number], // Similar to desktop but slightly closer
-        startFov: 62, // Between mobile and desktop FOV
-        endFov: 52,
+        position: [-10, 45, -250] as [number, number, number], // Much closer position
+        startFov: 65, // Slightly wider FOV for better view
+        endFov: 55,
       };
     } else if (deviceInfo?.isMobile) {
       if (deviceInfo.orientation === 'portrait') {

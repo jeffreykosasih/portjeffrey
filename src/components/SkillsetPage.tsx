@@ -189,7 +189,7 @@ export default function SkillsetPage({
         : 'rgba(0, 97, 97, 0.4)',
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
-      opacity: 0.95,
+      opacity: 1,
       zIndex: 1500,
       display: 'flex',
       flexDirection: 'column' as const,
@@ -198,7 +198,17 @@ export default function SkillsetPage({
       overflowY: 'auto' as const,
     };
 
-    if (deviceInfo?.isMobile) {
+    if (deviceInfo?.isLandscapeMobile) {
+      // Landscape mobile - desktop-like layout with better spacing
+      return {
+        ...baseStyles,
+        padding:
+          'max(env(safe-area-inset-top), 20px) 24px max(env(safe-area-inset-bottom), 20px) 24px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100dvh',
+      };
+    } else if (deviceInfo?.isMobile) {
       if (deviceInfo.orientation === 'landscape') {
         return {
           ...baseStyles,
@@ -242,7 +252,15 @@ export default function SkillsetPage({
       textAlign: 'center' as const,
     };
 
-    if (deviceInfo?.isMobile) {
+    if (deviceInfo?.isLandscapeMobile) {
+      // Landscape mobile - desktop-like title size but scaled appropriately
+      return {
+        ...baseStyles,
+        fontSize: '2.5rem', // Larger, more desktop-like
+        marginBottom: '20px',
+        marginTop: '10px',
+      };
+    } else if (deviceInfo?.isMobile) {
       if (deviceInfo.orientation === 'landscape') {
         return {
           ...baseStyles,
@@ -275,12 +293,16 @@ export default function SkillsetPage({
   const getCategoryButtonStyles = (category: SkillCategory) => {
     const isActive = activeCategory === category;
     const baseStyles = {
-      padding: deviceInfo?.isMobile
+      padding: deviceInfo?.isLandscapeMobile
+        ? '12px 24px' // Desktop-like padding for landscape mobile
+        : deviceInfo?.isMobile
         ? deviceInfo?.orientation === 'landscape'
           ? '6px 12px' // Reduced landscape padding
           : '12px 24px'
         : '15px 30px',
-      margin: deviceInfo?.isMobile
+      margin: deviceInfo?.isLandscapeMobile
+        ? '0 8px' // Better spacing for landscape mobile
+        : deviceInfo?.isMobile
         ? deviceInfo?.orientation === 'landscape'
           ? '0 3px' // Reduced landscape margin
           : '0 6px'
@@ -292,7 +314,11 @@ export default function SkillsetPage({
         : 'rgba(255, 255, 255, 0.1)',
       color: '#ffffff',
       fontWeight: '600',
-      fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
+      fontSize: deviceInfo?.isLandscapeMobile
+        ? '1rem' // Desktop-like font size for landscape mobile
+        : deviceInfo?.isMobile
+        ? '0.9rem'
+        : '1rem',
       fontFamily: 'Lato, sans-serif',
       cursor: 'pointer',
       transition: 'all 0.15s ease',
@@ -327,12 +353,16 @@ export default function SkillsetPage({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: deviceInfo?.isMobile
+          gap: deviceInfo?.isLandscapeMobile
+            ? '40px' // Desktop-like spacing for landscape mobile
+            : deviceInfo?.isMobile
             ? deviceInfo.orientation === 'landscape'
               ? '20px'
               : '25px'
             : '50px',
-          padding: deviceInfo?.isMobile
+          padding: deviceInfo?.isLandscapeMobile
+            ? '30px' // Better padding for landscape mobile
+            : deviceInfo?.isMobile
             ? deviceInfo.orientation === 'landscape'
               ? '15px'
               : '20px'
@@ -342,7 +372,7 @@ export default function SkillsetPage({
         {skillsData.languages.map((skill, index) => (
           <motion.div
             key={skill.name}
-            initial={{ opacity: 1, y: 10, scale: 1 }}
+            initial={{ opacity: 0, y: 10, scale: 1 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{
               duration: 0.3,
@@ -357,17 +387,31 @@ export default function SkillsetPage({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: deviceInfo?.isMobile ? '30px 20px' : '40px 30px',
+              padding: deviceInfo?.isLandscapeMobile
+                ? '35px 25px' // Desktop-like padding for landscape mobile
+                : deviceInfo?.isMobile
+                ? '30px 20px'
+                : '40px 30px',
               borderRadius: '24px',
-              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              backgroundColor: isDarkMode
+                ? 'rgba(255, 255, 255, 0.15)'
+                : 'rgba(255, 255, 255, 0.08)',
               backdropFilter: 'blur(20px)',
               cursor: 'pointer',
-              minWidth: deviceInfo?.isMobile ? '140px' : '180px',
+              minWidth: deviceInfo?.isLandscapeMobile
+                ? '160px' // Larger cards for landscape mobile
+                : deviceInfo?.isMobile
+                ? '140px'
+                : '180px',
             }}
           >
             <div
               style={{
-                fontSize: deviceInfo?.isMobile ? '60px' : '80px',
+                fontSize: deviceInfo?.isLandscapeMobile
+                  ? '70px' // Larger icons for landscape mobile
+                  : deviceInfo?.isMobile
+                  ? '60px'
+                  : '80px',
                 marginBottom: '20px',
               }}
             >
@@ -375,14 +419,18 @@ export default function SkillsetPage({
             </div>
             <h4
               style={{
-                fontSize: deviceInfo?.isMobile
+                fontSize: deviceInfo?.isLandscapeMobile
+                  ? '1.2rem' // Desktop-like title size for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo.orientation === 'landscape'
                     ? '0.9rem'
                     : '1rem'
                   : '1.4rem',
                 fontWeight: '700',
                 fontFamily: 'Lato, sans-serif',
-                marginBottom: deviceInfo?.isMobile
+                marginBottom: deviceInfo?.isLandscapeMobile
+                  ? '8px' // Better spacing for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo.orientation === 'landscape'
                     ? '4px'
                     : '6px'
@@ -395,7 +443,9 @@ export default function SkillsetPage({
             </h4>
             <p
               style={{
-                fontSize: deviceInfo?.isMobile
+                fontSize: deviceInfo?.isLandscapeMobile
+                  ? '0.9rem' // Larger description text for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo.orientation === 'landscape'
                     ? '0.7rem'
                     : '0.8rem'
@@ -428,22 +478,31 @@ export default function SkillsetPage({
         transition={{ duration: 0.2, delay: 0.05 }}
         style={{
           display: 'grid',
-          gridTemplateColumns: deviceInfo?.isMobile
+          gridTemplateColumns: deviceInfo?.isLandscapeMobile
+            ? 'repeat(3, 1fr)' // Desktop-like 3-column layout for landscape mobile
+            : deviceInfo?.isMobile
             ? deviceInfo.orientation === 'landscape'
               ? 'repeat(3, 1fr)'
               : 'repeat(2, 1fr)'
             : 'repeat(3, 1fr)',
-          gridTemplateRows:
-            deviceInfo?.isMobile && deviceInfo.orientation === 'landscape'
-              ? 'repeat(2, 1fr)'
-              : 'auto',
-          gap: deviceInfo?.isMobile
+          gridTemplateRows: deviceInfo?.isLandscapeMobile
+            ? 'repeat(2, 1fr)' // 2 rows for landscape mobile
+            : deviceInfo?.isMobile && deviceInfo.orientation === 'landscape'
+            ? 'repeat(2, 1fr)'
+            : 'auto',
+          gap: deviceInfo?.isLandscapeMobile
+            ? '20px' // Desktop-like spacing for landscape mobile
+            : deviceInfo?.isMobile
             ? deviceInfo.orientation === 'landscape'
               ? '8px' // Reduced from 15px
               : '16px'
             : '30px',
           width: '100%',
-          maxWidth: deviceInfo?.isMobile ? '380px' : '600px',
+          maxWidth: deviceInfo?.isLandscapeMobile
+            ? '500px' // Larger max width for landscape mobile
+            : deviceInfo?.isMobile
+            ? '380px'
+            : '600px',
           justifyItems: 'center',
           alignContent: 'center',
         }}
@@ -451,7 +510,7 @@ export default function SkillsetPage({
         {skills.map((skill, index) => (
           <motion.div
             key={skill.name}
-            initial={{ opacity: 1, y: 10, scale: 1 }}
+            initial={{ opacity: 0, y: 10, scale: 1 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{
               duration: 0.3,
@@ -466,22 +525,30 @@ export default function SkillsetPage({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: deviceInfo?.isMobile
+              padding: deviceInfo?.isLandscapeMobile
+                ? '20px 15px' // Desktop-like padding for landscape mobile
+                : deviceInfo?.isMobile
                 ? deviceInfo.orientation === 'landscape'
                   ? '8px 6px' // Reduced from 12px 8px
                   : '16px 10px'
                 : '28px 20px',
               borderRadius: '16px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: isDarkMode
+                ? 'rgba(255, 255, 255, 0.1)'
+                : 'rgba(255, 255, 255, 0.04)',
               backdropFilter: 'blur(15px)',
               cursor: 'pointer',
               width: '100%',
-              maxWidth: deviceInfo?.isMobile
+              maxWidth: deviceInfo?.isLandscapeMobile
+                ? '140px' // Desktop-like size for landscape mobile
+                : deviceInfo?.isMobile
                 ? deviceInfo.orientation === 'landscape'
                   ? '100px' // Reduced from 120px
                   : '140px'
                 : '180px',
-              minHeight: deviceInfo?.isMobile
+              minHeight: deviceInfo?.isLandscapeMobile
+                ? '120px' // Desktop-like height for landscape mobile
+                : deviceInfo?.isMobile
                 ? deviceInfo.orientation === 'landscape'
                   ? '80px' // Reduced from 100px
                   : '120px'
@@ -490,12 +557,16 @@ export default function SkillsetPage({
           >
             <div
               style={{
-                width: deviceInfo?.isMobile
+                width: deviceInfo?.isLandscapeMobile
+                  ? '48px' // Desktop-like icon size for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo.orientation === 'landscape'
                     ? '28px' // Reduced from 35px
                     : '42px'
                   : '60px',
-                height: deviceInfo?.isMobile
+                height: deviceInfo?.isLandscapeMobile
+                  ? '48px' // Desktop-like icon size for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo.orientation === 'landscape'
                     ? '28px' // Reduced from 35px
                     : '42px'
@@ -505,7 +576,9 @@ export default function SkillsetPage({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: deviceInfo?.isMobile
+                marginBottom: deviceInfo?.isLandscapeMobile
+                  ? '10px' // Desktop-like spacing for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo.orientation === 'landscape'
                     ? '4px' // Reduced from 8px
                     : '10px'
@@ -516,14 +589,22 @@ export default function SkillsetPage({
                 <FontAwesomeIcon
                   icon={skill.icon}
                   style={{
-                    fontSize: deviceInfo?.isMobile ? '22px' : '26px',
+                    fontSize: deviceInfo?.isLandscapeMobile
+                      ? '24px' // Desktop-like font size for landscape mobile
+                      : deviceInfo?.isMobile
+                      ? '22px'
+                      : '26px',
                     color: skill.textColor || '#ffffff',
                   }}
                 />
               ) : (
                 <skill.icon
                   style={{
-                    fontSize: deviceInfo?.isMobile ? '22px' : '26px',
+                    fontSize: deviceInfo?.isLandscapeMobile
+                      ? '24px' // Desktop-like font size for landscape mobile
+                      : deviceInfo?.isMobile
+                      ? '22px'
+                      : '26px',
                     color: skill.textColor || '#ffffff',
                   }}
                 />
@@ -531,17 +612,21 @@ export default function SkillsetPage({
             </div>
             <h4
               style={{
-                fontSize: deviceInfo?.isMobile
+                fontSize: deviceInfo?.isLandscapeMobile
+                  ? '0.95rem' // Desktop-like font size for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo.orientation === 'landscape'
                     ? '0.7rem' // Reduced for landscape
                     : '0.85rem'
                   : '1rem',
                 fontWeight: '700',
                 fontFamily: 'Lato, sans-serif',
-                marginBottom:
-                  deviceInfo?.isMobile && deviceInfo.orientation === 'landscape'
-                    ? '3px'
-                    : '6px',
+                marginBottom: deviceInfo?.isLandscapeMobile
+                  ? '6px' // Desktop-like spacing for landscape mobile
+                  : deviceInfo?.isMobile &&
+                    deviceInfo.orientation === 'landscape'
+                  ? '3px'
+                  : '6px',
                 color: '#ffffff',
                 textAlign: 'center',
               }}
@@ -550,7 +635,9 @@ export default function SkillsetPage({
             </h4>
             <p
               style={{
-                fontSize: deviceInfo?.isMobile
+                fontSize: deviceInfo?.isLandscapeMobile
+                  ? '0.75rem' // Desktop-like font size for landscape mobile
+                  : deviceInfo?.isMobile
                   ? deviceInfo.orientation === 'landscape'
                     ? '0.6rem' // Reduced for landscape
                     : '0.7rem'
@@ -570,7 +657,7 @@ export default function SkillsetPage({
 
         {showMoreButton && (
           <motion.div
-            initial={{ opacity: 1, y: 10, scale: 1 }}
+            initial={{ opacity: 0, y: 10, scale: 1 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{
               duration: 0.3,
@@ -589,7 +676,9 @@ export default function SkillsetPage({
               justifyContent: 'center',
               padding: deviceInfo?.isMobile ? '20px 12px' : '28px 20px',
               borderRadius: '20px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: isDarkMode
+                ? 'rgba(255, 255, 255, 0.1)'
+                : 'rgba(255, 255, 255, 0.04)',
               backdropFilter: 'blur(15px)',
               cursor: 'pointer',
               width: '100%',
@@ -663,7 +752,7 @@ export default function SkillsetPage({
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.2 }}
               style={{
-                backgroundColor: isDarkMode ? '#162542' : '#084CA6',
+                backgroundColor: isDarkMode ? '#162542' : '#005E80',
                 borderRadius: '24px',
                 padding: deviceInfo?.isMobile ? '30px 20px' : '40px 30px',
                 maxWidth: '600px',
@@ -742,7 +831,9 @@ export default function SkillsetPage({
                       alignItems: 'center',
                       padding: deviceInfo?.isMobile ? '20px 15px' : '25px 20px',
                       borderRadius: '16px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      backgroundColor: isDarkMode
+                        ? 'rgba(255, 255, 255, 0.1)'
+                        : 'rgba(255, 255, 255, 0.04)',
                       backdropFilter: 'blur(15px)',
                       cursor: 'pointer',
                     }}
@@ -862,7 +953,7 @@ export default function SkillsetPage({
                   : '48px'
                 : '50px',
               border: 'none',
-              backgroundColor: isDarkMode ? '#162542' : '#084CA6',
+              backgroundColor: isDarkMode ? '#162542' : '#005E80',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
@@ -964,7 +1055,7 @@ export default function SkillsetPage({
 
           {/* Footer description */}
           <motion.div
-            initial={{ opacity: 1, y: 10 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
             style={getFooterStyles()}

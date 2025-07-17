@@ -57,7 +57,7 @@ export default function ProfilePage({
         : 'rgba(0, 97, 97, 0.4)',
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
-      opacity: 0.95,
+      opacity: 1,
       zIndex: 1500,
       display: 'flex',
       flexDirection: 'column' as const,
@@ -112,14 +112,14 @@ export default function ProfilePage({
     };
 
     if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like horizontal layout with scaled components
+      // Landscape mobile - desktop-like horizontal layout with better spacing
       return {
         ...baseStyles,
         flexDirection: 'row' as const,
-        gap: '24px', // Good spacing for landscape mobile
+        gap: '40px', // More generous spacing like desktop
         alignItems: 'center',
         height: 'fit-content',
-        maxHeight: '85vh', // Leave some room for navigation
+        maxHeight: '90vh', // More room for content
       };
     } else if (deviceInfo?.isMobile) {
       if (deviceInfo.orientation === 'landscape') {
@@ -168,15 +168,15 @@ export default function ProfilePage({
     };
 
     if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like layout with scaled text
+      // Landscape mobile - desktop-like layout with larger, more readable text
       return {
         ...baseStyles,
         flex: 1,
-        fontSize: '0.9rem', // Appropriate for landscape mobile
-        lineHeight: '1.4',
-        paddingRight: '20px',
+        fontSize: '1.2rem', // Larger, more desktop-like text
+        lineHeight: '1.6',
+        paddingRight: '30px',
         textAlign: 'left' as const,
-        maxWidth: '60%', // Leave room for profile card
+        maxWidth: '65%', // Better text-to-card ratio
       };
     } else if (deviceInfo?.isMobile) {
       if (deviceInfo.orientation === 'landscape') {
@@ -236,11 +236,11 @@ export default function ProfilePage({
     };
 
     if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like proportions but scaled down
+      // Landscape mobile - desktop-like title size but appropriately scaled
       return {
         ...baseStyles,
-        fontSize: '1.6rem', // Larger than legacy landscape but smaller than portrait
-        marginBottom: '16px', // Good spacing for landscape mobile
+        fontSize: '2.2rem', // Much larger, more desktop-like
+        marginBottom: '20px', // Better spacing
         lineHeight: '1.2',
       };
     } else if (deviceInfo?.isMobile) {
@@ -278,11 +278,11 @@ export default function ProfilePage({
 
   const getProfileCardStyles = () => {
     if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like card sizing
+      // Landscape mobile - larger, more desktop-like card sizing
       return {
         flex: 'none',
-        minWidth: '200px', // Good size for landscape mobile
-        maxWidth: '240px',
+        minWidth: '240px', // Larger size for better desktop-like experience
+        maxWidth: '280px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -358,7 +358,7 @@ export default function ProfilePage({
         : '48px'
       : '50px',
     border: 'none',
-    backgroundColor: isDarkMode ? '#162542' : '#006161',
+    backgroundColor: isDarkMode ? '#162542' : '#005E80',
     color: '#ffffff',
     display: 'flex',
     alignItems: 'center',
@@ -370,13 +370,7 @@ export default function ProfilePage({
     <>
       <AnimatePresence>
         {isVisible && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: showLongStory ? 0 : 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-            style={getContainerStyles()}
-          >
+          <div style={getContainerStyles()}>
             {/* Back button with slide left to right effect */}
             <motion.button
               onClick={() => {
@@ -407,6 +401,7 @@ export default function ProfilePage({
                 shouldAnimateText ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }
               }
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
               transition={
                 shouldAnimateText
                   ? { duration: 0.8, delay: 0.2 }
@@ -486,7 +481,7 @@ export default function ProfilePage({
                 />
               </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

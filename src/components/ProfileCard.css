@@ -12,9 +12,9 @@
   --rotate-x: 0deg;
   --rotate-y: 0deg;
 
-  perspective: 600px;
+  perspective: 37.5rem; /* Converted from 600px */
   width: 100%;
-  max-width: 500px;
+  max-width: 31.25rem; /* Converted from 500px */
   margin: 0 auto;
   font-family: 'Lato', sans-serif;
 }
@@ -22,11 +22,11 @@
 .pc-card {
   position: relative;
   width: 120%;
-  height: 520px;
-  border-radius: 24px;
+  height: 32.5rem; /* Converted from 520px */
+  border-radius: 1.5rem; /* Converted from 24px */
   overflow: hidden;
   background: var(--behind-gradient);
-  border: 2px solid rgba(30, 144, 255, 0.8);
+  border: 2px solid rgba(30, 144, 255, 0.8); /* Keep 2px for precision */
   transition: transform 0.1s ease-out;
   transform-style: preserve-3d;
   transform: rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
@@ -42,11 +42,11 @@
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 24px;
+  border-radius: 1.5rem; /* Converted from 24px */
   overflow: hidden;
   background: var(--inner-gradient);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(1.25rem); /* Converted from 20px */
+  -webkit-backdrop-filter: blur(1.25rem); /* Converted from 20px */
 }
 
 .pc-shine {
@@ -55,7 +55,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 24px;
+  border-radius: 1.5rem; /* Converted from 24px */
   background: radial-gradient(
     circle at var(--pointer-x) var(--pointer-y),
     rgba(135, 206, 255, 0.25) 0%,
@@ -78,7 +78,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 24px;
+  border-radius: 1.5rem; /* Converted from 24px */
   background: linear-gradient(
     105deg,
     transparent 40%,
@@ -106,7 +106,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 24px;
+  border-radius: 1.5rem; /* Converted from 24px */
   z-index: 1;
 }
 
@@ -123,14 +123,14 @@
     rgba(0, 0, 0, 0.1) 50%,
     rgba(0, 0, 0, 0.4) 100%
   );
-  border-radius: 24px;
+  border-radius: 1.5rem; /* Converted from 24px */
   z-index: 2;
 }
 
 .pc-content {
   position: relative;
   z-index: 3;
-  padding: 32px;
+  padding: 2rem; /* Converted from 32px */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -145,45 +145,45 @@
 }
 
 .pc-header h3 {
-  font-size: 36px;
+  font-size: 2.25rem; /* Converted from 36px */
   font-weight: 700;
   color: white;
-  margin: 0 0 12px 0;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
-  letter-spacing: -0.5px;
+  margin: 0 0 0.75rem 0; /* Converted from 12px */
+  text-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.8); /* Converted from 4px 20px */
+  letter-spacing: -0.03125rem; /* Converted from -0.5px */
   font-family: 'Lato', sans-serif;
 }
 
 .pc-header p {
-  font-size: 18px;
+  font-size: 1.125rem; /* Converted from 18px */
   color: rgba(255, 255, 255, 0.95);
   margin: 0;
   font-weight: 400;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.7); /* Converted from 2px 10px */
   font-family: 'Lato', sans-serif;
 }
 
 /* Centered contact button - smaller */
 .pc-contact-btn {
-  padding: 10px 24px;
-  background: linear-gradient(135deg, #1e90ff 0%, #00bfff 50%, #4169e1 100%);
+  padding: 0.625rem 1.5rem; /* Converted from 10px 24px */
+  background: #005e80;
   border: none;
-  border-radius: 10px;
+  border-radius: 0.625rem; /* Converted from 10px */
   color: white;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 0.875rem; /* Converted from 14px */
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(30, 144, 255, 0.5);
-  min-width: 120px;
+  box-shadow: 0 0.25rem 0.9375rem rgba(0, 97, 97, 0.5); /* Converted from 4px 15px */
+  min-width: 7.5rem; /* Converted from 120px */
   margin-top: auto;
   font-family: 'Lato', sans-serif;
 }
 
 .pc-contact-btn:hover {
-  transform: translateY(-2px);
-  background: linear-gradient(135deg, #0080ff 0%, #1e90ff 50%, #00bfff 100%);
-  box-shadow: 0 8px 25px rgba(30, 144, 255, 0.8);
+  transform: translateY(-0.125rem); /* Converted from -2px */
+  background: #004d4d;
+  box-shadow: 0 0.5rem 1.5625rem rgba(0, 97, 97, 0.8); /* Converted from 8px 25px */
 }
 
 @keyframes pulse {
@@ -197,72 +197,75 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 48rem) {
+  /* Converted from 768px */
   .pc-card {
-    height: 400px; /* Reduced height for better mobile fit */
+    height: 25rem; /* Converted from 400px - reduced height for better mobile fit */
   }
 
   .pc-content {
-    padding: 24px; /* Reduced padding for mobile */
+    padding: 1.5rem; /* Converted from 24px - reduced padding for mobile */
   }
 
   .pc-header h3 {
-    font-size: 26px; /* Slightly smaller for mobile */
-    margin-bottom: 8px;
+    font-size: 1.625rem; /* Converted from 26px - slightly smaller for mobile */
+    margin-bottom: 0.5rem; /* Converted from 8px */
   }
 
   .pc-header p {
-    font-size: 15px;
+    font-size: 0.9375rem; /* Converted from 15px */
   }
 
   .pc-contact-btn {
-    padding: 8px 20px;
-    font-size: 13px;
-    min-width: 100px;
+    padding: 0.5rem 1.25rem; /* Converted from 8px 20px */
+    font-size: 0.8125rem; /* Converted from 13px */
+    min-width: 6.25rem; /* Converted from 100px */
   }
 }
 
 /* Landscape mobile specific adjustments */
-@media (max-width: 768px) and (orientation: landscape) {
+@media (max-width: 48rem) and (orientation: landscape) {
+  /* Converted from 768px */
   .pc-card-wrapper {
-    max-width: 200px; /* Ultra compact for landscape */
+    max-width: 12.5rem; /* Converted from 200px - ultra compact for landscape */
   }
 
   .pc-card {
-    height: 220px; /* Even smaller height for landscape */
+    height: 13.75rem; /* Converted from 220px - even smaller height for landscape */
   }
 
   .pc-content {
-    padding: 8px; /* Ultra compact padding */
+    padding: 0.5rem; /* Converted from 8px - ultra compact padding */
   }
 
   .pc-header h3 {
-    font-size: 16px; /* Smaller title for landscape */
-    margin-bottom: 2px; /* Reduced margin */
+    font-size: 1rem; /* Converted from 16px - smaller title for landscape */
+    margin-bottom: 0.125rem; /* Converted from 2px - reduced margin */
   }
 
   .pc-header p {
-    font-size: 11px; /* Smaller text */
+    font-size: 0.6875rem; /* Converted from 11px - smaller text */
   }
 
   .pc-contact-btn {
-    padding: 3px 10px; /* Smaller padding */
-    font-size: 10px; /* Smaller font */
-    min-width: 70px; /* Smaller min-width */
+    padding: 0.1875rem 0.625rem; /* Converted from 3px 10px - smaller padding */
+    font-size: 0.625rem; /* Converted from 10px - smaller font */
+    min-width: 4.375rem; /* Converted from 70px - smaller min-width */
   }
 }
 
 /* Portrait mobile specific adjustments */
-@media (max-width: 768px) and (orientation: portrait) {
+@media (max-width: 48rem) and (orientation: portrait) {
+  /* Converted from 768px */
   .pc-card-wrapper {
     max-width: min(
-      450px,
-      90vw
+      28.125rem,
+      /* Converted from 450px */ 90vw
     ); /* Responsive width for portrait - increased from 350px */
   }
 
   .pc-card {
-    height: 420px; /* Appropriate height for portrait */
+    height: 26.25rem; /* Converted from 420px - appropriate height for portrait */
   }
 }
 

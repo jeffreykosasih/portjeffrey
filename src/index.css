@@ -1,6 +1,47 @@
 /* Font imports - must be at the top */
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 
+/* CSS Custom Properties for consistent spacing and sizing */
+:root {
+  /* Spacing scale based on rem units */
+  --space-xs: 0.25rem; /* 4px */
+  --space-sm: 0.5rem; /* 8px */
+  --space-md: 0.75rem; /* 12px */
+  --space-base: 1rem; /* 16px */
+  --space-lg: 1.25rem; /* 20px */
+  --space-xl: 1.5rem; /* 24px */
+  --space-2xl: 2rem; /* 32px */
+  --space-3xl: 2.5rem; /* 40px */
+  --space-4xl: 3rem; /* 48px */
+  --space-5xl: 4rem; /* 64px */
+  --space-6xl: 5rem; /* 80px */
+
+  /* Touch target sizes */
+  --touch-target-sm: 2.75rem; /* 44px - minimum touch target */
+  --touch-target-md: 3rem; /* 48px - comfortable touch target */
+  --touch-target-lg: 3.5rem; /* 56px - large touch target */
+
+  /* Border radius scale */
+  --radius-sm: 0.375rem; /* 6px */
+  --radius-md: 0.5rem; /* 8px */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-xl: 1rem; /* 16px */
+  --radius-2xl: 1.5rem; /* 24px */
+  --radius-full: 9999px; /* Fully rounded */
+
+  /* Typography scale - using rem for scalability */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-5xl: 3rem; /* 48px */
+  --text-6xl: 3.75rem; /* 60px */
+}
+
 /* Basic reset and global styles */
 * {
   box-sizing: border-box;
@@ -37,120 +78,125 @@ body {
   font-family: 'Lato', sans-serif;
 }
 
-/* Mobile-first responsive text sizes */
+/* Mobile-first responsive text sizes using CSS custom properties */
 .text-responsive-xs {
-  font-size: 0.75rem; /* 12px */
-  line-height: 1rem; /* 16px */
+  font-size: var(--text-xs);
+  line-height: 1rem;
 }
 
 .text-responsive-sm {
-  font-size: 0.875rem; /* 14px */
-  line-height: 1.25rem; /* 20px */
+  font-size: var(--text-sm);
+  line-height: 1.25rem;
 }
 
 .text-responsive-base {
-  font-size: 1rem; /* 16px */
-  line-height: 1.5rem; /* 24px */
+  font-size: var(--text-base);
+  line-height: 1.5rem;
 }
 
 .text-responsive-lg {
-  font-size: 1.125rem; /* 18px */
-  line-height: 1.75rem; /* 28px */
+  font-size: var(--text-lg);
+  line-height: 1.75rem;
 }
 
-/* Touch-friendly interactive elements */
+/* Touch-friendly interactive elements using CSS custom properties */
 .touch-target {
-  min-height: 44px;
-  min-width: 44px;
+  min-height: var(--touch-target-sm);
+  min-width: var(--touch-target-sm);
   cursor: pointer;
 }
 
 /* Responsive sizing utilities */
-@media (min-width: 640px) {
+@media (min-width: 40rem) {
+  /* 640px in rem */
   .text-responsive-xs {
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     line-height: 1.25rem;
   }
   .text-responsive-sm {
-    font-size: 1rem;
+    font-size: var(--text-base);
     line-height: 1.5rem;
   }
   .text-responsive-base {
-    font-size: 1.125rem;
+    font-size: var(--text-lg);
     line-height: 1.75rem;
   }
   .text-responsive-lg {
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     line-height: 1.75rem;
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 48rem) {
+  /* 768px in rem */
   .text-responsive-xs {
-    font-size: 1rem;
+    font-size: var(--text-base);
     line-height: 1.5rem;
   }
   .text-responsive-sm {
-    font-size: 1.125rem;
+    font-size: var(--text-lg);
     line-height: 1.75rem;
   }
   .text-responsive-base {
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     line-height: 1.75rem;
   }
   .text-responsive-lg {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     line-height: 2rem;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 64rem) {
+  /* 1024px in rem */
   .text-responsive-xs {
-    font-size: 1.125rem;
+    font-size: var(--text-lg);
     line-height: 1.75rem;
   }
   .text-responsive-sm {
-    font-size: 1.25rem;
+    font-size: var(--text-xl);
     line-height: 1.75rem;
   }
   .text-responsive-base {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     line-height: 2rem;
   }
   .text-responsive-lg {
-    font-size: 2rem;
+    font-size: var(--text-4xl);
     line-height: 2.5rem;
   }
 }
 
-/* Skillset orbital animation with responsive adjustments */
+/* Skillset orbital animation with responsive adjustments using rem */
 @keyframes skillsetOrbit {
   from {
-    transform: rotate(0deg) translateX(100px) rotate(0deg);
+    transform: rotate(0deg) translateX(6.25rem) rotate(0deg); /* 100px in rem */
   }
   to {
-    transform: rotate(360deg) translateX(100px) rotate(-360deg);
+    transform: rotate(360deg) translateX(6.25rem) rotate(-360deg);
   }
 }
 
-@media (min-width: 640px) {
+@media (min-width: 40rem) {
+  /* 640px in rem */
   @keyframes skillsetOrbit {
     from {
-      transform: rotate(0deg) translateX(130px) rotate(0deg);
+      transform: rotate(0deg) translateX(8.125rem) rotate(0deg); /* 130px in rem */
     }
     to {
-      transform: rotate(360deg) translateX(130px) rotate(-360deg);
+      transform: rotate(360deg) translateX(8.125rem) rotate(-360deg);
     }
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 64rem) {
+  /* 1024px in rem */
   @keyframes skillsetOrbit {
     from {
-      transform: rotate(0deg) translateX(150px) rotate(0deg);
+      transform: rotate(0deg) translateX(9.375rem) rotate(0deg); /* 150px in rem */
     }
     to {
-      transform: rotate(360deg) translateX(150px) rotate(-360deg);
+      transform: rotate(360deg) translateX(9.375rem) rotate(-360deg);
     }
   }
 }
@@ -179,37 +225,38 @@ body {
   user-select: none;
 }
 
-/* Responsive container with safe areas */
+/* Responsive container with safe areas using CSS custom properties */
 .container-safe {
-  padding-left: max(16px, env(safe-area-inset-left));
-  padding-right: max(16px, env(safe-area-inset-right));
-  padding-top: max(16px, env(safe-area-inset-top));
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding-left: max(var(--space-base), env(safe-area-inset-left));
+  padding-right: max(var(--space-base), env(safe-area-inset-right));
+  padding-top: max(var(--space-base), env(safe-area-inset-top));
+  padding-bottom: max(var(--space-base), env(safe-area-inset-bottom));
 }
 
-/* Button styles for better touch targets */
+/* Button styles for better touch targets using CSS custom properties */
 .btn-touch {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-size: 1rem;
+  min-height: var(--touch-target-sm);
+  min-width: var(--touch-target-sm);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-base);
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-sm);
   transition: all 0.2s ease;
   border: none;
   cursor: pointer;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 48rem) {
+  /* 768px in rem */
   .btn-touch {
-    padding: 14px 28px;
-    font-size: 1.1rem;
-    min-height: 48px;
-    gap: 10px;
+    padding: calc(var(--space-md) + 0.125rem) calc(var(--space-xl) + 0.25rem);
+    font-size: calc(var(--text-base) + 0.1rem);
+    min-height: var(--touch-target-md);
+    gap: calc(var(--space-sm) + 0.125rem);
   }
 }
 
@@ -234,25 +281,93 @@ body {
   line-height: 1.1;
 }
 
-/* Improved form styling for mobile */
+/* Improved form styling for mobile using CSS custom properties */
 .form-input {
   width: 100%;
-  padding: 12px 16px;
-  border-radius: 10px;
+  padding: var(--space-md) var(--space-base);
+  border-radius: var(--radius-lg);
   border: 2px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(0.625rem); /* 10px in rem */
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   font-family: 'Lato', sans-serif;
   outline: none;
   transition: border-color 0.3s ease;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 48rem) {
+  /* 768px in rem */
   .form-input {
-    padding: 15px 20px;
-    border-radius: 12px;
-    font-size: 1rem;
+    padding: calc(var(--space-md) + 0.1875rem) var(--space-lg);
+    border-radius: var(--radius-xl);
+    font-size: var(--text-base);
   }
+}
+
+/* Utility classes for consistent spacing */
+.p-xs {
+  padding: var(--space-xs);
+}
+.p-sm {
+  padding: var(--space-sm);
+}
+.p-md {
+  padding: var(--space-md);
+}
+.p-base {
+  padding: var(--space-base);
+}
+.p-lg {
+  padding: var(--space-lg);
+}
+.p-xl {
+  padding: var(--space-xl);
+}
+.p-2xl {
+  padding: var(--space-2xl);
+}
+
+.m-xs {
+  margin: var(--space-xs);
+}
+.m-sm {
+  margin: var(--space-sm);
+}
+.m-md {
+  margin: var(--space-md);
+}
+.m-base {
+  margin: var(--space-base);
+}
+.m-lg {
+  margin: var(--space-lg);
+}
+.m-xl {
+  margin: var(--space-xl);
+}
+.m-2xl {
+  margin: var(--space-2xl);
+}
+
+.gap-xs {
+  gap: var(--space-xs);
+}
+.gap-sm {
+  gap: var(--space-sm);
+}
+.gap-md {
+  gap: var(--space-md);
+}
+.gap-base {
+  gap: var(--space-base);
+}
+.gap-lg {
+  gap: var(--space-lg);
+}
+.gap-xl {
+  gap: var(--space-xl);
+}
+.gap-2xl {
+  gap: var(--space-2xl);
 }

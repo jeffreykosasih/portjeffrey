@@ -74,7 +74,7 @@ function SceneLoadingFallback({ isDarkMode }: { isDarkMode: boolean }) {
         height: '100%',
         background: isDarkMode
           ? 'linear-gradient(to bottom, #162542 0%, #020918 100%)'
-          : 'linear-gradient(to bottom, #006161 0%, #006161 100%)',
+          : 'linear-gradient(to bottom, #005E80 0%, #005E80 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

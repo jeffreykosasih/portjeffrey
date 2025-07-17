@@ -45,8 +45,8 @@ export default function LongStoryPage({
       backgroundColor: isDarkMode
         ? 'rgba(22, 37, 66, 0.4)'
         : 'rgba(0, 97, 97, 0.4)',
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
+      backdropFilter: 'blur(0.5rem)', // Converted from 8px to rem
+      WebkitBackdropFilter: 'blur(0.5rem)', // Converted from 8px to rem
       opacity: 0.95,
       zIndex: 1500,
       display: 'flex',
@@ -59,24 +59,24 @@ export default function LongStoryPage({
     if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
-        padding: '20px 16px',
+        padding: 'var(--space-lg) var(--space-base)', // Using CSS custom properties
       };
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
-        padding: '30px 24px',
+        padding: 'calc(var(--space-xl) + 0.375rem) var(--space-xl)', // Using CSS custom properties with calc
       };
     } else {
       return {
         ...baseStyles,
-        padding: '40px',
+        padding: 'var(--space-3xl)', // Using CSS custom property
       };
     }
   };
 
   const getContentStyles = () => {
     const baseStyles = {
-      maxWidth: '800px',
+      maxWidth: '50rem', // Converted from 800px to rem
       width: '100%',
       display: 'flex',
       flexDirection: 'column' as const,
@@ -88,7 +88,7 @@ export default function LongStoryPage({
 
   const getTextContainerStyles = () => {
     const baseStyles = {
-      fontSize: '1.5rem',
+      fontSize: 'var(--text-2xl)', // Using CSS custom property
       lineHeight: '1.8',
       fontFamily: 'Lato, sans-serif',
       fontWeight: '300',
@@ -99,13 +99,13 @@ export default function LongStoryPage({
     if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
-        fontSize: '1.1rem',
+        fontSize: 'var(--text-lg)', // Using CSS custom property
         lineHeight: '1.6',
       };
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
-        fontSize: '1.3rem',
+        fontSize: 'calc(var(--text-xl) + 0.05rem)', // Using CSS custom property with calc
         lineHeight: '1.7',
       };
     } else {
@@ -117,7 +117,7 @@ export default function LongStoryPage({
     const baseStyles = {
       fontWeight: '700',
       fontFamily: 'Lato, sans-serif',
-      marginBottom: '30px',
+      marginBottom: 'calc(var(--space-xl) + 0.375rem)', // Using CSS custom property with calc
       background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
       WebkitBackgroundClip: 'text',
       backgroundClip: 'text',
@@ -128,19 +128,19 @@ export default function LongStoryPage({
     if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
-        fontSize: '2.5rem',
-        marginBottom: '20px',
+        fontSize: 'calc(var(--text-4xl) - 0.25rem)', // Using CSS custom property with calc (converted from 2.5rem)
+        marginBottom: 'var(--space-lg)', // Using CSS custom property
       };
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
-        fontSize: '3rem',
-        marginBottom: '25px',
+        fontSize: 'var(--text-5xl)', // Using CSS custom property (converted from 3rem)
+        marginBottom: 'calc(var(--space-xl) + 0.0625rem)', // Using CSS custom property with calc
       };
     } else {
       return {
         ...baseStyles,
-        fontSize: '4rem',
+        fontSize: 'var(--text-6xl)', // Using CSS custom property (converted from 4rem)
       };
     }
   };
@@ -150,10 +150,10 @@ export default function LongStoryPage({
       borderRadius: '50%',
       position: 'absolute' as const,
       zIndex: 1001,
-      width: '50px',
-      height: '50px',
+      width: 'var(--space-4xl)', // Using CSS custom property (converted from 50px)
+      height: 'var(--space-4xl)', // Using CSS custom property (converted from 50px)
       border: 'none',
-      backgroundColor: isDarkMode ? '#162542' : '#006161',
+      backgroundColor: isDarkMode ? '#162542' : '#005E80',
       color: '#ffffff',
       display: 'flex',
       alignItems: 'center',
@@ -164,16 +164,16 @@ export default function LongStoryPage({
     if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
-        top: '16px',
-        right: '16px',
-        width: '48px',
-        height: '48px',
+        top: 'var(--space-base)', // Using CSS custom property
+        right: 'var(--space-base)', // Using CSS custom property
+        width: 'var(--touch-target-md)', // Using CSS custom property
+        height: 'var(--touch-target-md)', // Using CSS custom property
       };
     } else {
       return {
         ...baseStyles,
-        top: '20px',
-        right: '20px',
+        top: 'var(--space-lg)', // Using CSS custom property
+        right: 'var(--space-lg)', // Using CSS custom property
       };
     }
   };
@@ -203,7 +203,9 @@ export default function LongStoryPage({
               icon={faArrowLeft}
               style={{
                 color: '#ffffff',
-                fontSize: deviceInfo?.isMobile ? '18px' : '20px',
+                fontSize: deviceInfo?.isMobile
+                  ? 'var(--text-lg)'
+                  : 'var(--text-xl)', // Using CSS custom properties
               }}
             />
           </motion.button>
@@ -234,15 +236,16 @@ export default function LongStoryPage({
               style={getTextContainerStyles()}
             >
               <h1 style={getTitleStyles()}>Long Story 📖</h1>
-              <p style={{ marginBottom: '20px' }}>
-                I was born in Indonesia, got a bachelor of computer science and
-                now pursuing MIT degree in Melbourne. Had experience from lots
-                of related field like being part of Apple Developer academy
-                where I learn business, UI/UX design and coding in general. Then
-                work as product owner at bank, becoming free lance making sites,
-                also joining a bootcamp program. Now, I'm looking for developer
-                jobs or design if possible so if you're interested, let's reach
-                out!
+              <p style={{ marginBottom: 'var(--space-lg)' }}>
+                {' '}
+                {/* Using CSS custom property */}I was born in Indonesia, got a
+                bachelor of computer science and now pursuing MIT degree in
+                Melbourne. Had experience from lots of related field like being
+                part of Apple Developer academy where I learn business, UI/UX
+                design and coding in general. Then work as product owner at
+                bank, becoming free lance making sites, also joining a bootcamp
+                program. Now, I'm looking for developer jobs or design if
+                possible so if you're interested, let's reach out!
               </p>
             </motion.div>
           </motion.div>

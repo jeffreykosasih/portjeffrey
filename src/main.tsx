@@ -128,7 +128,7 @@ function App(): React.JSX.Element {
       width: '100vw',
       height: '100vh',
       position: 'relative' as const,
-      backgroundColor: isDarkMode ? '#162542' : '#006161',
+      backgroundColor: isDarkMode ? '#162542' : '#005E80',
     };
 
     // Add safe area padding for mobile devices
@@ -274,7 +274,7 @@ function App(): React.JSX.Element {
                 position: 'relative',
                 background: isDarkMode
                   ? 'linear-gradient(to bottom, #162542 0%, #020918 100%)'
-                  : 'linear-gradient(to bottom, #006161 0%, #006161 100%)',
+                  : 'linear-gradient(to bottom, #005E80 0%, #005E80 100%)',
               }}
             >
               {/* Jefri text in top left corner */}

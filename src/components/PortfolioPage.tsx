@@ -64,11 +64,7 @@ export default function PortfolioPage({
   return (
     <AnimatePresence>
       {isVisible && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
+        <div
           style={{
             position: 'fixed',
             top: 0,
@@ -80,7 +76,7 @@ export default function PortfolioPage({
               : 'rgba(0, 97, 97, 0.4)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
-            opacity: 0.95,
+            opacity: 1,
             zIndex: 1500,
             display: 'flex',
             flexDirection: 'column',
@@ -135,7 +131,7 @@ export default function PortfolioPage({
                   : '48px'
                 : '50px',
               border: 'none',
-              backgroundColor: isDarkMode ? '#162542' : '#084CA6',
+              backgroundColor: isDarkMode ? '#162542' : '#005E80',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
@@ -160,6 +156,7 @@ export default function PortfolioPage({
               shouldAnimateText ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }
             }
             animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
             transition={
               shouldAnimateText
                 ? { duration: 0.8, delay: 0.2 }
@@ -242,7 +239,7 @@ export default function PortfolioPage({
                   key={index}
                   initial={
                     shouldAnimateText
-                      ? { opacity: 1, y: 10, scale: 1 }
+                      ? { opacity: 0, y: 10, scale: 1 }
                       : { opacity: 1, y: 0, scale: 1 }
                   }
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -265,7 +262,9 @@ export default function PortfolioPage({
                     alignItems: 'center',
                     padding: 0,
                     borderRadius: '16px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                    backgroundColor: isDarkMode
+                      ? 'rgba(255, 255, 255, 0.15)'
+                      : 'rgba(255, 255, 255, 0.08)',
                     backdropFilter: 'blur(20px)',
                     cursor: project.link ? 'pointer' : 'default',
                     flex: '1',
@@ -485,7 +484,7 @@ export default function PortfolioPage({
               </p>
             </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );
