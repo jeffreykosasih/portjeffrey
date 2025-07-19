@@ -80,14 +80,13 @@ function App(): React.JSX.Element {
   };
 
   const openBurgerMenu = (slideDirection: 'left' | 'right' = 'right'): void => {
-    // When opening burger menu from a page, don't animate burger menu or page text
-    setShouldAnimateBurgerMenu(false);
+    // When opening burger menu from a page, enable opacity animation but disable other animations
+    setShouldAnimateBurgerMenu(true); // Enable burger menu animation for opacity
     setShouldAnimatePageText(false);
     setBurgerMenuSlideDirection(slideDirection);
     setIsBurgerMenuOpen(true);
     // Reset animation flags after a brief delay
     setTimeout(() => {
-      setShouldAnimateBurgerMenu(true);
       setShouldAnimatePageText(true);
     }, 100);
   };

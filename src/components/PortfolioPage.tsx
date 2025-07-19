@@ -33,7 +33,7 @@ export default function PortfolioPage({
       link: 'https://katsuretsu.vercel.app',
       status: 'Completed',
       image: '/assets/images/project_katsu.jpg',
-      tech: ['Motion', 'Node.js', 'React', 'Tailwind', 'TypeScript'],
+      tech: ['Node.js', 'React', 'JavaScript', 'Motion', 'Tailwind'],
     },
     {
       title: 'Port Jeffrey',
@@ -42,7 +42,14 @@ export default function PortfolioPage({
       link: 'https://jefri.dev',
       status: 'Completed',
       image: '/assets/images/profile.jpg',
-      tech: ['Node.js', 'Three.js', 'Motion', 'React', 'Tailwind'],
+      tech: [
+        'Node.js',
+        'React',
+        'TypeScript',
+        'Three.js',
+        'Motion',
+        'Tailwind',
+      ],
     },
     {
       title: 'Muscle Memory',
@@ -50,7 +57,7 @@ export default function PortfolioPage({
       link: 'https://musclememo.vercel.app',
       status: 'Completed',
       image: '/assets/images/project_muscle.jpg',
-      tech: ['TypeScript', 'Node.js', 'Motion', 'React'],
+      tech: ['Node.js', 'React', 'TypeScript', 'Motion', 'Tailwind'],
     },
     {
       title: 'Coming Soon!',
@@ -64,16 +71,21 @@ export default function PortfolioPage({
   return (
     <AnimatePresence>
       {isVisible && (
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
           style={{
             position: 'fixed',
             top: 0,
             left: 0,
             width: '100vw',
+            transition: '0.5',
             height: deviceInfo?.isMobile ? '100dvh' : '100vh', // Use dynamic viewport height
             backgroundColor: isDarkMode
               ? 'rgba(22, 37, 66, 0.4)'
-              : 'rgba(0, 97, 97, 0.4)',
+              : 'rgba(0, 94, 128, 0.5)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
             opacity: 1,
@@ -265,7 +277,7 @@ export default function PortfolioPage({
                     backgroundColor: isDarkMode
                       ? 'rgba(255, 255, 255, 0.15)'
                       : 'rgba(255, 255, 255, 0.08)',
-                    backdropFilter: 'blur(20px)',
+
                     cursor: project.link ? 'pointer' : 'default',
                     flex: '1',
                     minWidth: deviceInfo?.isMobile
@@ -297,7 +309,7 @@ export default function PortfolioPage({
                   <div
                     style={{
                       width: '100%',
-                      height: '65%',
+                      height: '60%',
                       borderRadius: project.image
                         ? '20px 20px 0 0'
                         : '20px 20px 20px 20px',
@@ -344,8 +356,6 @@ export default function PortfolioPage({
                           width: '24px',
                           height: '24px',
                           borderRadius: '50%',
-                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                          backdropFilter: 'blur(10px)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -368,7 +378,7 @@ export default function PortfolioPage({
                     style={{
                       height: '20%',
                       width: '100%',
-                      padding: deviceInfo?.isMobile ? '10px 12px' : '12px 16px',
+                      padding: deviceInfo?.isMobile ? '8px 12px' : '10px 16px',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'center',
@@ -402,15 +412,15 @@ export default function PortfolioPage({
                     </p>
                   </div>
 
-                  {/* Technology Tags Section - 15% */}
+                  {/* Technology Tags Section - 20% */}
                   {project.tech && (
                     <div
                       style={{
-                        height: '15%',
+                        height: '20%',
                         width: '100%',
                         padding: deviceInfo?.isMobile
-                          ? '4px 12px 12px 12px'
-                          : '6px 16px 16px 16px',
+                          ? '6px 12px 12px 12px'
+                          : '8px 16px 16px 16px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -424,7 +434,7 @@ export default function PortfolioPage({
                           justifyContent: 'center',
                         }}
                       >
-                        {project.tech.slice(0, 4).map((tech) => (
+                        {project.tech.slice(0, 7).map((tech) => (
                           <span
                             key={tech}
                             style={{
@@ -484,7 +494,7 @@ export default function PortfolioPage({
               </p>
             </motion.div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );

@@ -54,7 +54,7 @@ export default function ProfilePage({
       height: '100vh',
       backgroundColor: isDarkMode
         ? 'rgba(22, 37, 66, 0.4)'
-        : 'rgba(0, 97, 97, 0.4)',
+        : 'rgba(0, 94, 128, 0.5)',
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
       opacity: 1,
@@ -370,7 +370,13 @@ export default function ProfilePage({
     <>
       <AnimatePresence>
         {isVisible && (
-          <div style={getContainerStyles()}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={getContainerStyles()}
+          >
             {/* Back button with slide left to right effect */}
             <motion.button
               onClick={() => {
@@ -381,7 +387,6 @@ export default function ProfilePage({
               initial={{ x: 20 }}
               animate={{ x: 0 }}
               whileHover={{ x: -5 }}
-              transition={{ duration: 0.3 }}
               style={getBackButtonStyles()}
               onMouseEnter={() => setIsButtonHovered(true)}
               onMouseLeave={() => setIsButtonHovered(false)}
@@ -481,7 +486,7 @@ export default function ProfilePage({
                 />
               </motion.div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 

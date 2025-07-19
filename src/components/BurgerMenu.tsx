@@ -396,20 +396,23 @@ export default function BurgerMenu({
                 : slideDirection === 'left'
                 ? '-100%'
                 : '100%',
+              opacity: 0,
             }}
             animate={{
               x: '30%', // Back to original positioning
+              opacity: 1,
               transition: !shouldAnimate
                 ? { duration: 0 }
                 : {
                     type: 'tween',
                     ease: 'easeOut',
-                    duration: 0.6, // Slower animation (was 0.3)
+                    duration: 0.5, // Slower animation (was 0.3)
                   },
             }}
             exit={{
               x: '100%',
-              transition: { duration: 0.6, ease: 'easeInOut' }, // Slower exit too
+              opacity: 0,
+              transition: { duration: 0.5, ease: 'easeInOut' }, // Slower exit too
             }}
             onAnimationComplete={() => {
               // Reset the flag once animation is complete
@@ -449,7 +452,6 @@ export default function BurgerMenu({
               </motion.button>
             ))}
 
-            {/* Connect section - improved positioning for iPhone portrait */}
             <motion.div
               initial={
                 shouldAnimate ? { opacity: 1, y: 20 } : { opacity: 1, y: 0 }

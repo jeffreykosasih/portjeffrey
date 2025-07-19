@@ -34,6 +34,7 @@ interface SkillsetPageProps {
   isDarkMode: boolean;
   shouldAnimateText?: boolean;
   deviceInfo?: DeviceInfo;
+  onPlayClickSound?: () => void;
 }
 
 type SkillCategory = 'tools' | 'programming' | 'languages';
@@ -171,6 +172,7 @@ export default function SkillsetPage({
   isDarkMode,
   shouldAnimateText = true,
   deviceInfo,
+  onPlayClickSound,
 }: SkillsetPageProps) {
   const [activeCategory, setActiveCategory] = useState<SkillCategory>('tools');
   const [isButtonHovered, setIsButtonHovered] = React.useState(false);
@@ -186,7 +188,7 @@ export default function SkillsetPage({
       height: '100vh',
       backgroundColor: isDarkMode
         ? 'rgba(22, 37, 66, 0.4)'
-        : 'rgba(0, 97, 97, 0.4)',
+        : 'rgba(0, 94, 128, 0.5)',
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
       opacity: 1,
@@ -311,7 +313,7 @@ export default function SkillsetPage({
       border: 'none',
       backgroundColor: isActive
         ? 'rgba(255, 255, 255, 0.2)'
-        : 'rgba(255, 255, 255, 0.1)',
+        : 'rgba(255, 255, 255, 0.2)',
       color: '#ffffff',
       fontWeight: '600',
       fontSize: deviceInfo?.isLandscapeMobile
@@ -322,7 +324,6 @@ export default function SkillsetPage({
       fontFamily: 'Lato, sans-serif',
       cursor: 'pointer',
       transition: 'all 0.15s ease',
-      backdropFilter: 'blur(10px)',
       boxShadow: isActive ? '0 4px 15px rgba(255, 255, 255, 0.2)' : 'none',
     };
 
@@ -395,8 +396,7 @@ export default function SkillsetPage({
               borderRadius: '24px',
               backgroundColor: isDarkMode
                 ? 'rgba(255, 255, 255, 0.15)'
-                : 'rgba(255, 255, 255, 0.08)',
-              backdropFilter: 'blur(20px)',
+                : 'rgba(255, 255, 255, 0.15)',
               cursor: 'pointer',
               minWidth: deviceInfo?.isLandscapeMobile
                 ? '160px' // Larger cards for landscape mobile
@@ -535,8 +535,7 @@ export default function SkillsetPage({
               borderRadius: '16px',
               backgroundColor: isDarkMode
                 ? 'rgba(255, 255, 255, 0.1)'
-                : 'rgba(255, 255, 255, 0.04)',
-              backdropFilter: 'blur(15px)',
+                : 'rgba(255, 255, 255, 0.1)',
               cursor: 'pointer',
               width: '100%',
               maxWidth: deviceInfo?.isLandscapeMobile
@@ -678,8 +677,7 @@ export default function SkillsetPage({
               borderRadius: '20px',
               backgroundColor: isDarkMode
                 ? 'rgba(255, 255, 255, 0.1)'
-                : 'rgba(255, 255, 255, 0.04)',
-              backdropFilter: 'blur(15px)',
+                : 'rgba(255, 255, 255, 0.05)',
               cursor: 'pointer',
               width: '100%',
               maxWidth: deviceInfo?.isMobile ? '160px' : '180px',
@@ -725,15 +723,14 @@ export default function SkillsetPage({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.5 }}
             style={{
               position: 'fixed',
               top: 0,
               left: 0,
               width: '100vw',
               height: '100vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              backdropFilter: 'blur(10px)',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
               zIndex: 2000,
               display: 'flex',
               alignItems: 'center',
@@ -832,9 +829,8 @@ export default function SkillsetPage({
                       padding: deviceInfo?.isMobile ? '20px 15px' : '25px 20px',
                       borderRadius: '16px',
                       backgroundColor: isDarkMode
-                        ? 'rgba(255, 255, 255, 0.1)'
+                        ? 'rgba(255, 255, 255, 0.04)'
                         : 'rgba(255, 255, 255, 0.04)',
-                      backdropFilter: 'blur(15px)',
                       cursor: 'pointer',
                     }}
                   >
@@ -915,12 +911,13 @@ export default function SkillsetPage({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
           style={getContainerStyles()}
         >
           {/* Back button with slide left to right effect */}
           <motion.button
             onClick={() => {
+              onPlayClickSound?.(); // Play click sound
               onClose(); // Close current page
               onOpenBurgerMenu('right'); // Open burger menu sliding from right corner
             }}

@@ -194,30 +194,13 @@ export default function ConnectPage({
 
   return (
     <>
-      <style>
-        {`
-          .bright-placeholder::placeholder {
-            color: rgba(255, 255, 255, 0.9) !important;
-            opacity: 1 !important;
-          }
-          .bright-placeholder::-webkit-input-placeholder {
-            color: rgba(255, 255, 255, 0.9) !important;
-            opacity: 1 !important;
-          }
-          .bright-placeholder::-moz-placeholder {
-            color: rgba(255, 255, 255, 0.9) !important;
-            opacity: 1 !important;
-          }
-          .bright-placeholder:-ms-input-placeholder {
-            color: rgba(255, 255, 255, 0.9) !important;
-            opacity: 1 !important;
-          }
-        `}
-      </style>
-
       <AnimatePresence>
         {isVisible && (
-          <div
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
             style={{
               position: 'fixed',
               top: 0,
@@ -228,7 +211,7 @@ export default function ConnectPage({
                 : '100vh',
               backgroundColor: isDarkMode
                 ? 'rgba(22, 37, 66, 0.4)'
-                : 'rgba(0, 97, 97, 0.4)',
+                : 'rgba(0, 94, 128, 0.5)',
               backdropFilter: 'blur(0.5rem)', // Converted to rem
               WebkitBackdropFilter: 'blur(0.5rem)', // Converted to rem
               opacity: 0.95,
@@ -493,14 +476,13 @@ export default function ConnectPage({
                               ? method.hoverColor
                               : isDarkMode
                               ? 'rgba(255, 255, 255, 0.1)'
-                              : 'rgba(255, 255, 255, 0.04)',
+                              : 'rgba(255, 255, 255, 0.1)',
                           borderRadius: deviceInfo?.isMobile ? '12px' : '15px',
                           padding: deviceInfo?.isLandscapeMobile
                             ? '12px 20px 15px 20px' // Desktop-like padding for landscape mobile
                             : deviceInfo?.isMobile
                             ? '12px 16px 15px 16px'
                             : '12px 20px 15px 20px',
-                          backdropFilter: 'blur(10px)',
                           border: 'none',
                           cursor: 'pointer',
                           transform:
@@ -624,8 +606,7 @@ export default function ConnectPage({
                             : '2px solid rgba(255, 255, 255, 0.2)',
                           backgroundColor: isDarkMode
                             ? 'rgba(255, 255, 255, 0.1)'
-                            : 'rgba(255, 255, 255, 0.04)',
-                          backdropFilter: 'blur(10px)',
+                            : 'rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
                           fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
                           fontFamily: 'Lato, sans-serif',
@@ -676,8 +657,7 @@ export default function ConnectPage({
                             : '2px solid rgba(255, 255, 255, 0.2)',
                           backgroundColor: isDarkMode
                             ? 'rgba(255, 255, 255, 0.1)'
-                            : 'rgba(255, 255, 255, 0.04)',
-                          backdropFilter: 'blur(10px)',
+                            : 'rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
                           fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
                           fontFamily: 'Lato, sans-serif',
@@ -728,8 +708,7 @@ export default function ConnectPage({
                             : '2px solid rgba(255, 255, 255, 0.2)',
                           backgroundColor: isDarkMode
                             ? 'rgba(255, 255, 255, 0.1)'
-                            : 'rgba(255, 255, 255, 0.04)',
-                          backdropFilter: 'blur(10px)',
+                            : 'rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
                           fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
                           fontFamily: 'Lato, sans-serif',
@@ -870,7 +849,7 @@ export default function ConnectPage({
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

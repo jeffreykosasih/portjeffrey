@@ -102,12 +102,11 @@ export default function AppLoadingScreen({
 
   const titleStyles: React.CSSProperties = {
     fontFamily: "'Lato', sans-serif",
-    fontSize: 'clamp(var(--text-5xl), 8vw, var(--text-6xl))', // Using CSS custom properties with clamp
+    fontSize: '7rem',
     fontWeight: 800,
     letterSpacing: '-0.05em',
     lineHeight: 1,
     color: colors.text,
-    marginBottom: 'var(--space-4xl)', // Using CSS custom property
   };
 
   const buttonStyles: React.CSSProperties = {
