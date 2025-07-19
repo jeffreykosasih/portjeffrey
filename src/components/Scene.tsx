@@ -1390,8 +1390,7 @@ function SceneComponent({
         <OrbitControls
           enablePan={false}
           enableZoom={false}
-          // enableRotate={false} // Commented out for easier object positioning during development
-          enableRotate={true}
+          enableRotate={false}
           target={[0, 0, 0]}
           maxDistance={
             deviceInfo?.isLandscapeMobile
