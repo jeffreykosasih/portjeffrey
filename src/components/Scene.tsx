@@ -1285,17 +1285,9 @@ function SceneComponent({
           <>
             <ambientLight intensity={0.3} color='#b8c6db' />
             <directionalLight
-              position={[-20, 30, 10]}
+              position={[-20, 40, 70]}
               intensity={0.8}
               color='#e6f3ff'
-              castShadow
-              shadow-mapSize-width={2048}
-              shadow-mapSize-height={2048}
-              shadow-camera-far={100}
-              shadow-camera-left={-50}
-              shadow-camera-right={50}
-              shadow-camera-top={50}
-              shadow-camera-bottom={-50}
             />
           </>
         ) : (
@@ -1303,16 +1295,8 @@ function SceneComponent({
             <ambientLight intensity={0.4} color='#fff5e6' />
             <directionalLight
               position={[20, 40, 15]}
-              intensity={1.5}
+              intensity={4.5}
               color='#fff8dc'
-              castShadow
-              shadow-mapSize-width={2048}
-              shadow-mapSize-height={2048}
-              shadow-camera-far={100}
-              shadow-camera-left={-50}
-              shadow-camera-right={50}
-              shadow-camera-top={50}
-              shadow-camera-bottom={-50}
             />
           </>
         )}

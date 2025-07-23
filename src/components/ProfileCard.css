@@ -174,7 +174,7 @@
   font-size: 0.875rem; /* Converted from 14px */
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 0.25rem 0.9375rem rgba(0, 97, 97, 0.5); /* Converted from 4px 15px */
+  box-shadow: 0 0.25rem 0.9375rem rgba(59, 116, 197, 0.8); /* Converted from 4px 15px */
   min-width: 7.5rem; /* Converted from 120px */
   margin-top: auto;
   font-family: 'Lato', sans-serif;
@@ -182,8 +182,8 @@
 
 .pc-contact-btn:hover {
   transform: translateY(-0.125rem); /* Converted from -2px */
-  background: #004d4d;
-  box-shadow: 0 0.5rem 1.5625rem rgba(0, 97, 97, 0.8); /* Converted from 8px 25px */
+  background: #6f6d65;
+  box-shadow: 0 0.5rem 1.5625rem rgba(111, 109, 101, 0.8); /* Converted from 8px 25px */
 }
 
 @keyframes pulse {
