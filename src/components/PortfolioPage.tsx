@@ -29,7 +29,7 @@ export default function PortfolioPage({
     {
       title: 'Katsu Retsu',
       description:
-        'Front end site for Japaneserestaurant with modern theme and animation',
+        'Front end site for Japanese restaurant with modern theme and animation',
       link: 'http://katsuseiba.vercel.app',
       status: 'Completed',
       image: '/assets/images/project_katsu.jpg',
