@@ -29,11 +29,11 @@ export default function PortfolioPage({
     {
       title: 'Katsu Retsu',
       description:
-        'Front end site for restaurant with modern theme and animation',
-      link: 'https://katsuretsu.vercel.app',
+        'Front end site for Japaneserestaurant with modern theme and animation',
+      link: 'http://katsuseiba.vercel.app',
       status: 'Completed',
       image: '/assets/images/project_katsu.jpg',
-      tech: ['Node.js', 'React', 'JavaScript', 'Motion', 'Tailwind'],
+      tech: ['JavaScript', 'Motion', 'Node.js', 'React', 'Tailwind'],
     },
     {
       title: 'Port Jeffrey',
@@ -43,12 +43,12 @@ export default function PortfolioPage({
       status: 'Completed',
       image: '/assets/images/profile.jpg',
       tech: [
+        'Motion',
         'Node.js',
         'React',
-        'TypeScript',
         'Three.js',
-        'Motion',
         'Tailwind',
+        'TypeScript',
       ],
     },
     {
@@ -57,7 +57,14 @@ export default function PortfolioPage({
       link: 'https://musclememo.vercel.app',
       status: 'Completed',
       image: '/assets/images/project_muscle.jpg',
-      tech: ['Node.js', 'React', 'TypeScript', 'Motion', 'Tailwind'],
+      tech: [
+        'Motion',
+        'Node.js',
+        'React',
+        'Three.js',
+        'Tailwind',
+        'TypeScript',
+      ],
     },
     {
       title: 'Coming Soon!',
