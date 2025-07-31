@@ -42,14 +42,7 @@ export default function PortfolioPage({
       link: 'https://jefri.dev',
       status: 'Completed',
       image: '/assets/images/profile.jpg',
-      tech: [
-        'Motion',
-        'Node.js',
-        'React',
-        'Three.js',
-        'Tailwind',
-        'TypeScript',
-      ],
+      tech: ['Motion', 'Node.js', 'React', 'Tailwind', 'TypeScript'],
     },
     {
       title: 'Muscle Memory',
@@ -57,14 +50,7 @@ export default function PortfolioPage({
       link: 'https://musclememo.vercel.app',
       status: 'Completed',
       image: '/assets/images/project_muscle.jpg',
-      tech: [
-        'Motion',
-        'Node.js',
-        'React',
-        'Three.js',
-        'Tailwind',
-        'TypeScript',
-      ],
+      tech: ['Motion', 'Node.js', 'React', 'Tailwind', 'TypeScript'],
     },
     {
       title: 'Coming Soon!',
