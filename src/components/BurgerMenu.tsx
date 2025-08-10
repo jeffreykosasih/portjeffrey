@@ -240,14 +240,22 @@ export default function BurgerMenu({
       baseWidth = '25vw';
     }
 
+    const background = isDarkMode
+      ? 'rgba(22, 37, 66, 0.94)'
+      : 'rgba(0, 94, 128, 0.94)';
+
     return {
       position: 'fixed' as const,
       top: 0,
       right: 0,
       width: baseWidth,
       height: '100dvh', // Use dynamic viewport height for better mobile support
-      backgroundColor: isDarkMode ? '#162542' : '#005E80',
-      backdropFilter: 'blur(0.625rem)', // Converted from 10px to rem
+      background,
+      // Performance hints
+      willChange: 'transform, opacity',
+      transform: 'translateZ(0)',
+      backfaceVisibility: 'hidden',
+      contain: 'layout paint size style',
       zIndex: 9999,
       display: 'flex',
       flexDirection: 'column' as const,
@@ -421,6 +429,7 @@ export default function BurgerMenu({
               }
             }}
             style={getMenuStyles()}
+            className='gpu-accelerated'
           >
             {/* Menu items - back to original layout */}
             {menuItems.map((item, index) => (

@@ -67,7 +67,7 @@ body {
 
 #root {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   /* Ensure proper rendering on all devices */
   min-height: -webkit-fill-available;
   min-height: fill-available;

@@ -43,8 +43,8 @@ export default function LongStoryPage({
       width: '100vw',
       height: '100vh',
       backgroundColor: isDarkMode
-        ? 'rgba(22, 37, 66, 0.4)'
-        : 'rgba(0, 97, 97, 0.4)',
+        ? 'rgba(22, 37, 66, 0.7)'
+        : 'rgba(0, 94, 128, 0.7)',
       backdropFilter: 'blur(0.5rem)', // Converted from 8px to rem
       WebkitBackdropFilter: 'blur(0.5rem)', // Converted from 8px to rem
       opacity: 0.95,

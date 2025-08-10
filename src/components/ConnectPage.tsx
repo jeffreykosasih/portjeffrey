@@ -58,6 +58,62 @@ export default function ConnectPage({
     message?: string;
   }>({});
 
+  // Responsive styles based on device type with landscape mobile support
+  const getContainerStyles = () => {
+    const baseStyles = {
+      position: 'fixed' as const,
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: isDarkMode
+        ? 'rgba(22, 37, 66, 0.4)'
+        : 'rgba(0, 94, 128, 0.5)',
+      backdropFilter: 'blur(0.5rem)',
+      WebkitBackdropFilter: 'blur(0.5rem)',
+      opacity: 0.95,
+      zIndex: 1500,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      color: '#ffffff',
+      overflowY: 'auto' as const,
+      overflowX: 'hidden' as const,
+      WebkitOverflowScrolling: 'touch',
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+    };
+
+    // Enhanced with landscape mobile support
+    if (deviceInfo?.isLandscapeMobile) {
+      // Landscape mobile - desktop-like layout with scaled components
+      return {
+        ...baseStyles,
+        padding:
+          'max(env(safe-area-inset-top), calc(var(--space-xl) + 0.375rem)) var(--space-xl) max(env(safe-area-inset-bottom), calc(var(--space-xl) + 0.375rem)) var(--space-xl)',
+        height: '100dvh',
+      };
+    } else if (deviceInfo?.isMobile) {
+      return {
+        ...baseStyles,
+        padding:
+          'max(env(safe-area-inset-top), var(--space-lg)) var(--space-base) max(env(safe-area-inset-bottom), var(--space-6xl)) var(--space-base)',
+        height: '100dvh',
+      };
+    } else if (deviceInfo?.isTablet) {
+      return {
+        ...baseStyles,
+        padding: 'calc(var(--space-xl) + 0.375rem) var(--space-xl)',
+      };
+    }
+
+    return {
+      ...baseStyles,
+      padding: 'var(--space-3xl)',
+    };
+  };
+
   const validateForm = () => {
     const errors: {
       name?: string;
@@ -201,40 +257,7 @@ export default function ConnectPage({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: deviceInfo?.isMobile
-                ? '100dvh' // Use dynamic viewport height on mobile
-                : '100vh',
-              backgroundColor: isDarkMode
-                ? 'rgba(22, 37, 66, 0.4)'
-                : 'rgba(0, 94, 128, 0.5)',
-              backdropFilter: 'blur(0.5rem)', // Converted to rem
-              WebkitBackdropFilter: 'blur(0.5rem)', // Converted to rem
-              opacity: 0.95,
-              zIndex: 1500,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-start', // Always start from top for better scrolling
-              alignItems: 'center',
-              color: '#ffffff',
-              padding: deviceInfo?.isLandscapeMobile
-                ? 'max(env(safe-area-inset-top), calc(var(--space-xl) + 0.375rem)) var(--space-xl) max(env(safe-area-inset-bottom), calc(var(--space-xl) + 0.375rem)) var(--space-xl)' // Using CSS custom properties
-                : deviceInfo?.isMobile
-                ? 'max(env(safe-area-inset-top), var(--space-lg)) var(--space-base) max(env(safe-area-inset-bottom), var(--space-6xl)) var(--space-base)' // Using CSS custom properties
-                : deviceInfo?.isTablet
-                ? 'calc(var(--space-xl) + 0.375rem) var(--space-xl)' // Using CSS custom properties
-                : 'var(--space-3xl)', // Using CSS custom property
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              // Improve mobile scrolling
-              WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
+            style={getContainerStyles()}
           >
             {/* Back button with slide left to right effect */}
             <motion.button

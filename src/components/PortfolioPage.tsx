@@ -25,6 +25,71 @@ export default function PortfolioPage({
   deviceInfo,
 }: PortfolioPageProps) {
   const [isButtonHovered, setIsButtonHovered] = React.useState(false);
+
+  // Responsive styles based on device type with landscape mobile support
+  const getContainerStyles = () => {
+    const baseStyles = {
+      position: 'fixed' as const,
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: isDarkMode
+        ? 'rgba(22, 37, 66, 0.4)'
+        : 'rgba(0, 94, 128, 0.5)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      opacity: 1,
+      zIndex: 1500,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      color: '#ffffff',
+      overflowY: 'auto' as const,
+      overflowX: 'hidden' as const,
+    };
+
+    // Enhanced with landscape mobile support
+    if (deviceInfo?.isLandscapeMobile) {
+      // Landscape mobile - desktop-like layout with scaled components
+      return {
+        ...baseStyles,
+        padding:
+          'max(env(safe-area-inset-top), 10px) 16px max(env(safe-area-inset-bottom), 20px) 16px',
+        height: '100dvh',
+      };
+    } else if (deviceInfo?.isMobile) {
+      if (deviceInfo.orientation === 'landscape') {
+        // Regular mobile landscape - legacy support
+        return {
+          ...baseStyles,
+          padding:
+            'max(env(safe-area-inset-top), 10px) 16px max(env(safe-area-inset-bottom), 20px) 16px',
+          height: '100dvh',
+        };
+      } else {
+        // Portrait mobile
+        return {
+          ...baseStyles,
+          padding:
+            'max(env(safe-area-inset-top), 20px) 16px max(env(safe-area-inset-bottom), 40px) 16px',
+          height: '100dvh',
+        };
+      }
+    } else if (deviceInfo?.isTablet) {
+      return {
+        ...baseStyles,
+        padding: '30px 24px',
+      };
+    }
+
+    return {
+      ...baseStyles,
+      padding: '40px',
+    };
+  };
+
   const projects = [
     {
       title: 'Katsu Retsu',
@@ -70,34 +135,9 @@ export default function PortfolioPage({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
           style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
+            ...getContainerStyles(),
             transition: '0.5',
-            height: deviceInfo?.isMobile ? '100dvh' : '100vh', // Use dynamic viewport height
-            backgroundColor: isDarkMode
-              ? 'rgba(22, 37, 66, 0.4)'
-              : 'rgba(0, 94, 128, 0.5)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            opacity: 1,
-            zIndex: 1500,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
             visibility: isVisible ? 'visible' : 'hidden',
-            color: '#ffffff',
-            padding: deviceInfo?.isMobile
-              ? deviceInfo?.orientation === 'landscape'
-                ? 'max(env(safe-area-inset-top), 10px) 16px max(env(safe-area-inset-bottom), 20px) 16px'
-                : 'max(env(safe-area-inset-top), 20px) 16px max(env(safe-area-inset-bottom), 40px) 16px'
-              : deviceInfo?.isTablet
-              ? '30px 24px'
-              : '40px',
-            overflowY: 'auto' as const, // Enable scrolling
-            overflowX: 'hidden' as const, // Prevent horizontal scroll
             pointerEvents: isVisible ? 'auto' : 'none',
           }}
         >

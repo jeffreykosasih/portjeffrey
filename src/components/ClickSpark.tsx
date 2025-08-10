@@ -8,6 +8,7 @@ interface ClickSparkProps {
   duration?: number;
   easing?: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out';
   extraScale?: number;
+  disabled?: boolean;
   children?: React.ReactNode;
 }
 
@@ -26,6 +27,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
   duration = 400,
   easing = 'ease-out',
   extraScale = 1.0,
+  disabled = false,
   children,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -182,6 +184,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
   }, [stopAnimation]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>): void => {
+    if (disabled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -219,19 +222,21 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
         width: '100%',
         height: '100%',
         position: 'relative',
-        cursor: 'pointer', // Add cursor pointer to indicate clickable area
+        cursor: disabled ? 'default' : 'pointer',
       }}
       onClick={handleClick}
     >
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          zIndex: 1000, // Ensure canvas is on top
-        }}
-      />
+      {!disabled && (
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 1000,
+          }}
+        />
+      )}
       {children}
     </div>
   );

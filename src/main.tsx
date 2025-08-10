@@ -61,6 +61,7 @@ function App(): React.JSX.Element {
   const [burgerMenuSlideDirection, setBurgerMenuSlideDirection] = useState<
     'left' | 'right'
   >('right');
+  const [showWaves, setShowWaves] = useState<boolean>(true);
 
   const toggleTheme = (): void => {
     setIsDarkMode((prevMode) => !prevMode);
@@ -125,13 +126,13 @@ function App(): React.JSX.Element {
   const responsiveStyles = React.useMemo(() => {
     const baseStyles = {
       width: '100vw',
-      height: '100vh',
+      height: '100dvh',
       position: 'relative' as const,
       backgroundColor: isDarkMode ? '#162542' : '#005E80',
     };
 
     // Add safe area padding for mobile devices
-    if (deviceInfo.isMobile) {
+    if (deviceInfo.isMobile || deviceInfo.isLandscapeMobile) {
       return {
         ...baseStyles,
         paddingTop: 'env(safe-area-inset-top)',
@@ -265,7 +266,7 @@ function App(): React.JSX.Element {
             zIndex: 1,
           }}
         >
-          <ClickSpark {...clickSparkProps}>
+          <ClickSpark {...{ ...clickSparkProps, disabled: isBurgerMenuOpen }}>
             <div
               style={{
                 width: '100vw',
@@ -299,6 +300,8 @@ function App(): React.JSX.Element {
                 onNavigateToPage={(page: string) => openPage(page as PageName)}
                 onPlayClickSound={playClickSound}
                 showExploreNotification={showExploreNotification}
+                isBurgerMenuOpen={isBurgerMenuOpen}
+                showWaves={showWaves}
               />
 
               <div
@@ -354,6 +357,27 @@ function App(): React.JSX.Element {
                   transition={{ duration: 0.6, delay: 1.0 }}
                   style={{ pointerEvents: 'auto' }}
                 >
+                  {/* Temporary waves toggle for debugging performance */}
+                  <button
+                    onClick={() => setShowWaves((v) => !v)}
+                    style={{
+                      position: 'fixed',
+                      bottom: 'max(env(safe-area-inset-bottom), 16px)',
+                      left: '16px',
+                      zIndex: 11000,
+                      padding: '8px 12px',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: isDarkMode ? '#FAF1E6' : '#FFEEA9',
+                      color: isDarkMode ? '#162542' : '#005E80',
+                      fontFamily: 'Lato, sans-serif',
+                      fontWeight: 800,
+                      boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {showWaves ? 'Hide Waves' : 'Show Waves'}
+                  </button>
                   <MemoizedBurgerMenu
                     isDarkMode={isDarkMode}
                     onNavigate={openPage}

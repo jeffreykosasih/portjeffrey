@@ -9,6 +9,7 @@ import { Canvas, useFrame, ThreeEvent, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
+import ObjectPopupMenu from './ObjectPopupMenu';
 
 interface SceneProps {
   isDarkMode: boolean;
@@ -19,6 +20,7 @@ interface SceneProps {
   onNavigateToPage?: (page: string) => void;
   onPlayClickSound?: () => void;
   showExploreNotification?: boolean;
+  isBurgerMenuOpen?: boolean;
 }
 
 // ============================================
@@ -499,6 +501,7 @@ function AnimatedCloud({
   moveRange,
   isDarkMode,
   speed = 1,
+  isBurgerMenuOpen,
 }: {
   modelPath: string;
   basePosition: [number, number, number];
@@ -506,11 +509,13 @@ function AnimatedCloud({
   moveRange: number;
   isDarkMode: boolean;
   speed?: number;
+  isBurgerMenuOpen?: boolean;
 }) {
   const cloudRef = useRef<any>(null);
 
   useFrame(({ clock }) => {
-    if (cloudRef.current) {
+    // Pause cloud animations when burger menu is open for performance
+    if (cloudRef.current && !isBurgerMenuOpen) {
       const time = clock.getElapsedTime();
 
       // Create a triangle wave function for smooth back-and-forth movement
@@ -550,9 +555,11 @@ function AnimatedCloud({
 function SimpleClouds({
   isDarkMode,
   deviceInfo,
+  isBurgerMenuOpen,
 }: {
   isDarkMode: boolean;
   deviceInfo?: any;
+  isBurgerMenuOpen?: boolean;
 }) {
   // Enhanced cloud settings with landscape mobile support
   const getCloudSettings = () => {
@@ -626,6 +633,7 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
+        isBurgerMenuOpen={isBurgerMenuOpen}
       />
       <AnimatedCloud
         modelPath='/models/object_cloud2.glb'
@@ -634,6 +642,7 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
+        isBurgerMenuOpen={isBurgerMenuOpen}
       />
       <AnimatedCloud
         modelPath='/models/object_cloud3.glb'
@@ -642,6 +651,7 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
+        isBurgerMenuOpen={isBurgerMenuOpen}
       />
       <AnimatedCloud
         modelPath='/models/object_cloud4.glb'
@@ -650,17 +660,25 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
+        isBurgerMenuOpen={isBurgerMenuOpen}
       />
     </group>
   );
 }
 
-function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
+function SimpleBoat({
+  isDarkMode,
+  isBurgerMenuOpen,
+}: {
+  isDarkMode: boolean;
+  isBurgerMenuOpen?: boolean;
+}) {
   const { scene } = useGLTF('/models/object_boat.glb');
   const boatRef = useRef<any>(null);
 
   useFrame(({ clock }) => {
-    if (boatRef.current) {
+    // Pause boat animation when burger menu is open for performance
+    if (boatRef.current && !isBurgerMenuOpen) {
       const time = clock.getElapsedTime();
       boatRef.current.position.y = Math.sin(time * 0.8) * 0.5;
     }
@@ -986,8 +1004,135 @@ function SimpleSea({ isDarkMode }: { isDarkMode: boolean }) {
   );
 }
 
+function SimpleOceanWaves({
+  isDarkMode,
+  isBurgerMenuOpen,
+}: {
+  isDarkMode: boolean;
+  isBurgerMenuOpen?: boolean;
+}) {
+  const { scene } = useGLTF('/models/object_ocean_waves.glb');
+  const wavesRef = useRef<any>(null);
+
+  useFrame(({ clock }) => {
+    // Completely pause wave animations when burger menu is open for maximum performance
+    if (wavesRef.current && !isBurgerMenuOpen) {
+      const time = clock.getElapsedTime();
+
+      // Create gentle wave movements (only when menu is closed)
+      // Vertical bobbing motion
+      wavesRef.current.position.y = -1.5 + Math.sin(time * 0.8) * 0.3;
+
+      // Slight side-to-side movement
+      wavesRef.current.position.x = Math.sin(time * 0.5) * 2;
+
+      // Gentle rotation for more natural wave movement
+      wavesRef.current.rotation.y = Math.sin(time * 0.3) * 0.05;
+    }
+  });
+
+  if (!scene) {
+    // Fallback - create a simple animated plane if model fails to load
+    return (
+      <group ref={wavesRef} position={[0, -1.5, 0]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[1800, 900, 1]}>
+          <planeGeometry args={[1, 1, 32, 32]} />
+          <meshStandardMaterial
+            color={isDarkMode ? '#012a3d' : '#7ce3ff'}
+            transparent
+            opacity={0.6}
+          />
+        </mesh>
+      </group>
+    );
+  }
+
+  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
+    // Store original color if not already stored
+    if (!material.userData) material.userData = {};
+    if (!material.userData.originalColor) {
+      const brightness = material.color.r + material.color.g + material.color.b;
+      const isOverBright =
+        brightness > 2.8 ||
+        (material.color.r > 0.95 &&
+          material.color.g > 0.95 &&
+          material.color.b > 0.95);
+
+      material.userData.originalColor = isOverBright
+        ? { r: 0.3, g: 0.6, b: 0.8 } // Ocean blue fallback color
+        : {
+            r: material.color.r,
+            g: material.color.g,
+            b: material.color.b,
+          };
+    }
+
+    const { r, g, b } = material.userData.originalColor;
+    material.color.setRGB(r, g, b);
+
+    if (isDarkMode) {
+      // Darker waves in dark mode
+      material.color.multiplyScalar(0.3);
+      material.color.setRGB(
+        material.color.r * 0.1,
+        material.color.g * 0.1,
+        material.color.b * 0.1
+      );
+    } else {
+      // Brighter, more vibrant waves in light mode
+      material.color.multiplyScalar(1);
+      material.color.setRGB(
+        material.color.r * 0.8,
+        material.color.g * 0.8,
+        material.color.b * 0.6
+      );
+    }
+
+    // Set material properties for water
+    if ('roughness' in material) material.roughness = 0.1;
+    if ('metalness' in material) material.metalness = 0.1;
+    if ('transparent' in material) material.transparent = true;
+    if ('opacity' in material) material.opacity = isDarkMode ? 0.3 : 0.8;
+    material.needsUpdate = true;
+  });
+
+  // Handle case where scene processing failed
+  if (!clonedScene) {
+    return (
+      <group ref={wavesRef} position={[0, -1.5, 0]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[1800, 900, 1]}>
+          <planeGeometry args={[1, 1, 32, 32]} />
+          <meshStandardMaterial
+            color={isDarkMode ? '#012a3d' : '#7ce3ff'}
+            transparent
+            opacity={0.6}
+            side={2}
+          />
+        </mesh>
+      </group>
+    );
+  }
+
+  return (
+    <group
+      ref={wavesRef}
+      position={[0, -1.5, 0]} // Positioned above the ocean
+      scale={[50, 1, 50]} // Scale to match the sea size
+      rotation={[0, 0, 0]}
+    >
+      <primitive object={clonedScene} />
+    </group>
+  );
+}
+
 // Animated Camera Component with smooth zoom
-function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
+function AnimatedCamera({
+  deviceInfo,
+  isBurgerMenuOpen,
+}: {
+  deviceInfo?: any;
+  isBurgerMenuOpen?: boolean;
+}) {
   const cameraRef = useRef<any>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -1046,21 +1191,27 @@ function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
   }, []);
 
   useFrame(({ clock }) => {
-    if (cameraRef.current && mounted) {
-      const time = clock.getElapsedTime();
+    if (!cameraRef.current || !mounted) return;
 
-      // Smooth FOV transition for zoom effect
-      const progress = Math.min(time / 3, 1); // 3 seconds to complete
-      const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
-
-      // Use device-specific FOV values
-      const currentFov =
-        cameraSettings.startFov +
-        (cameraSettings.endFov - cameraSettings.startFov) * easeProgress;
-
-      cameraRef.current.fov = currentFov;
+    if (isBurgerMenuOpen) {
+      // When menu is open, freeze zoom at final FOV
+      cameraRef.current.fov = cameraSettings.endFov;
       cameraRef.current.updateProjectionMatrix();
+      return;
     }
+
+    const time = clock.getElapsedTime();
+    // Smooth FOV transition for zoom effect
+    const progress = Math.min(time / 3, 1); // 3 seconds to complete
+    const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+
+    // Use device-specific FOV values
+    const currentFov =
+      cameraSettings.startFov +
+      (cameraSettings.endFov - cameraSettings.startFov) * easeProgress;
+
+    cameraRef.current.fov = currentFov;
+    cameraRef.current.updateProjectionMatrix();
   });
 
   return (
@@ -1068,9 +1219,49 @@ function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
       ref={cameraRef}
       makeDefault
       position={cameraSettings.position}
-      fov={cameraSettings.startFov}
+      // If menu is open at mount time, start at endFov to avoid zoom-in
+      fov={isBurgerMenuOpen ? cameraSettings.endFov : cameraSettings.startFov}
     />
   );
+}
+
+// Screen Position Tracker Component
+function ScreenPositionTracker({
+  onUpdatePositions,
+}: {
+  onUpdatePositions: (positions: Record<string, [number, number]>) => void;
+}) {
+  const { camera, size } = useThree();
+
+  // Object positions in 3D world space (matching InteractiveObject positions)
+  const objectPositions = {
+    twochairs: new THREE.Vector3(-20, 3, -15),
+    house: new THREE.Vector3(18, 6, 15),
+    stonehead: new THREE.Vector3(22, 5, -18),
+    surfboard: new THREE.Vector3(-18, 2, 12),
+  };
+
+  useFrame(() => {
+    const screenPositions: Record<string, [number, number]> = {};
+
+    Object.entries(objectPositions).forEach(([key, worldPos]) => {
+      // Clone the position to avoid modifying the original
+      const pos = worldPos.clone();
+
+      // Project 3D position to 2D screen coordinates
+      pos.project(camera);
+
+      // Convert from normalized device coordinates to pixel coordinates
+      const x = (pos.x * 0.5 + 0.5) * size.width;
+      const y = (pos.y * -0.5 + 0.5) * size.height;
+
+      screenPositions[key] = [x, y];
+    });
+
+    onUpdatePositions(screenPositions);
+  });
+
+  return null; // This component doesn't render anything
 }
 
 // Main Scene Component
@@ -1084,6 +1275,7 @@ function SceneComponent({
   onNavigateToPage,
   onPlayClickSound,
   showExploreNotification,
+  isBurgerMenuOpen,
 }: SceneProps) {
   const [sceneLoaded, setSceneLoaded] = useState(false);
   const [hoveredObject, setHoveredObject] = useState<string | null>(null);
@@ -1091,6 +1283,12 @@ function SceneComponent({
   const [hoveredHouse, setHoveredHouse] = useState(false);
   const [hoveredStoneHead, setHoveredStoneHead] = useState(false);
   const [hoveredSurfboard, setHoveredSurfboard] = useState(false);
+  const [currentPopup, setCurrentPopup] = useState<
+    'twochairs' | 'house' | 'stonehead' | 'surfboard' | null
+  >(null);
+  const [objectScreenPositions, setObjectScreenPositions] = useState<
+    Record<string, [number, number]>
+  >({});
 
   useEffect(() => {
     const timer = setTimeout(() => setSceneLoaded(true), 300);
@@ -1122,6 +1320,11 @@ function SceneComponent({
       return (hovered: boolean) => {
         setHoveredObject(hovered ? objectName : null);
         setHovered(hovered);
+        setCurrentPopup(
+          hovered
+            ? (objectName as 'twochairs' | 'house' | 'stonehead' | 'surfboard')
+            : null
+        );
       };
     },
     []
@@ -1171,6 +1374,16 @@ function SceneComponent({
           zIndex: 10,
           pointerEvents: sceneLoaded ? 'none' : 'all',
         }}
+      />
+
+      {/* Object Popup Menu */}
+      <ObjectPopupMenu
+        objectType={currentPopup}
+        isDarkMode={isDarkMode}
+        deviceInfo={deviceInfo}
+        objectPosition={
+          currentPopup ? objectScreenPositions[currentPopup] : undefined
+        }
       />
 
       {/* Bottom Center Title Display for Objects */}
@@ -1243,6 +1456,7 @@ function SceneComponent({
         )}
       </AnimatePresence>
 
+      {/* Reduce render load while menu is open */}
       <Canvas
         style={{
           position: 'absolute',
@@ -1252,14 +1466,21 @@ function SceneComponent({
           height: '100%',
           zIndex: 1,
           background: 'transparent',
-          filter: showExploreNotification ? 'blur(2px)' : 'none',
+          filter:
+            showExploreNotification && !isBurgerMenuOpen ? 'blur(2px)' : 'none',
           transition: 'filter 0.3s ease-in-out',
         }}
+        frameloop={isBurgerMenuOpen ? 'demand' : 'always'}
+        dpr={(() => {
+          if (typeof window === 'undefined') return 1;
+          if (isBurgerMenuOpen) return 1;
+          const max = deviceInfo?.isMobile ? 1.5 : 2;
+          return Math.min(window.devicePixelRatio || 1, max);
+        })()}
         onCreated={({ gl }) => {
           // Better performance on mobile devices
-          const pixelRatio = deviceInfo?.isMobile
-            ? Math.min(window.devicePixelRatio, 1.5)
-            : Math.min(window.devicePixelRatio, 2);
+          const max = deviceInfo?.isMobile ? 1.5 : 2;
+          const pixelRatio = Math.min(window.devicePixelRatio || 1, max);
           gl.setPixelRatio(pixelRatio);
 
           // Ensure accurate color rendering
@@ -1274,6 +1495,7 @@ function SceneComponent({
             setHoveredHouse(false);
             setHoveredStoneHead(false);
             setHoveredSurfboard(false);
+            setCurrentPopup(null);
           }, 100);
         }}
       >
@@ -1360,17 +1582,25 @@ function SceneComponent({
           </InteractiveObject>
 
           {/* Boat (non-interactive) */}
-          <SimpleBoat key={`boat-${isDarkMode}`} isDarkMode={isDarkMode} />
+          <SimpleBoat
+            key={`boat-${isDarkMode}`}
+            isDarkMode={isDarkMode}
+            isBurgerMenuOpen={isBurgerMenuOpen}
+          />
 
           {/* Environmental Elements */}
           <SimpleClouds
             key={`clouds-${isDarkMode}`}
             isDarkMode={isDarkMode}
             deviceInfo={deviceInfo}
+            isBurgerMenuOpen={isBurgerMenuOpen}
           />
         </Suspense>
 
-        <AnimatedCamera deviceInfo={deviceInfo} />
+        <AnimatedCamera
+          deviceInfo={deviceInfo}
+          isBurgerMenuOpen={isBurgerMenuOpen}
+        />
         <OrbitControls
           enablePan={false}
           enableZoom={false}
@@ -1395,6 +1625,9 @@ function SceneComponent({
               : 40
           }
         />
+
+        {/* Screen Position Tracker */}
+        <ScreenPositionTracker onUpdatePositions={setObjectScreenPositions} />
       </Canvas>
     </div>
   );
@@ -1411,5 +1644,6 @@ useGLTF.preload('/models/object_cloud1.glb');
 useGLTF.preload('/models/object_cloud2.glb');
 useGLTF.preload('/models/object_cloud3.glb');
 useGLTF.preload('/models/object_cloud4.glb');
+useGLTF.preload('/models/object_ocean_waves.glb');
 
 export default React.memo(SceneComponent);
