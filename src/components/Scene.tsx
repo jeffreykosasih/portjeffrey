@@ -1142,44 +1142,38 @@ function AnimatedCamera({
       // Landscape mobile - bring camera much closer for better visibility
       return {
         position: [-10, 45, -250] as [number, number, number], // Much closer position
-        startFov: 65, // Slightly wider FOV for better view
-        endFov: 55,
+        fov: 55,
       };
     } else if (deviceInfo?.isMobile) {
       if (deviceInfo.orientation === 'portrait') {
         return {
           position: [-10, 70, -380] as [number, number, number],
-          startFov: 80,
-          endFov: 70,
+          fov: 70,
         };
       } else {
         // Regular mobile landscape - legacy support
         return {
           position: [-10, 65, -350] as [number, number, number],
-          startFov: 65,
-          endFov: 55,
+          fov: 55,
         };
       }
     } else if (deviceInfo?.isTablet) {
       if (deviceInfo.orientation === 'portrait') {
         return {
           position: [-10, 65, -360] as [number, number, number],
-          startFov: 70,
-          endFov: 60,
+          fov: 60,
         };
       } else {
         return {
           position: [-10, 60, -340] as [number, number, number],
-          startFov: 65,
-          endFov: 55,
+          fov: 55,
         };
       }
     } else {
       // Desktop
       return {
         position: [-10, 55, -300] as [number, number, number],
-        startFov: 60,
-        endFov: 50,
+        fov: 50,
       };
     }
   };
@@ -1190,27 +1184,11 @@ function AnimatedCamera({
     setMounted(true);
   }, []);
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
     if (!cameraRef.current || !mounted) return;
 
-    if (isBurgerMenuOpen) {
-      // When menu is open, freeze zoom at final FOV
-      cameraRef.current.fov = cameraSettings.endFov;
-      cameraRef.current.updateProjectionMatrix();
-      return;
-    }
-
-    const time = clock.getElapsedTime();
-    // Smooth FOV transition for zoom effect
-    const progress = Math.min(time / 3, 1); // 3 seconds to complete
-    const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
-
-    // Use device-specific FOV values
-    const currentFov =
-      cameraSettings.startFov +
-      (cameraSettings.endFov - cameraSettings.startFov) * easeProgress;
-
-    cameraRef.current.fov = currentFov;
+    // Set camera FOV immediately (no zoom animation)
+    cameraRef.current.fov = cameraSettings.fov;
     cameraRef.current.updateProjectionMatrix();
   });
 
@@ -1219,8 +1197,8 @@ function AnimatedCamera({
       ref={cameraRef}
       makeDefault
       position={cameraSettings.position}
-      // If menu is open at mount time, start at endFov to avoid zoom-in
-      fov={isBurgerMenuOpen ? cameraSettings.endFov : cameraSettings.startFov}
+      // Always use final FOV to avoid zoom-in animation
+      fov={cameraSettings.fov}
     />
   );
 }
@@ -1235,10 +1213,10 @@ function ScreenPositionTracker({
 
   // Object positions in 3D world space (matching InteractiveObject positions)
   const objectPositions = {
-    twochairs: new THREE.Vector3(-20, 3, -15),
-    house: new THREE.Vector3(18, 6, 15),
-    stonehead: new THREE.Vector3(22, 5, -18),
-    surfboard: new THREE.Vector3(-18, 2, 12),
+    twochairs: new THREE.Vector3(-23, 0.5, -15),
+    house: new THREE.Vector3(15, 0, 15),
+    stonehead: new THREE.Vector3(20, -1, -10),
+    surfboard: new THREE.Vector3(-16, 5, 12),
   };
 
   useFrame(() => {
@@ -1535,8 +1513,8 @@ function SceneComponent({
           <InteractiveObject
             onHover={handleTwoChairsHover}
             onClick={() => handleNavigation('connect')}
-            boundingBox={getBoundingBox([8, 6, 8])}
-            position={[-20, 3, -15]}
+            boundingBox={getBoundingBox([8, 8, 8])}
+            position={[-23, 0.5, -15]}
             isDarkMode={isDarkMode}
           >
             <SimpleTwoChairs
@@ -1549,7 +1527,7 @@ function SceneComponent({
             onHover={handleHouseHover}
             onClick={() => handleNavigation('portfolio')}
             boundingBox={getBoundingBox([12, 15, 12])}
-            position={[18, 6, 15]}
+            position={[15, 0, 15]}
             isDarkMode={isDarkMode}
           >
             <SimpleHouse key={`house-${isDarkMode}`} isDarkMode={isDarkMode} />
@@ -1559,7 +1537,7 @@ function SceneComponent({
             onHover={handleStoneHeadHover}
             onClick={() => handleNavigation('profile')}
             boundingBox={getBoundingBox([8, 10, 8])}
-            position={[22, 5, -18]}
+            position={[20, -1, -10]}
             isDarkMode={isDarkMode}
           >
             <SimpleStoneHead
@@ -1572,7 +1550,7 @@ function SceneComponent({
             onHover={handleSurfboardHover}
             onClick={() => handleNavigation('skillset')}
             boundingBox={getBoundingBox([6, 4, 8])}
-            position={[-18, 2, 12]}
+            position={[-16, 5, 12]}
             isDarkMode={isDarkMode}
           >
             <SimpleSurfboard
