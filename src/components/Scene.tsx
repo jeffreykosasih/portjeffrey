@@ -32,6 +32,7 @@ interface InteractiveObjectProps {
   onClick?: () => void;
   boundingBox?: [number, number, number];
   position?: [number, number, number];
+  rotation?: [number, number, number];
 }
 
 // Component to apply brightness effect on hover
@@ -112,6 +113,7 @@ function InteractiveObject({
   onClick,
   boundingBox = [10, 10, 10],
   position = [0, 0, 0],
+  rotation,
   isDarkMode,
 }: InteractiveObjectProps & { isDarkMode?: boolean }) {
   const timeoutRef = useRef<number | null>(null);
@@ -149,6 +151,7 @@ function InteractiveObject({
     <group>
       <mesh
         position={position}
+        rotation={rotation}
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
         onClick={onClick}
@@ -501,7 +504,6 @@ function AnimatedCloud({
   moveRange,
   isDarkMode,
   speed = 1,
-  isBurgerMenuOpen,
 }: {
   modelPath: string;
   basePosition: [number, number, number];
@@ -509,13 +511,12 @@ function AnimatedCloud({
   moveRange: number;
   isDarkMode: boolean;
   speed?: number;
-  isBurgerMenuOpen?: boolean;
 }) {
   const cloudRef = useRef<any>(null);
 
   useFrame(({ clock }) => {
-    // Pause cloud animations when burger menu is open for performance
-    if (cloudRef.current && !isBurgerMenuOpen) {
+    // Keep cloud animations running continuously
+    if (cloudRef.current) {
       const time = clock.getElapsedTime();
 
       // Create a triangle wave function for smooth back-and-forth movement
@@ -555,11 +556,9 @@ function AnimatedCloud({
 function SimpleClouds({
   isDarkMode,
   deviceInfo,
-  isBurgerMenuOpen,
 }: {
   isDarkMode: boolean;
   deviceInfo?: any;
-  isBurgerMenuOpen?: boolean;
 }) {
   // Enhanced cloud settings with landscape mobile support
   const getCloudSettings = () => {
@@ -633,7 +632,6 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
-        isBurgerMenuOpen={isBurgerMenuOpen}
       />
       <AnimatedCloud
         modelPath='/models/object_cloud2.glb'
@@ -642,7 +640,6 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
-        isBurgerMenuOpen={isBurgerMenuOpen}
       />
       <AnimatedCloud
         modelPath='/models/object_cloud3.glb'
@@ -651,7 +648,6 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
-        isBurgerMenuOpen={isBurgerMenuOpen}
       />
       <AnimatedCloud
         modelPath='/models/object_cloud4.glb'
@@ -660,25 +656,18 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
-        isBurgerMenuOpen={isBurgerMenuOpen}
       />
     </group>
   );
 }
 
-function SimpleBoat({
-  isDarkMode,
-  isBurgerMenuOpen,
-}: {
-  isDarkMode: boolean;
-  isBurgerMenuOpen?: boolean;
-}) {
+function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
   const { scene } = useGLTF('/models/object_boat.glb');
   const boatRef = useRef<any>(null);
 
   useFrame(({ clock }) => {
-    // Pause boat animation when burger menu is open for performance
-    if (boatRef.current && !isBurgerMenuOpen) {
+    // Keep boat animation running continuously
+    if (boatRef.current) {
       const time = clock.getElapsedTime();
       boatRef.current.position.y = Math.sin(time * 0.8) * 0.5;
     }
@@ -976,6 +965,108 @@ function SimpleSurfboard({ isDarkMode }: { isDarkMode: boolean }) {
   );
 }
 
+function SimpleIslandLamp({
+  isDarkMode,
+  position = [0, 0, 0],
+  rotation,
+  deviceInfo,
+}: {
+  isDarkMode: boolean;
+  position?: [number, number, number];
+  rotation?: [number, number, number];
+  deviceInfo?: any;
+}) {
+  const { scene } = useGLTF('/models/object_island_lamp.glb');
+
+  // Use the same scale calculation as the island for consistency
+  const getLampScale = () => {
+    if (deviceInfo?.isLandscapeMobile) {
+      return [0.51, 0.51, 0.51] as [number, number, number];
+    } else if (deviceInfo?.isMobile) {
+      return [0.55, 0.55, 0.55] as [number, number, number];
+    } else if (deviceInfo?.isTablet) {
+      return [0.52, 0.52, 0.52] as [number, number, number];
+    } else {
+      return [0.5, 0.5, 0.5] as [number, number, number];
+    }
+  };
+
+  if (!scene) {
+    return (
+      <group position={position}>
+        <mesh>
+          <cylinderGeometry args={[0.5, 0.5, 4]} />
+          <meshStandardMaterial
+            color={isDarkMode ? '#444444' : '#888888'}
+            roughness={0.7}
+            metalness={0.1}
+          />
+        </mesh>
+      </group>
+    );
+  }
+
+  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
+    // Store original color if not already stored - same as island processing
+    if (!material.userData) material.userData = {};
+    if (!material.userData.originalColor) {
+      const brightness = material.color.r + material.color.g + material.color.b;
+      const isOverBright =
+        brightness > 2.8 ||
+        (material.color.r > 0.95 &&
+          material.color.g > 0.95 &&
+          material.color.b > 0.95);
+
+      material.userData.originalColor = isOverBright
+        ? { r: 0.6, g: 0.5, b: 0.4 } // Fallback color for overbright materials
+        : {
+            r: material.color.r,
+            g: material.color.g,
+            b: material.color.b,
+          };
+    }
+
+    const { r, g, b } = material.userData.originalColor;
+    material.color.setRGB(r, g, b);
+
+    if (isDarkMode) {
+      material.color.multiplyScalar(0.05);
+    } else {
+      material.color.multiplyScalar(1.4);
+    }
+
+    // Set material properties for natural terrain - same as island
+    if ('roughness' in material) material.roughness = 0.8;
+    if ('metalness' in material) material.metalness = 0.0;
+    material.needsUpdate = true;
+  });
+
+  // Handle case where scene processing failed
+  if (!clonedScene) {
+    return (
+      <group position={position}>
+        <mesh>
+          <cylinderGeometry args={[0.5, 0.5, 4]} />
+          <meshStandardMaterial
+            color={isDarkMode ? '#444444' : '#888888'}
+            roughness={0.7}
+            metalness={0.1}
+          />
+        </mesh>
+      </group>
+    );
+  }
+
+  return (
+    <primitive
+      object={clonedScene}
+      position={position}
+      rotation={rotation}
+      scale={getLampScale()}
+    />
+  );
+}
+
 // Environment (Sky, Sea, Camera)
 
 function SimpleSky({ isDarkMode }: { isDarkMode: boolean }) {
@@ -1015,11 +1106,11 @@ function SimpleOceanWaves({
   const wavesRef = useRef<any>(null);
 
   useFrame(({ clock }) => {
-    // Completely pause wave animations when burger menu is open for maximum performance
+    // Reduce wave animation frequency when burger menu is open for better performance
     if (wavesRef.current && !isBurgerMenuOpen) {
       const time = clock.getElapsedTime();
 
-      // Create gentle wave movements (only when menu is closed)
+      // Create gentle wave movements (only when menu is closed for performance)
       // Vertical bobbing motion
       wavesRef.current.position.y = -1.5 + Math.sin(time * 0.8) * 0.3;
 
@@ -1035,7 +1126,7 @@ function SimpleOceanWaves({
     // Fallback - create a simple animated plane if model fails to load
     return (
       <group ref={wavesRef} position={[0, -1.5, 0]}>
-        <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[1800, 900, 1]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[2000, 1000, 1]}>
           <planeGeometry args={[1, 1, 32, 32]} />
           <meshStandardMaterial
             color={isDarkMode ? '#012a3d' : '#7ce3ff'}
@@ -1048,51 +1139,21 @@ function SimpleOceanWaves({
   }
 
   const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    // Store original color if not already stored
+    // Simplified material processing for better performance
     if (!material.userData) material.userData = {};
-    if (!material.userData.originalColor) {
-      const brightness = material.color.r + material.color.g + material.color.b;
-      const isOverBright =
-        brightness > 2.8 ||
-        (material.color.r > 0.95 &&
-          material.color.g > 0.95 &&
-          material.color.b > 0.95);
 
-      material.userData.originalColor = isOverBright
-        ? { r: 0.3, g: 0.6, b: 0.8 } // Ocean blue fallback color
-        : {
-            r: material.color.r,
-            g: material.color.g,
-            b: material.color.b,
-          };
-    }
-
-    const { r, g, b } = material.userData.originalColor;
-    material.color.setRGB(r, g, b);
-
+    // Simple color adjustment based on mode
     if (isDarkMode) {
-      // Darker waves in dark mode
-      material.color.multiplyScalar(0.3);
-      material.color.setRGB(
-        material.color.r * 0.1,
-        material.color.g * 0.1,
-        material.color.b * 0.1
-      );
+      material.color.setHex(0x012a3d); // Dark ocean blue
     } else {
-      // Brighter, more vibrant waves in light mode
-      material.color.multiplyScalar(1);
-      material.color.setRGB(
-        material.color.r * 0.8,
-        material.color.g * 0.8,
-        material.color.b * 0.6
-      );
+      material.color.setHex(0x4a90e2); // Light ocean blue
     }
 
-    // Set material properties for water
-    if ('roughness' in material) material.roughness = 0.1;
-    if ('metalness' in material) material.metalness = 0.1;
+    // Set material properties for water (simplified)
+    if ('roughness' in material) material.roughness = 0.2;
+    if ('metalness' in material) material.metalness = 0.0;
     if ('transparent' in material) material.transparent = true;
-    if ('opacity' in material) material.opacity = isDarkMode ? 0.3 : 0.8;
+    if ('opacity' in material) material.opacity = isDarkMode ? 0.4 : 0.7;
     material.needsUpdate = true;
   });
 
@@ -1100,7 +1161,7 @@ function SimpleOceanWaves({
   if (!clonedScene) {
     return (
       <group ref={wavesRef} position={[0, -1.5, 0]}>
-        <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[1800, 900, 1]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[2000, 1000, 1]}>
           <planeGeometry args={[1, 1, 32, 32]} />
           <meshStandardMaterial
             color={isDarkMode ? '#012a3d' : '#7ce3ff'}
@@ -1117,7 +1178,7 @@ function SimpleOceanWaves({
     <group
       ref={wavesRef}
       position={[0, -1.5, 0]} // Positioned above the ocean
-      scale={[50, 1, 50]} // Scale to match the sea size
+      scale={[25, 0.8, 25]} // Increased scale to cover more sea area
       rotation={[0, 0, 0]}
     >
       <primitive object={clonedScene} />
@@ -1364,76 +1425,6 @@ function SceneComponent({
         }
       />
 
-      {/* Bottom Center Title Display for Objects */}
-      <AnimatePresence mode='wait'>
-        {(hoveredTwoChairs ||
-          hoveredHouse ||
-          hoveredStoneHead ||
-          hoveredSurfboard) && (
-          <motion.div
-            key={`object-title-${
-              hoveredTwoChairs
-                ? 'Connect'
-                : hoveredHouse
-                ? 'Portfolio'
-                : hoveredStoneHead
-                ? 'Profile'
-                : hoveredSurfboard
-                ? 'Skillset'
-                : ''
-            }`}
-            style={{
-              position: 'fixed',
-              bottom: '2%', // Moved up from bottom to be more centered
-              left: '47.5%',
-              transform: 'translateX(-50%)',
-              zIndex: 9999,
-              pointerEvents: 'none',
-            }}
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{
-              duration: 0.25,
-              ease: 'easeOut',
-              exit: { duration: 0.2, ease: 'easeIn' },
-            }}
-          >
-            <div
-              style={{
-                fontFamily: 'Lato, sans-serif',
-                fontWeight: '700',
-                fontSize: deviceInfo?.isLandscapeMobile
-                  ? '1.25rem' // Good size for landscape mobile readability
-                  : deviceInfo?.isMobile
-                  ? '1.2rem'
-                  : deviceInfo?.isTablet
-                  ? '1.35rem'
-                  : '1.5rem',
-                color: isDarkMode ? '#FFFFFF' : '#FFFFFF',
-                textShadow:
-                  '0 4px 12px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6)',
-                padding: deviceInfo?.isLandscapeMobile
-                  ? '6px 14px' // Compact padding for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? '8px 16px'
-                  : '10px 20px',
-              }}
-            >
-              {hoveredTwoChairs
-                ? 'Connect'
-                : hoveredHouse
-                ? 'Portfolio'
-                : hoveredStoneHead
-                ? 'Profile'
-                : hoveredSurfboard
-                ? 'Skillset'
-                : ''}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Reduce render load while menu is open */}
       <Canvas
         style={{
@@ -1514,7 +1505,7 @@ function SceneComponent({
             onHover={handleTwoChairsHover}
             onClick={() => handleNavigation('connect')}
             boundingBox={getBoundingBox([8, 8, 8])}
-            position={[-23, 0.5, -15]}
+            position={[-23, 5, -15]}
             isDarkMode={isDarkMode}
           >
             <SimpleTwoChairs
@@ -1526,8 +1517,8 @@ function SceneComponent({
           <InteractiveObject
             onHover={handleHouseHover}
             onClick={() => handleNavigation('portfolio')}
-            boundingBox={getBoundingBox([12, 15, 12])}
-            position={[15, 0, 15]}
+            boundingBox={getBoundingBox([20, 15, 15])}
+            position={[14, 8, 15]}
             isDarkMode={isDarkMode}
           >
             <SimpleHouse key={`house-${isDarkMode}`} isDarkMode={isDarkMode} />
@@ -1536,8 +1527,8 @@ function SceneComponent({
           <InteractiveObject
             onHover={handleStoneHeadHover}
             onClick={() => handleNavigation('profile')}
-            boundingBox={getBoundingBox([8, 10, 8])}
-            position={[20, -1, -10]}
+            boundingBox={getBoundingBox([8, 10, 15])}
+            position={[20, 6, -10]}
             isDarkMode={isDarkMode}
           >
             <SimpleStoneHead
@@ -1549,8 +1540,9 @@ function SceneComponent({
           <InteractiveObject
             onHover={handleSurfboardHover}
             onClick={() => handleNavigation('skillset')}
-            boundingBox={getBoundingBox([6, 4, 8])}
-            position={[-16, 5, 12]}
+            boundingBox={getBoundingBox([20, 10, 8])}
+            rotation={[0, 2, 0]}
+            position={[-16, 6, 12]}
             isDarkMode={isDarkMode}
           >
             <SimpleSurfboard
@@ -1559,20 +1551,47 @@ function SceneComponent({
             />
           </InteractiveObject>
 
-          {/* Boat (non-interactive) */}
-          <SimpleBoat
-            key={`boat-${isDarkMode}`}
+          {/* Island Lamps (non-interactive) - positioned around the island */}
+          <SimpleIslandLamp
+            key={`lamp1-${isDarkMode}`}
             isDarkMode={isDarkMode}
-            isBurgerMenuOpen={isBurgerMenuOpen}
+            position={[17.5, 0.5, 0]}
+            rotation={[0, 1, 0]}
+            deviceInfo={deviceInfo}
           />
+          <SimpleIslandLamp
+            key={`lamp2-${isDarkMode}`}
+            isDarkMode={isDarkMode}
+            position={[-5, 0.5, 20]}
+            rotation={[0, 5.5, 0]}
+            deviceInfo={deviceInfo}
+          />
+          <SimpleIslandLamp
+            key={`lamp3-${isDarkMode}`}
+            isDarkMode={isDarkMode}
+            position={[-25, 0.5, 0]}
+            rotation={[0, 5.5, 0]}
+            deviceInfo={deviceInfo}
+          />
+
+          {/* Boat (non-interactive) */}
+          <SimpleBoat key={`boat-${isDarkMode}`} isDarkMode={isDarkMode} />
 
           {/* Environmental Elements */}
           <SimpleClouds
             key={`clouds-${isDarkMode}`}
             isDarkMode={isDarkMode}
             deviceInfo={deviceInfo}
-            isBurgerMenuOpen={isBurgerMenuOpen}
           />
+
+          {/* Ocean Waves - hidden when burger menu is open for performance */}
+          {!isBurgerMenuOpen && (
+            <SimpleOceanWaves
+              key={`waves-${isDarkMode}`}
+              isDarkMode={isDarkMode}
+              isBurgerMenuOpen={isBurgerMenuOpen}
+            />
+          )}
         </Suspense>
 
         <AnimatedCamera
@@ -1582,7 +1601,7 @@ function SceneComponent({
         <OrbitControls
           enablePan={false}
           enableZoom={false}
-          enableRotate={false}
+          enableRotate={true}
           target={[0, 0, 0]}
           maxDistance={
             deviceInfo?.isLandscapeMobile
@@ -1618,6 +1637,7 @@ useGLTF.preload('/models/object_two_chairs.glb');
 useGLTF.preload('/models/object_house.glb');
 useGLTF.preload('/models/object_stone_head.glb');
 useGLTF.preload('/models/object_surfboard.glb');
+useGLTF.preload('/models/object_island_lamp.glb');
 useGLTF.preload('/models/object_cloud1.glb');
 useGLTF.preload('/models/object_cloud2.glb');
 useGLTF.preload('/models/object_cloud3.glb');

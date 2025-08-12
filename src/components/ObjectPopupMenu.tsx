@@ -71,11 +71,56 @@ const ObjectPopupMenu: React.FC<ObjectPopupMenuProps> = ({
 
   const isMobile = deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile;
 
+  // Individual positioning for each object
+  const getCustomPosition = () => {
+    const baseX = objectPosition[0];
+    const baseY = objectPosition[1];
+
+    switch (objectType) {
+      case 'twochairs': // Connect - Two Chairs
+        return {
+          left: baseX - (isMobile ? 60 : 80), // Offset left
+          top: baseY - (isMobile ? 100 : 120), // Above
+          transform: 'none',
+        };
+
+      case 'house': // Portfolio - House
+        return {
+          left: baseX + (isMobile ? 40 : 60), // Offset right
+          top: baseY - (isMobile ? 120 : 150), // Above
+          transform: 'none',
+        };
+
+      case 'stonehead': // Profile - Stone Head
+        return {
+          left: baseX + (isMobile ? 30 : 50), // Offset right
+          top: baseY - (isMobile ? 80 : 100), // Slightly above
+          transform: 'none',
+        };
+
+      case 'surfboard': // Skillset - Surfboard
+        return {
+          left: baseX - (isMobile ? 80 : 100), // Offset left
+          top: baseY - (isMobile ? 60 : 80), // Close above
+          transform: 'none',
+        };
+
+      default:
+        return {
+          left: baseX,
+          top: baseY - (isMobile ? 120 : 150),
+          transform: 'translateX(-50%)',
+        };
+    }
+  };
+
+  const customPosition = getCustomPosition();
+
   const popupStyle = {
     position: 'fixed' as const,
-    left: objectPosition[0],
-    top: objectPosition[1] - (isMobile ? 120 : 150),
-    transform: 'translateX(-50%)',
+    left: customPosition.left,
+    top: customPosition.top,
+    transform: customPosition.transform,
     zIndex: 9999,
     pointerEvents: 'none' as const,
   };
