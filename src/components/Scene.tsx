@@ -669,7 +669,7 @@ function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
     // Keep boat animation running continuously
     if (boatRef.current) {
       const time = clock.getElapsedTime();
-      boatRef.current.position.y = Math.sin(time * 0.8) * 0.5;
+      boatRef.current.position.y = Math.sin(time * 0.8) * 0.25;
     }
   });
 
@@ -1106,30 +1106,35 @@ function SimpleOceanWaves({
   const wavesRef = useRef<any>(null);
 
   useFrame(({ clock }) => {
-    // Reduce wave animation frequency when burger menu is open for better performance
+    // Only animate waves when burger menu is closed and component should be visible
     if (wavesRef.current && !isBurgerMenuOpen) {
       const time = clock.getElapsedTime();
 
       // Create gentle wave movements (only when menu is closed for performance)
       // Vertical bobbing motion
-      wavesRef.current.position.y = -1.5 + Math.sin(time * 0.8) * 0.3;
+      wavesRef.current.position.y = -2 + Math.sin(time * 0.8) * 0.3;
 
       // Slight side-to-side movement
       wavesRef.current.position.x = Math.sin(time * 0.5) * 2;
 
       // Gentle rotation for more natural wave movement
       wavesRef.current.rotation.y = Math.sin(time * 0.3) * 0.05;
+    } else if (wavesRef.current && isBurgerMenuOpen) {
+      // Reset to base position when burger menu is open
+      wavesRef.current.position.y = -2;
+      wavesRef.current.position.x = 0;
+      wavesRef.current.rotation.y = 0;
     }
   });
 
   if (!scene) {
     // Fallback - create a simple animated plane if model fails to load
     return (
-      <group ref={wavesRef} position={[0, -1.5, 0]}>
+      <group ref={wavesRef} position={[0, -2, 0]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[2000, 1000, 1]}>
           <planeGeometry args={[1, 1, 32, 32]} />
           <meshStandardMaterial
-            color={isDarkMode ? '#012a3d' : '#7ce3ff'}
+            color={isDarkMode ? '#000a0f' : '#1a4d66'}
             transparent
             opacity={0.6}
           />
@@ -1142,11 +1147,11 @@ function SimpleOceanWaves({
     // Simplified material processing for better performance
     if (!material.userData) material.userData = {};
 
-    // Simple color adjustment based on mode
+    // Simple color adjustment based on mode - darker wave colors
     if (isDarkMode) {
-      material.color.setHex(0x012a3d); // Dark ocean blue
+      material.color.setHex(0x000a0f); // Much darker sea color
     } else {
-      material.color.setHex(0x4a90e2); // Light ocean blue
+      material.color.setHex(0x1a4d66); // Much darker light sea color
     }
 
     // Set material properties for water (simplified)
@@ -1160,11 +1165,11 @@ function SimpleOceanWaves({
   // Handle case where scene processing failed
   if (!clonedScene) {
     return (
-      <group ref={wavesRef} position={[0, -1.5, 0]}>
+      <group ref={wavesRef} position={[0, -2, 0]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[2000, 1000, 1]}>
           <planeGeometry args={[1, 1, 32, 32]} />
           <meshStandardMaterial
-            color={isDarkMode ? '#012a3d' : '#7ce3ff'}
+            color={isDarkMode ? '#000a0f' : '#1a4d66'}
             transparent
             opacity={0.6}
             side={2}
@@ -1177,8 +1182,8 @@ function SimpleOceanWaves({
   return (
     <group
       ref={wavesRef}
-      position={[0, -1.5, 0]} // Positioned above the ocean
-      scale={[25, 0.8, 25]} // Increased scale to cover more sea area
+      position={[0, -2, 0]} // Match original SimpleSea position
+      scale={[80, 0.8, 40]} // Significantly increased scale to match original sea coverage (2000x1000 area)
       rotation={[0, 0, 0]}
     >
       <primitive object={clonedScene} />
@@ -1469,7 +1474,7 @@ function SceneComponent({
         }}
       >
         <SimpleSky isDarkMode={isDarkMode} />
-        <SimpleSea isDarkMode={isDarkMode} />
+        {/* <SimpleSea isDarkMode={isDarkMode} /> */}
 
         {/* Simplified lighting system */}
         {isDarkMode ? (
@@ -1584,10 +1589,10 @@ function SceneComponent({
             deviceInfo={deviceInfo}
           />
 
-          {/* Ocean Waves - hidden when burger menu is open for performance */}
-          {!isBurgerMenuOpen && (
+          {/* Ocean Waves - completely hidden when burger menu is open for performance */}
+          {!isBurgerMenuOpen && showSea && (
             <SimpleOceanWaves
-              key={`waves-${isDarkMode}`}
+              key={`waves-${isDarkMode}-${isBurgerMenuOpen}`}
               isDarkMode={isDarkMode}
               isBurgerMenuOpen={isBurgerMenuOpen}
             />
@@ -1601,7 +1606,7 @@ function SceneComponent({
         <OrbitControls
           enablePan={false}
           enableZoom={false}
-          enableRotate={true}
+          enableRotate={false}
           target={[0, 0, 0]}
           maxDistance={
             deviceInfo?.isLandscapeMobile
