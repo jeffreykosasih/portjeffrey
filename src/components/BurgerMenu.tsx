@@ -29,6 +29,7 @@ interface BurgerMenuProps {
   onOpenChange?: (isOpen: boolean, shouldAnimate?: boolean) => void;
   activePage?: PageName | null;
   onHideThemeToggle?: (hide: boolean) => void;
+  onHideCreditsButton?: (hide: boolean) => void;
   shouldAnimate?: boolean;
   deviceInfo?: DeviceInfo;
   onPlayClickSound?: () => void;
@@ -118,6 +119,7 @@ export default function BurgerMenu({
   onOpenChange,
   activePage,
   onHideThemeToggle,
+  onHideCreditsButton,
   shouldAnimate = true,
   deviceInfo,
   onPlayClickSound,
@@ -149,6 +151,8 @@ export default function BurgerMenu({
     if (onHideThemeToggle) {
       onHideThemeToggle(newState);
     }
+    // Keep credits button visible when menu opens/closes
+    // (Remove this logic to fix the issue)
   };
 
   const handleNavigation = (page: PageName): void => {
@@ -161,6 +165,7 @@ export default function BurgerMenu({
       if (onHideThemeToggle) {
         onHideThemeToggle(true);
       }
+      // Keep credits button visible
     } else {
       // When returning to home, reopen menu if it was open before
       if (page === 'home' && wasOpenBehindPage) {
@@ -179,6 +184,7 @@ export default function BurgerMenu({
         if (onHideThemeToggle) {
           onHideThemeToggle(false);
         }
+        // Keep credits button visible
       }
       // Reset the flag when navigating back to home
       setWasOpenBehindPage(false);
@@ -254,7 +260,7 @@ export default function BurgerMenu({
       // Performance hints
       willChange: 'transform, opacity',
       transform: 'translateZ(0)',
-      backfaceVisibility: 'hidden',
+      backfaceVisibility: 'hidden' as const,
       contain: 'layout paint size style',
       zIndex: 9999,
       display: 'flex',

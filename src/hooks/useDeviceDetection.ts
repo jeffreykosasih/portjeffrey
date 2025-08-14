@@ -25,17 +25,22 @@ const useDeviceDetection = (): DeviceInfo => {
     const initialPixelRatio =
       typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
-    const isMobileWidth = initialWidth < 768;
+    const isMobileWidth = initialWidth < 640;
+    const isTabletWidth = initialWidth >= 640 && initialWidth < 1024;
+    const isLaptopWidth = initialWidth >= 1024 && initialWidth < 1440;
+    const isDesktopWidth = initialWidth >= 1440;
     const isLandscape = initialWidth > initialHeight;
     const aspectRatio = initialWidth / initialHeight;
 
-    // Landscape mobile: mobile width but in landscape with significant aspect ratio difference
+    // Enhanced device detection with better breakpoints
     const isLandscapeMobile = isMobileWidth && isLandscape && aspectRatio > 1.5;
+    const isPortraitTablet = isTabletWidth && !isLandscape;
+    const isLandscapeTablet = isTabletWidth && isLandscape;
 
     return {
       isMobile: isMobileWidth && !isLandscapeMobile, // Regular mobile excludes landscape mobile
-      isTablet: initialWidth >= 768 && initialWidth < 1024,
-      isDesktop: initialWidth >= 1024,
+      isTablet: isTabletWidth,
+      isDesktop: isLaptopWidth || isDesktopWidth,
       isLandscapeMobile,
       isTouchDevice: false,
       isLowPerformance: false,
@@ -91,17 +96,22 @@ const useDeviceDetection = (): DeviceInfo => {
       }
     })();
 
-    const isMobileWidth = width < 768;
+    const isMobileWidth = width < 640;
+    const isTabletWidth = width >= 640 && width < 1024;
+    const isLaptopWidth = width >= 1024 && width < 1440;
+    const isDesktopWidth = width >= 1440;
     const isLandscape = width > height;
     const aspectRatio = width / height;
 
-    // Landscape mobile: mobile width but in landscape with significant aspect ratio difference
+    // Enhanced device detection with better breakpoints
     const isLandscapeMobile = isMobileWidth && isLandscape && aspectRatio > 1.5;
+    const isPortraitTablet = isTabletWidth && !isLandscape;
+    const isLandscapeTablet = isTabletWidth && isLandscape;
 
     setDeviceInfo({
       isMobile: isMobileWidth && !isLandscapeMobile, // Regular mobile excludes landscape mobile
-      isTablet: width >= 768 && width < 1024,
-      isDesktop: width >= 1024,
+      isTablet: isTabletWidth,
+      isDesktop: isLaptopWidth || isDesktopWidth,
       isLandscapeMobile,
       isTouchDevice,
       isLowPerformance,

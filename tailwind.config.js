@@ -3,12 +3,40 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     screens: {
-      xs: '320px',
-      sm: '640px',
-      md: '768px',
-      lg: '1024px',
-      xl: '1280px',
-      '2xl': '1536px',
+      // Mobile devices
+      xs: '320px', // Small mobile (portrait)
+      sm: '480px', // Mobile landscape / larger mobile
+      mobile: '640px', // Large mobile devices
+
+      // Tablet devices
+      md: '768px', // Tablet portrait
+      tablet: '900px', // Tablet landscape / small laptop
+
+      // Laptop and desktop
+      lg: '1024px', // Small laptop
+      laptop: '1280px', // Standard laptop
+      xl: '1440px', // Large laptop / small desktop
+      desktop: '1600px', // Standard desktop
+      '2xl': '1920px', // Large desktop
+      '3xl': '2560px', // Ultra-wide / 4K displays
+
+      // Orientation-specific breakpoints
+      landscape: { raw: '(orientation: landscape)' },
+      portrait: { raw: '(orientation: portrait)' },
+
+      // Combined device + orientation breakpoints
+      'mobile-landscape': {
+        raw: '(max-width: 900px) and (orientation: landscape)',
+      },
+      'tablet-landscape': {
+        raw: '(min-width: 768px) and (max-width: 1024px) and (orientation: landscape)',
+      },
+      'mobile-portrait': {
+        raw: '(max-width: 640px) and (orientation: portrait)',
+      },
+      'tablet-portrait': {
+        raw: '(min-width: 640px) and (max-width: 900px) and (orientation: portrait)',
+      },
     },
     extend: {
       colors: {

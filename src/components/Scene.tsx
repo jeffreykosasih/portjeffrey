@@ -669,13 +669,13 @@ function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
     // Keep boat animation running continuously
     if (boatRef.current) {
       const time = clock.getElapsedTime();
-      boatRef.current.position.y = Math.sin(time * 0.8) * 0.25;
+      boatRef.current.position.y = Math.sin(time * 0.8) * 0.5;
     }
   });
 
   if (!scene) {
     return (
-      <group ref={boatRef} position={[-13, 0, -45]}>
+      <group ref={boatRef} position={[-15, 4, -40]}>
         <mesh>
           <boxGeometry args={[36, 12, 18]} />
           <meshStandardMaterial
@@ -700,7 +700,7 @@ function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
   // Handle case where scene processing failed
   if (!clonedScene) {
     return (
-      <group ref={boatRef} position={[-13, 0, -45]}>
+      <group ref={boatRef} position={[-15, 4, -40]}>
         <mesh>
           <boxGeometry args={[36, 12, 18]} />
           <meshStandardMaterial
@@ -716,7 +716,7 @@ function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
   return (
     <group
       ref={boatRef}
-      position={[-15, 2, -40]}
+      position={[-15, 1, -40]}
       scale={[6, 6, 6]}
       rotation={[0, 5, 0]}
     >
@@ -1107,23 +1107,12 @@ function SimpleOceanWaves({
 
   useFrame(({ clock }) => {
     // Only animate waves when burger menu is closed and component should be visible
-    if (wavesRef.current && !isBurgerMenuOpen) {
+    if (wavesRef.current) {
       const time = clock.getElapsedTime();
 
-      // Create gentle wave movements (only when menu is closed for performance)
-      // Vertical bobbing motion
-      wavesRef.current.position.y = -2 + Math.sin(time * 0.8) * 0.3;
-
-      // Slight side-to-side movement
-      wavesRef.current.position.x = Math.sin(time * 0.5) * 2;
-
-      // Gentle rotation for more natural wave movement
-      wavesRef.current.rotation.y = Math.sin(time * 0.3) * 0.05;
-    } else if (wavesRef.current && isBurgerMenuOpen) {
-      // Reset to base position when burger menu is open
-      wavesRef.current.position.y = -2;
-      wavesRef.current.position.x = 0;
-      wavesRef.current.rotation.y = 0;
+      wavesRef.current.position.y = -1.5;
+      wavesRef.current.position.x = -3;
+      wavesRef.current.rotation.y = Math.sin(time * 0.3) * 0.5;
     }
   });
 
@@ -1474,7 +1463,7 @@ function SceneComponent({
         }}
       >
         <SimpleSky isDarkMode={isDarkMode} />
-        {/* <SimpleSea isDarkMode={isDarkMode} /> */}
+        <SimpleSea isDarkMode={isDarkMode} />
 
         {/* Simplified lighting system */}
         {isDarkMode ? (
@@ -1589,10 +1578,10 @@ function SceneComponent({
             deviceInfo={deviceInfo}
           />
 
-          {/* Ocean Waves - completely hidden when burger menu is open for performance */}
-          {!isBurgerMenuOpen && showSea && (
+          {/* Ocean Waves - visible even when burger menu is open */}
+          {showSea && (
             <SimpleOceanWaves
-              key={`waves-${isDarkMode}-${isBurgerMenuOpen}`}
+              key={`waves-${isDarkMode}`}
               isDarkMode={isDarkMode}
               isBurgerMenuOpen={isBurgerMenuOpen}
             />

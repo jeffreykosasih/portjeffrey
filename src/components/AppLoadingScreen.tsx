@@ -19,6 +19,7 @@ export default function AppLoadingScreen({
   onLoadingComplete,
   onExploreClick,
   isDarkMode,
+  deviceInfo,
   onPlayClickSound,
 }: AppLoadingScreenProps): React.JSX.Element {
   const [showTitle, setShowTitle] = useState(false);
@@ -100,31 +101,91 @@ export default function AppLoadingScreen({
     height: '100%',
   };
 
-  const titleStyles: React.CSSProperties = {
-    fontFamily: "'Lato', sans-serif",
-    fontSize: '7rem',
-    fontWeight: 800,
-    letterSpacing: '-0.05em',
-    lineHeight: 1,
-    color: colors.text,
-  };
+  // Responsive title styles based on device type
+  const titleStyles: React.CSSProperties = React.useMemo(() => {
+    const baseStyles: React.CSSProperties = {
+      fontFamily: "'Lato', sans-serif",
+      fontWeight: 800,
+      letterSpacing: '-0.05em',
+      lineHeight: 1.1,
+      color: colors.text,
+      textAlign: 'center',
+    };
 
-  const buttonStyles: React.CSSProperties = {
-    fontFamily: "'Lato', sans-serif",
-    fontSize: 'var(--text-2xl)', // Using CSS custom property
-    lineHeight: 1.2,
-    fontWeight: 600,
-    padding: 'calc(var(--space-md) + 0.125rem) var(--space-2xl)', // Using CSS custom properties
-    borderRadius: 'var(--radius-full)', // Using CSS custom property
-    backgroundColor: isDarkMode ? colors.text : '#ffffff', // Use yellow in dark mode, white in light mode
-    color: isDarkMode ? '#162542' : '#005E80', // Dark text in dark mode, blue in light mode
-    border: 'none',
-    boxShadow: isDarkMode
-      ? '0 0.5rem 1.25rem rgba(232, 230, 130, 0.3)' // Converted to rem
-      : '0 0.5rem 1.25rem rgba(0, 0, 0, 0.1)', // Converted to rem
-    transition: 'all 0.3s ease',
-    cursor: 'pointer',
-  };
+    // Device-specific font sizes
+    if (deviceInfo?.isMobile) {
+      return {
+        ...baseStyles,
+        fontSize: '2.5rem', // Mobile portrait
+      };
+    } else if (deviceInfo?.isLandscapeMobile) {
+      return {
+        ...baseStyles,
+        fontSize: '2rem', // Mobile landscape - smaller due to limited height
+      };
+    } else if (deviceInfo?.isTablet) {
+      return {
+        ...baseStyles,
+        fontSize: deviceInfo.orientation === 'landscape' ? '3.5rem' : '4rem', // Tablet responsive
+      };
+    } else {
+      // Desktop and larger screens
+      return {
+        ...baseStyles,
+        fontSize: '7rem', // Original desktop size
+      };
+    }
+  }, [colors.text, deviceInfo]);
+
+  // Responsive button styles based on device type
+  const buttonStyles: React.CSSProperties = React.useMemo(() => {
+    const baseStyles: React.CSSProperties = {
+      fontFamily: "'Lato', sans-serif",
+      lineHeight: 1.2,
+      fontWeight: 600,
+      borderRadius: 'var(--radius-full)',
+      backgroundColor: isDarkMode ? colors.text : '#ffffff',
+      color: isDarkMode ? '#162542' : '#005E80',
+      border: 'none',
+      boxShadow: isDarkMode
+        ? '0 0.5rem 1.25rem rgba(232, 230, 130, 0.3)'
+        : '0 0.5rem 1.25rem rgba(0, 0, 0, 0.1)',
+      transition: 'all 0.3s ease',
+      cursor: 'pointer',
+    };
+
+    // Device-specific button sizing
+    if (deviceInfo?.isMobile) {
+      return {
+        ...baseStyles,
+        fontSize: 'var(--mobile-text-lg)',
+        padding: 'var(--space-md) var(--space-xl)',
+        minHeight: 'var(--touch-target-sm)',
+      };
+    } else if (deviceInfo?.isLandscapeMobile) {
+      return {
+        ...baseStyles,
+        fontSize: 'var(--mobile-text-base)',
+        padding: 'var(--space-sm) var(--space-lg)',
+        minHeight: 'var(--touch-target-sm)',
+      };
+    } else if (deviceInfo?.isTablet) {
+      return {
+        ...baseStyles,
+        fontSize: 'var(--text-lg)',
+        padding: 'var(--space-lg) var(--space-2xl)',
+        minHeight: 'var(--touch-target-md)',
+      };
+    } else {
+      // Desktop and larger screens
+      return {
+        ...baseStyles,
+        fontSize: 'var(--text-2xl)',
+        padding: 'calc(var(--space-md) + 0.125rem) var(--space-2xl)',
+        minHeight: 'var(--touch-target-lg)',
+      };
+    }
+  }, [isDarkMode, colors.text, deviceInfo]);
 
   const handleButtonMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.transform = 'translateY(-0.125rem)'; // Converted to rem
@@ -182,13 +243,31 @@ export default function AppLoadingScreen({
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 'var(--space-4xl)', // Using CSS custom property
+            gap: deviceInfo?.isMobile
+              ? 'var(--space-2xl)'
+              : deviceInfo?.isLandscapeMobile
+              ? 'var(--space-lg)'
+              : deviceInfo?.isTablet
+              ? 'var(--space-3xl)'
+              : 'var(--space-4xl)', // Responsive gap based on device
+            width: '100%',
+            maxWidth: deviceInfo?.isMobile
+              ? '90%'
+              : deviceInfo?.isTablet
+              ? '80%'
+              : '100%', // Prevent overflow on small screens
           }}
         >
           {/* Dots or Title Area */}
           <div
             style={{
-              height: '17.5rem', // Converted from 280px to rem
+              height: deviceInfo?.isMobile
+                ? '12rem'
+                : deviceInfo?.isLandscapeMobile
+                ? '8rem'
+                : deviceInfo?.isTablet
+                ? '15rem'
+                : '17.5rem', // Responsive height based on device
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -205,7 +284,10 @@ export default function AppLoadingScreen({
                   exit='exit'
                   style={{
                     display: 'flex',
-                    gap: 'var(--space-md)', // Using CSS custom property
+                    gap:
+                      deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile
+                        ? 'var(--space-sm)'
+                        : 'var(--space-md)', // Responsive gap for dots
                   }}
                 >
                   {[0, 1, 2].map((index) => (
@@ -216,8 +298,14 @@ export default function AppLoadingScreen({
                         y: [0, -30, 0],
                       }}
                       style={{
-                        width: 'var(--space-lg)', // Using CSS custom property (20px equivalent)
-                        height: 'var(--space-lg)', // Using CSS custom property (20px equivalent)
+                        width:
+                          deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile
+                            ? 'var(--space-base)'
+                            : 'var(--space-lg)', // Responsive dot size
+                        height:
+                          deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile
+                            ? 'var(--space-base)'
+                            : 'var(--space-lg)', // Responsive dot size
                         borderRadius: '50%',
                         backgroundColor: colors.dots,
                       }}
@@ -248,10 +336,16 @@ export default function AppLoadingScreen({
                     stiffness: 80,
                   }}
                 >
-                  <div style={{ marginBottom: 'var(--space-sm)' }}>
+                  <div
+                    style={{
+                      marginBottom:
+                        deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile
+                          ? 'var(--space-xs)'
+                          : 'var(--space-sm)',
+                    }}
+                  >
                     Welcome to
-                  </div>{' '}
-                  {/* Using CSS custom property */}
+                  </div>
                   <div>Port Jeffrey</div>
                 </motion.div>
               )}
@@ -261,7 +355,13 @@ export default function AppLoadingScreen({
           {/* Button Area */}
           <div
             style={{
-              height: 'var(--space-6xl)', // Converted from 80px to rem (5rem)
+              height: deviceInfo?.isMobile
+                ? 'var(--space-4xl)'
+                : deviceInfo?.isLandscapeMobile
+                ? 'var(--space-3xl)'
+                : deviceInfo?.isTablet
+                ? 'var(--space-5xl)'
+                : 'var(--space-6xl)', // Responsive height based on device
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

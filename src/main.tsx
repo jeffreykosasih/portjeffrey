@@ -54,6 +54,8 @@ function App(): React.JSX.Element {
   const [showMainApp, setShowMainApp] = useState<boolean>(false);
   const [isThemeToggleHidden, setIsThemeToggleHidden] =
     useState<boolean>(false);
+  const [isCreditsButtonHidden, setIsCreditsButtonHidden] =
+    useState<boolean>(false);
   const [isCreditsPopupVisible, setIsCreditsPopupVisible] =
     useState<boolean>(false);
   const [showExploreNotification, setShowExploreNotification] =
@@ -344,7 +346,7 @@ function App(): React.JSX.Element {
                       playClickSound();
                       toggleCreditsPopup();
                     }}
-                    isHidden={isThemeToggleHidden}
+                    isHidden={isCreditsButtonHidden}
                     deviceInfo={deviceInfo}
                   />
                 </motion.div>
@@ -362,6 +364,7 @@ function App(): React.JSX.Element {
                     onOpenChange={setIsBurgerMenuOpen}
                     activePage={activePage}
                     onHideThemeToggle={setIsThemeToggleHidden}
+                    onHideCreditsButton={setIsCreditsButtonHidden}
                     shouldAnimate={shouldAnimateBurgerMenu}
                     deviceInfo={deviceInfo}
                     onPlayClickSound={playClickSound}
