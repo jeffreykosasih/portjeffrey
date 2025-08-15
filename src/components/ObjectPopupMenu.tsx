@@ -47,9 +47,9 @@ const getObjectConfig = (
   isDarkMode: boolean,
   isMobile: boolean
 ) => {
-  // Use darker brown colors like the tree - adjusts for light/dark mode
-  const brownColor = isDarkMode ? '#2d1b0e' : '#5d3a1f'; // Dark brown tones
-  const shadowColor = isDarkMode ? '#1a0e07' : '#3d2416'; // Even darker for shadows
+  // Use green colors - adjusts for light/dark mode
+  const greenColor = isDarkMode ? '#0d1a12' : '#2d5a3d'; // Much darker green for dark mode
+  const shadowColor = isDarkMode ? '#050a07' : '#1a3424'; // Even darker green for shadows
 
   // Get unified position for this object
   const position = getPopupPosition(objectType, isMobile);
@@ -58,28 +58,28 @@ const getObjectConfig = (
     twochairs: {
       title: 'Connect',
       icon: faEnvelope,
-      backgroundColor: brownColor,
+      backgroundColor: greenColor,
       shadowColor: shadowColor,
       position: { left: -50, top: -200 },
     },
     house: {
       title: 'Portfolio',
       icon: faBriefcase,
-      backgroundColor: brownColor,
+      backgroundColor: greenColor,
       shadowColor: shadowColor,
       position: { left: position.x, top: -250 },
     },
     stonehead: {
       title: 'Profile',
       icon: faUser,
-      backgroundColor: brownColor,
+      backgroundColor: greenColor,
       shadowColor: shadowColor,
       position: { left: -75, top: -225 },
     },
     surfboard: {
       title: 'Skillset',
       icon: faCogs,
-      backgroundColor: brownColor,
+      backgroundColor: greenColor,
       shadowColor: shadowColor,
       position: { left: -80, top: -150 },
     },

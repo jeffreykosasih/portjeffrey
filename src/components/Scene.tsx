@@ -560,7 +560,7 @@ function SimpleClouds({
   isDarkMode: boolean;
   deviceInfo?: any;
 }) {
-  // Enhanced cloud settings with landscape mobile support
+  // Enhanced cloud settings with landscape mobile support - now with 8 clouds
   const getCloudSettings = () => {
     if (deviceInfo?.isLandscapeMobile) {
       return {
@@ -569,11 +569,20 @@ function SimpleClouds({
         scale2: 3.7,
         scale3: 4.0,
         scale4: 4.4,
+        scale5: 4.1,
+        scale6: 3.9,
+        scale7: 4.3,
+        scale8: 3.8,
         positions: {
           cloud1: [0, 31, 145] as [number, number, number],
           cloud2: [0, 31, 48] as [number, number, number],
           cloud3: [-98, 36, 145] as [number, number, number],
           cloud4: [-98, 36, 72] as [number, number, number],
+          // Right side clouds (other side)
+          cloud5: [98, 36, 145] as [number, number, number],
+          cloud6: [98, 36, 72] as [number, number, number],
+          cloud7: [120, 31, 100] as [number, number, number],
+          cloud8: [80, 33, 48] as [number, number, number],
         },
       };
     } else if (deviceInfo?.isMobile) {
@@ -583,11 +592,20 @@ function SimpleClouds({
         scale2: 4.5,
         scale3: 4.8,
         scale4: 5.2,
+        scale5: 4.9,
+        scale6: 4.7,
+        scale7: 5.1,
+        scale8: 4.6,
         positions: {
           cloud1: [0, 35, 130] as [number, number, number],
           cloud2: [0, 35, 40] as [number, number, number],
           cloud3: [-90, 40, 130] as [number, number, number],
           cloud4: [-90, 40, 65] as [number, number, number],
+          // Right side clouds (other side)
+          cloud5: [90, 40, 130] as [number, number, number],
+          cloud6: [90, 40, 65] as [number, number, number],
+          cloud7: [110, 35, 95] as [number, number, number],
+          cloud8: [70, 37, 40] as [number, number, number],
         },
       };
     } else if (deviceInfo?.isTablet) {
@@ -597,11 +615,20 @@ function SimpleClouds({
         scale2: 4,
         scale3: 4.3,
         scale4: 4.7,
+        scale5: 4.4,
+        scale6: 4.2,
+        scale7: 4.6,
+        scale8: 4.1,
         positions: {
           cloud1: [0, 32, 140] as [number, number, number],
           cloud2: [0, 32, 45] as [number, number, number],
           cloud3: [-95, 37, 140] as [number, number, number],
           cloud4: [-95, 37, 70] as [number, number, number],
+          // Right side clouds (other side)
+          cloud5: [95, 37, 140] as [number, number, number],
+          cloud6: [95, 37, 70] as [number, number, number],
+          cloud7: [115, 32, 100] as [number, number, number],
+          cloud8: [75, 34, 45] as [number, number, number],
         },
       };
     } else {
@@ -611,11 +638,20 @@ function SimpleClouds({
         scale2: 3.5,
         scale3: 3.8,
         scale4: 4.2,
+        scale5: 4.0,
+        scale6: 3.9,
+        scale7: 4.3,
+        scale8: 3.7,
         positions: {
           cloud1: [0, 30, 150] as [number, number, number],
           cloud2: [0, 30, 50] as [number, number, number],
           cloud3: [-100, 35, 150] as [number, number, number],
           cloud4: [-100, 35, 75] as [number, number, number],
+          // Right side clouds (other side)
+          cloud5: [100, 35, 150] as [number, number, number],
+          cloud6: [100, 35, 75] as [number, number, number],
+          cloud7: [120, 30, 100] as [number, number, number],
+          cloud8: [80, 32, 50] as [number, number, number],
         },
       };
     }
@@ -625,6 +661,7 @@ function SimpleClouds({
 
   return (
     <group>
+      {/* Original left side clouds */}
       <AnimatedCloud
         modelPath='/models/object_cloud1.glb'
         basePosition={cloudSettings.positions.cloud1}
@@ -655,6 +692,40 @@ function SimpleClouds({
         scale={cloudSettings.scale4}
         moveRange={70}
         speed={0.5}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* New right side clouds (other side) */}
+      <AnimatedCloud
+        modelPath='/models/object_cloud1.glb'
+        basePosition={cloudSettings.positions.cloud5}
+        scale={cloudSettings.scale5}
+        moveRange={70}
+        speed={0.6}
+        isDarkMode={isDarkMode}
+      />
+      <AnimatedCloud
+        modelPath='/models/object_cloud2.glb'
+        basePosition={cloudSettings.positions.cloud6}
+        scale={cloudSettings.scale6}
+        moveRange={70}
+        speed={0.4}
+        isDarkMode={isDarkMode}
+      />
+      <AnimatedCloud
+        modelPath='/models/object_cloud3.glb'
+        basePosition={cloudSettings.positions.cloud7}
+        scale={cloudSettings.scale7}
+        moveRange={70}
+        speed={0.7}
+        isDarkMode={isDarkMode}
+      />
+      <AnimatedCloud
+        modelPath='/models/object_cloud4.glb'
+        basePosition={cloudSettings.positions.cloud8}
+        scale={cloudSettings.scale8}
+        moveRange={70}
+        speed={0.3}
         isDarkMode={isDarkMode}
       />
     </group>
@@ -1095,18 +1166,11 @@ function SimpleSea({ isDarkMode }: { isDarkMode: boolean }) {
   );
 }
 
-function SimpleOceanWaves({
-  isDarkMode,
-  isBurgerMenuOpen,
-}: {
-  isDarkMode: boolean;
-  isBurgerMenuOpen?: boolean;
-}) {
+function SimpleOceanWaves({ isDarkMode }: { isDarkMode: boolean }) {
   const { scene } = useGLTF('/models/object_ocean_waves.glb');
   const wavesRef = useRef<any>(null);
 
   useFrame(({ clock }) => {
-    // Only animate waves when burger menu is closed and component should be visible
     if (wavesRef.current) {
       const time = clock.getElapsedTime();
 
@@ -1181,13 +1245,7 @@ function SimpleOceanWaves({
 }
 
 // Animated Camera Component with smooth zoom
-function AnimatedCamera({
-  deviceInfo,
-  isBurgerMenuOpen,
-}: {
-  deviceInfo?: any;
-  isBurgerMenuOpen?: boolean;
-}) {
+function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
   const cameraRef = useRef<any>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -1433,10 +1491,9 @@ function SceneComponent({
             showExploreNotification && !isBurgerMenuOpen ? 'blur(2px)' : 'none',
           transition: 'filter 0.3s ease-in-out',
         }}
-        frameloop={isBurgerMenuOpen ? 'demand' : 'always'}
+        frameloop='always'
         dpr={(() => {
           if (typeof window === 'undefined') return 1;
-          if (isBurgerMenuOpen) return 1;
           const max = deviceInfo?.isMobile ? 1.5 : 2;
           return Math.min(window.devicePixelRatio || 1, max);
         })()}
@@ -1569,29 +1626,16 @@ function SceneComponent({
           />
 
           {/* Boat (non-interactive) */}
-          <SimpleBoat key={`boat-${isDarkMode}`} isDarkMode={isDarkMode} />
+          <SimpleBoat isDarkMode={isDarkMode} />
 
           {/* Environmental Elements */}
-          <SimpleClouds
-            key={`clouds-${isDarkMode}`}
-            isDarkMode={isDarkMode}
-            deviceInfo={deviceInfo}
-          />
+          <SimpleClouds isDarkMode={isDarkMode} deviceInfo={deviceInfo} />
 
           {/* Ocean Waves - visible even when burger menu is open */}
-          {showSea && (
-            <SimpleOceanWaves
-              key={`waves-${isDarkMode}`}
-              isDarkMode={isDarkMode}
-              isBurgerMenuOpen={isBurgerMenuOpen}
-            />
-          )}
+          {showSea && <SimpleOceanWaves isDarkMode={isDarkMode} />}
         </Suspense>
 
-        <AnimatedCamera
-          deviceInfo={deviceInfo}
-          isBurgerMenuOpen={isBurgerMenuOpen}
-        />
+        <AnimatedCamera deviceInfo={deviceInfo} />
         <OrbitControls
           enablePan={false}
           enableZoom={false}
