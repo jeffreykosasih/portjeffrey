@@ -21,6 +21,7 @@ interface SceneProps {
   onPlayClickSound?: () => void;
   showExploreNotification?: boolean;
   isBurgerMenuOpen?: boolean;
+  triggerInitialZoom?: boolean;
 }
 
 // ============================================
@@ -411,14 +412,14 @@ function SimpleIsland({
     material.color.setRGB(r, g, b);
 
     if (isDarkMode) {
-      material.color.multiplyScalar(0.05);
+      material.color.multiplyScalar(0.1);
     } else {
-      material.color.multiplyScalar(1.4);
+      material.color.multiplyScalar(2.4);
     }
 
     // Set material properties for natural terrain
-    if ('roughness' in material) material.roughness = 0.8;
-    if ('metalness' in material) material.metalness = 0.0;
+    if ('roughness' in material) material.roughness = 1.8;
+    if ('metalness' in material) material.metalness = 0.1;
     material.needsUpdate = true;
   });
 
@@ -461,22 +462,16 @@ function SimpleCloud({
   }
 
   const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    material.roughness = 0.9;
-    material.metalness = 0.0;
+    if ('roughness' in material) material.roughness = 0.9;
+    if ('metalness' in material) material.metalness = 0.0;
 
     if (isDarkMode) {
-      // Make clouds dark blue in dark mode
-      material.color.setHex(0x1a237e); // Dark blue color
+      material.color.setHex(0x1a237e);
     } else {
-      // Make clouds extremely bright and clear white in bright mode like sunlight
       material.color.setHex(0xffffff);
-      material.color.multiplyScalar(1.8); // Reduced to prevent overexposure
-      if (material.emissive && material.emissive.setHex) {
-        material.emissive.setHex(0xffffff);
-      }
-      if ('emissiveIntensity' in material) {
-        material.emissiveIntensity = 0.5; // Enhanced glow
-      }
+      material.color.multiplyScalar(1.8);
+      if (material.emissive?.setHex) material.emissive.setHex(0xffffff);
+      if ('emissiveIntensity' in material) material.emissiveIntensity = 0.5;
     }
 
     material.needsUpdate = true;
@@ -504,6 +499,7 @@ function AnimatedCloud({
   moveRange,
   isDarkMode,
   speed = 1,
+  isBurgerMenuOpen,
 }: {
   modelPath: string;
   basePosition: [number, number, number];
@@ -511,12 +507,19 @@ function AnimatedCloud({
   moveRange: number;
   isDarkMode: boolean;
   speed?: number;
+  isBurgerMenuOpen?: boolean;
 }) {
   const cloudRef = useRef<any>(null);
+  const frameCountRef = useRef(0);
 
   useFrame(({ clock }) => {
-    // Keep cloud animations running continuously
-    if (cloudRef.current) {
+    // Throttle animations when burger menu is open for better performance
+    frameCountRef.current++;
+    const shouldUpdate = isBurgerMenuOpen
+      ? frameCountRef.current % 3 === 0
+      : true;
+
+    if (cloudRef.current && shouldUpdate) {
       const time = clock.getElapsedTime();
 
       // Create a triangle wave function for smooth back-and-forth movement
@@ -556,102 +559,64 @@ function AnimatedCloud({
 function SimpleClouds({
   isDarkMode,
   deviceInfo,
+  isBurgerMenuOpen,
 }: {
   isDarkMode: boolean;
   deviceInfo?: any;
+  isBurgerMenuOpen?: boolean;
 }) {
-  // Enhanced cloud settings with landscape mobile support - now with 8 clouds
+  // Enhanced cloud settings - 4 clouds total (2 left, 2 right)
   const getCloudSettings = () => {
     if (deviceInfo?.isLandscapeMobile) {
       return {
-        // Desktop-like positioning but slightly adjusted for landscape mobile
         scale1: 4.2,
         scale2: 3.7,
         scale3: 4.0,
         scale4: 4.4,
-        scale5: 4.1,
-        scale6: 3.9,
-        scale7: 4.3,
-        scale8: 3.8,
         positions: {
-          cloud1: [0, 31, 145] as [number, number, number],
-          cloud2: [0, 31, 48] as [number, number, number],
-          cloud3: [-98, 36, 145] as [number, number, number],
-          cloud4: [-98, 36, 72] as [number, number, number],
-          // Right side clouds (other side)
-          cloud5: [98, 36, 145] as [number, number, number],
-          cloud6: [98, 36, 72] as [number, number, number],
-          cloud7: [120, 31, 100] as [number, number, number],
-          cloud8: [80, 33, 48] as [number, number, number],
+          cloud1: [-98, 36, 145] as [number, number, number], // Left back
+          cloud2: [-98, 36, 72] as [number, number, number], // Left front
+          cloud3: [98, 36, 145] as [number, number, number], // Right back
+          cloud4: [98, 36, 72] as [number, number, number], // Right front
         },
       };
     } else if (deviceInfo?.isMobile) {
       return {
-        // Bring clouds slightly closer and make them bigger for mobile visibility
         scale1: 5,
         scale2: 4.5,
         scale3: 4.8,
         scale4: 5.2,
-        scale5: 4.9,
-        scale6: 4.7,
-        scale7: 5.1,
-        scale8: 4.6,
         positions: {
-          cloud1: [0, 35, 130] as [number, number, number],
-          cloud2: [0, 35, 40] as [number, number, number],
-          cloud3: [-90, 40, 130] as [number, number, number],
-          cloud4: [-90, 40, 65] as [number, number, number],
-          // Right side clouds (other side)
-          cloud5: [90, 40, 130] as [number, number, number],
-          cloud6: [90, 40, 65] as [number, number, number],
-          cloud7: [110, 35, 95] as [number, number, number],
-          cloud8: [70, 37, 40] as [number, number, number],
+          cloud1: [-90, 40, 130] as [number, number, number], // Left back
+          cloud2: [-90, 40, 65] as [number, number, number], // Left front
+          cloud3: [90, 40, 130] as [number, number, number], // Right back
+          cloud4: [90, 40, 65] as [number, number, number], // Right front
         },
       };
     } else if (deviceInfo?.isTablet) {
       return {
-        // Medium adjustments for tablet
         scale1: 4.5,
         scale2: 4,
         scale3: 4.3,
         scale4: 4.7,
-        scale5: 4.4,
-        scale6: 4.2,
-        scale7: 4.6,
-        scale8: 4.1,
         positions: {
-          cloud1: [0, 32, 140] as [number, number, number],
-          cloud2: [0, 32, 45] as [number, number, number],
-          cloud3: [-95, 37, 140] as [number, number, number],
-          cloud4: [-95, 37, 70] as [number, number, number],
-          // Right side clouds (other side)
-          cloud5: [95, 37, 140] as [number, number, number],
-          cloud6: [95, 37, 70] as [number, number, number],
-          cloud7: [115, 32, 100] as [number, number, number],
-          cloud8: [75, 34, 45] as [number, number, number],
+          cloud1: [-95, 37, 140] as [number, number, number], // Left back
+          cloud2: [-95, 37, 70] as [number, number, number], // Left front
+          cloud3: [95, 37, 140] as [number, number, number], // Right back
+          cloud4: [95, 37, 70] as [number, number, number], // Right front
         },
       };
     } else {
       return {
-        // Original desktop settings
         scale1: 4,
         scale2: 3.5,
         scale3: 3.8,
         scale4: 4.2,
-        scale5: 4.0,
-        scale6: 3.9,
-        scale7: 4.3,
-        scale8: 3.7,
         positions: {
-          cloud1: [0, 30, 150] as [number, number, number],
-          cloud2: [0, 30, 50] as [number, number, number],
-          cloud3: [-100, 35, 150] as [number, number, number],
-          cloud4: [-100, 35, 75] as [number, number, number],
-          // Right side clouds (other side)
-          cloud5: [100, 35, 150] as [number, number, number],
-          cloud6: [100, 35, 75] as [number, number, number],
-          cloud7: [120, 30, 100] as [number, number, number],
-          cloud8: [80, 32, 50] as [number, number, number],
+          cloud1: [-100, 35, 150] as [number, number, number], // Left back
+          cloud2: [-100, 35, 75] as [number, number, number], // Left front
+          cloud3: [100, 35, 150] as [number, number, number], // Right back
+          cloud4: [100, 35, 75] as [number, number, number], // Right front
         },
       };
     }
@@ -661,7 +626,7 @@ function SimpleClouds({
 
   return (
     <group>
-      {/* Original left side clouds */}
+      {/* Left side clouds */}
       <AnimatedCloud
         modelPath='/models/object_cloud1.glb'
         basePosition={cloudSettings.positions.cloud1}
@@ -669,6 +634,7 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
+        isBurgerMenuOpen={isBurgerMenuOpen}
       />
       <AnimatedCloud
         modelPath='/models/object_cloud2.glb'
@@ -677,68 +643,51 @@ function SimpleClouds({
         moveRange={70}
         speed={0.5}
         isDarkMode={isDarkMode}
+        isBurgerMenuOpen={isBurgerMenuOpen}
       />
+
+      {/* Right side clouds */}
       <AnimatedCloud
         modelPath='/models/object_cloud3.glb'
         basePosition={cloudSettings.positions.cloud3}
         scale={cloudSettings.scale3}
         moveRange={70}
-        speed={0.5}
+        speed={0.6}
         isDarkMode={isDarkMode}
+        isBurgerMenuOpen={isBurgerMenuOpen}
       />
       <AnimatedCloud
         modelPath='/models/object_cloud4.glb'
         basePosition={cloudSettings.positions.cloud4}
         scale={cloudSettings.scale4}
         moveRange={70}
-        speed={0.5}
-        isDarkMode={isDarkMode}
-      />
-
-      {/* New right side clouds (other side) */}
-      <AnimatedCloud
-        modelPath='/models/object_cloud1.glb'
-        basePosition={cloudSettings.positions.cloud5}
-        scale={cloudSettings.scale5}
-        moveRange={70}
-        speed={0.6}
-        isDarkMode={isDarkMode}
-      />
-      <AnimatedCloud
-        modelPath='/models/object_cloud2.glb'
-        basePosition={cloudSettings.positions.cloud6}
-        scale={cloudSettings.scale6}
-        moveRange={70}
         speed={0.4}
         isDarkMode={isDarkMode}
-      />
-      <AnimatedCloud
-        modelPath='/models/object_cloud3.glb'
-        basePosition={cloudSettings.positions.cloud7}
-        scale={cloudSettings.scale7}
-        moveRange={70}
-        speed={0.7}
-        isDarkMode={isDarkMode}
-      />
-      <AnimatedCloud
-        modelPath='/models/object_cloud4.glb'
-        basePosition={cloudSettings.positions.cloud8}
-        scale={cloudSettings.scale8}
-        moveRange={70}
-        speed={0.3}
-        isDarkMode={isDarkMode}
+        isBurgerMenuOpen={isBurgerMenuOpen}
       />
     </group>
   );
 }
 
-function SimpleBoat({ isDarkMode }: { isDarkMode: boolean }) {
+function SimpleBoat({
+  isDarkMode,
+  isBurgerMenuOpen,
+}: {
+  isDarkMode: boolean;
+  isBurgerMenuOpen?: boolean;
+}) {
   const { scene } = useGLTF('/models/object_boat.glb');
   const boatRef = useRef<any>(null);
+  const frameCountRef = useRef(0);
 
   useFrame(({ clock }) => {
-    // Keep boat animation running continuously
-    if (boatRef.current) {
+    // Throttle animations when burger menu is open for better performance
+    frameCountRef.current++;
+    const shouldUpdate = isBurgerMenuOpen
+      ? frameCountRef.current % 2 === 0
+      : true;
+
+    if (boatRef.current && shouldUpdate) {
       const time = clock.getElapsedTime();
       boatRef.current.position.y = Math.sin(time * 0.8) * 0.5;
     }
@@ -891,7 +840,7 @@ function SimpleHouse({ isDarkMode }: { isDarkMode: boolean }) {
     material.color.setRGB(r, g, b);
 
     if (isDarkMode) {
-      material.color.multiplyScalar(0.2);
+      material.color.multiplyScalar(0.125);
     } else {
       material.color.multiplyScalar(2.6);
     }
@@ -954,7 +903,7 @@ function SimpleStoneHead({ isDarkMode }: { isDarkMode: boolean }) {
     if (isDarkMode) {
       material.color.multiplyScalar(0.3);
     } else {
-      material.color.multiplyScalar(1);
+      material.color.multiplyScalar(0.75);
     }
   });
 
@@ -1166,17 +1115,32 @@ function SimpleSea({ isDarkMode }: { isDarkMode: boolean }) {
   );
 }
 
-function SimpleOceanWaves({ isDarkMode }: { isDarkMode: boolean }) {
+function SimpleOceanWaves({
+  isDarkMode,
+  isBurgerMenuOpen,
+}: {
+  isDarkMode: boolean;
+  isBurgerMenuOpen?: boolean;
+}) {
   const { scene } = useGLTF('/models/object_ocean_waves.glb');
   const wavesRef = useRef<any>(null);
+  const frameCountRef = useRef(0);
 
   useFrame(({ clock }) => {
-    if (wavesRef.current) {
-      const time = clock.getElapsedTime();
+    // Throttle animations when burger menu is open for better performance
+    frameCountRef.current++;
+    const shouldUpdate = isBurgerMenuOpen
+      ? frameCountRef.current % 2 === 0
+      : true;
 
+    if (wavesRef.current) {
       wavesRef.current.position.y = -1.5;
       wavesRef.current.position.x = -3;
-      wavesRef.current.rotation.y = Math.sin(time * 0.3) * 0.5;
+
+      if (shouldUpdate) {
+        const time = clock.getElapsedTime();
+        wavesRef.current.rotation.y = Math.sin(time * 0.3) * 0.5;
+      }
     }
   });
 
@@ -1197,17 +1161,14 @@ function SimpleOceanWaves({ isDarkMode }: { isDarkMode: boolean }) {
   }
 
   const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    // Simplified material processing for better performance
-    if (!material.userData) material.userData = {};
-
-    // Simple color adjustment based on mode - darker wave colors
+    // Simplified water material processing
     if (isDarkMode) {
-      material.color.setHex(0x000a0f); // Much darker sea color
+      material.color.setHex(0x000a0f);
     } else {
-      material.color.setHex(0x1a4d66); // Much darker light sea color
+      material.color.setHex(0x1a4d66);
     }
 
-    // Set material properties for water (simplified)
+    // Water-specific properties
     if ('roughness' in material) material.roughness = 0.2;
     if ('metalness' in material) material.metalness = 0.0;
     if ('transparent' in material) material.transparent = true;
@@ -1245,47 +1206,56 @@ function SimpleOceanWaves({ isDarkMode }: { isDarkMode: boolean }) {
 }
 
 // Animated Camera Component with smooth zoom
-function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
+function AnimatedCamera({
+  deviceInfo,
+  triggerInitialZoom = false,
+}: {
+  deviceInfo?: any;
+  triggerInitialZoom?: boolean;
+}) {
   const cameraRef = useRef<any>(null);
   const [mounted, setMounted] = useState(false);
+  const [isZooming, setIsZooming] = useState(false);
+  const [zoomProgress, setZoomProgress] = useState(0);
+  const [initialZoomTriggered, setInitialZoomTriggered] = useState(false);
 
-  // Enhanced camera settings with landscape mobile support
+  // Enhanced camera settings with landscape mobile support - much closer positions
   const getCameraSettings = () => {
     if (deviceInfo?.isLandscapeMobile) {
       // Landscape mobile - bring camera much closer for better visibility
       return {
-        position: [-10, 45, -250] as [number, number, number], // Much closer position
+        position: [-10, 30, -80] as [number, number, number], // Much closer position
         fov: 55,
       };
     } else if (deviceInfo?.isMobile) {
       if (deviceInfo.orientation === 'portrait') {
         return {
-          position: [-10, 70, -380] as [number, number, number],
+          position: [-10, 35, -100] as [number, number, number],
           fov: 70,
         };
       } else {
         // Regular mobile landscape - legacy support
         return {
-          position: [-10, 65, -350] as [number, number, number],
+          position: [-10, 32, -90] as [number, number, number],
           fov: 55,
         };
       }
     } else if (deviceInfo?.isTablet) {
       if (deviceInfo.orientation === 'portrait') {
         return {
-          position: [-10, 65, -360] as [number, number, number],
+          position: [-10, 35, -95] as [number, number, number],
           fov: 60,
         };
       } else {
         return {
-          position: [-10, 60, -340] as [number, number, number],
+          position: [-10, 32, -85] as [number, number, number],
           fov: 55,
         };
       }
     } else {
       // Desktop
       return {
-        position: [-10, 55, -300] as [number, number, number],
+        position: [-2.5, 15, -80] as [number, number, number],
         fov: 50,
       };
     }
@@ -1293,24 +1263,79 @@ function AnimatedCamera({ deviceInfo }: { deviceInfo?: any }) {
 
   const cameraSettings = getCameraSettings();
 
+  // Calculate starting position (slightly further away) for smooth zoom animation
+  const getStartingPosition = (): [number, number, number] => {
+    const [x, y, z] = cameraSettings.position;
+    // Move camera slightly back for a subtle zoom effect
+    return [x, y, z - 10]; // Move 30 units further back for subtle zoom
+  };
+
+  const startingPosition = getStartingPosition();
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useFrame(() => {
+  // Handle initial zoom trigger
+  useEffect(() => {
+    if (triggerInitialZoom && !initialZoomTriggered) {
+      setInitialZoomTriggered(true);
+      setIsZooming(true);
+      setZoomProgress(0);
+    }
+  }, [triggerInitialZoom, initialZoomTriggered]);
+
+  useFrame((state, delta) => {
     if (!cameraRef.current || !mounted) return;
 
-    // Set camera FOV immediately (no zoom animation)
+    // Set camera FOV
     cameraRef.current.fov = cameraSettings.fov;
     cameraRef.current.updateProjectionMatrix();
+
+    // Handle zoom animation
+    if (isZooming && zoomProgress < 1) {
+      const newProgress = Math.min(zoomProgress + delta * 0.6, 1); // Slower zoom over ~3.3 seconds
+      setZoomProgress(newProgress);
+
+      // Smoother easing function for gentle animation (ease-in-out)
+      const easedProgress =
+        newProgress < 0.5
+          ? 2 * newProgress * newProgress
+          : 1 - Math.pow(-2 * newProgress + 2, 2) / 2;
+
+      // Interpolate between starting position and target position
+      const [startX, startY, startZ] = startingPosition;
+      const [targetX, targetY, targetZ] = cameraSettings.position;
+
+      const currentX = startX + (targetX - startX) * easedProgress;
+      const currentY = startY + (targetY - startY) * easedProgress;
+      const currentZ = startZ + (targetZ - startZ) * easedProgress;
+
+      cameraRef.current.position.set(currentX, currentY, currentZ);
+
+      // Stop zooming when complete
+      if (newProgress >= 1) {
+        setIsZooming(false);
+        cameraRef.current.position.set(targetX, targetY, targetZ);
+      }
+    } else if (!isZooming && initialZoomTriggered) {
+      // Ensure camera is at final position when not zooming
+      const [targetX, targetY, targetZ] = cameraSettings.position;
+      cameraRef.current.position.set(targetX, targetY, targetZ);
+    }
   });
+
+  // Determine initial position based on whether zoom is triggered
+  const initialPosition =
+    triggerInitialZoom && !initialZoomTriggered
+      ? startingPosition
+      : cameraSettings.position;
 
   return (
     <PerspectiveCamera
       ref={cameraRef}
       makeDefault
-      position={cameraSettings.position}
-      // Always use final FOV to avoid zoom-in animation
+      position={initialPosition}
       fov={cameraSettings.fov}
     />
   );
@@ -1367,6 +1392,7 @@ function SceneComponent({
   onPlayClickSound,
   showExploreNotification,
   isBurgerMenuOpen,
+  triggerInitialZoom,
 }: SceneProps) {
   const [sceneLoaded, setSceneLoaded] = useState(false);
   const [hoveredObject, setHoveredObject] = useState<string | null>(null);
@@ -1626,16 +1652,31 @@ function SceneComponent({
           />
 
           {/* Boat (non-interactive) */}
-          <SimpleBoat isDarkMode={isDarkMode} />
+          <SimpleBoat
+            isDarkMode={isDarkMode}
+            isBurgerMenuOpen={isBurgerMenuOpen}
+          />
 
           {/* Environmental Elements */}
-          <SimpleClouds isDarkMode={isDarkMode} deviceInfo={deviceInfo} />
+          <SimpleClouds
+            isDarkMode={isDarkMode}
+            deviceInfo={deviceInfo}
+            isBurgerMenuOpen={isBurgerMenuOpen}
+          />
 
           {/* Ocean Waves - visible even when burger menu is open */}
-          {showSea && <SimpleOceanWaves isDarkMode={isDarkMode} />}
+          {showSea && (
+            <SimpleOceanWaves
+              isDarkMode={isDarkMode}
+              isBurgerMenuOpen={isBurgerMenuOpen}
+            />
+          )}
         </Suspense>
 
-        <AnimatedCamera deviceInfo={deviceInfo} />
+        <AnimatedCamera
+          deviceInfo={deviceInfo}
+          triggerInitialZoom={triggerInitialZoom}
+        />
         <OrbitControls
           enablePan={false}
           enableZoom={false}
@@ -1643,21 +1684,21 @@ function SceneComponent({
           target={[0, 0, 0]}
           maxDistance={
             deviceInfo?.isLandscapeMobile
-              ? 90 // Between desktop and mobile for landscape mobile
+              ? 120 // Adjusted for closer camera positions
               : deviceInfo?.isMobile
-              ? 120
+              ? 140
               : deviceInfo?.isTablet
-              ? 100
-              : 80
+              ? 130
+              : 110
           }
           minDistance={
             deviceInfo?.isLandscapeMobile
-              ? 45 // Between desktop and mobile for landscape mobile
+              ? 60 // Adjusted for closer camera positions
               : deviceInfo?.isMobile
-              ? 60
+              ? 70
               : deviceInfo?.isTablet
-              ? 50
-              : 40
+              ? 65
+              : 55
           }
         />
 

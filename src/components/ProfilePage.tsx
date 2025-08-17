@@ -4,21 +4,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import ProfileCard from './ProfileCard';
 import LongStoryPage from './LongStoryPage';
-
-interface DeviceInfo {
-  isMobile: boolean;
-  isTablet: boolean;
-  isDesktop: boolean;
-  isTouchDevice: boolean;
-  isLowPerformance: boolean;
-  screenWidth: number;
-  screenHeight: number;
-  devicePixelRatio: number;
-  orientation: 'portrait' | 'landscape';
-  isRetinaDisplay: boolean;
-  supportsWebGL: boolean;
-  isLandscapeMobile: boolean;
-}
+import { DeviceInfo } from '../lib/types';
+import {
+  getResponsiveValue,
+  getSpacing,
+  getTextSize,
+  ResponsiveValues,
+} from '../lib/responsiveUtils';
 
 interface ProfilePageProps {
   isVisible: boolean;
@@ -44,64 +36,38 @@ export default function ProfilePage({
   const [isButtonHovered, setIsButtonHovered] = React.useState(false);
   const [showLongStory, setShowLongStory] = React.useState(false);
 
-  // Responsive styles based on device type with landscape mobile support
+  // Responsive container styles
   const getContainerStyles = () => {
-    const baseStyles = {
+    const padding = getResponsiveValue(deviceInfo, {
+      mobile: getSpacing(deviceInfo, 'medium'),
+      landscapeMobile: getSpacing(deviceInfo, 'small'),
+      tablet: getSpacing(deviceInfo, 'large'),
+      desktop: getSpacing(deviceInfo, 'large'),
+    });
+
+    return {
       position: 'fixed' as const,
       top: 0,
       left: 0,
       width: '100vw',
-      height: '100vh',
+      height: '100dvh',
       backgroundColor: isDarkMode
         ? 'rgba(22, 37, 66, 0.4)'
         : 'rgba(0, 94, 128, 0.5)',
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
-      opacity: 1,
-      zIndex: 1500,
+      zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
-      justifyContent: 'center',
+      justifyContent: deviceInfo?.isLandscapeMobile ? 'center' : 'flex-start',
       alignItems: 'center',
       color: '#ffffff',
-      padding: '40px 20px',
+      padding: `max(env(safe-area-inset-top), ${padding}) ${padding} max(env(safe-area-inset-bottom), ${padding}) ${padding}`,
       overflowY: 'auto' as const,
     };
-
-    // Enhanced with landscape mobile support
-    if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like layout with scaled components
-      return {
-        ...baseStyles,
-        padding:
-          'max(env(safe-area-inset-top), 8px) 16px max(env(safe-area-inset-bottom), 8px) 16px',
-        justifyContent: 'center', // Center content for desktop-like experience
-        height: '100dvh',
-      };
-    } else if (deviceInfo?.isMobile) {
-      if (deviceInfo.orientation === 'landscape') {
-        // Regular mobile landscape - legacy support
-        return {
-          ...baseStyles,
-          padding:
-            'max(env(safe-area-inset-top), 10px) 20px max(env(safe-area-inset-bottom), 10px) 20px',
-          justifyContent: 'flex-start',
-          height: '100dvh',
-        };
-      } else {
-        // Portrait mobile
-        return {
-          ...baseStyles,
-          padding:
-            'max(env(safe-area-inset-top), 30px) 16px max(env(safe-area-inset-bottom), 20px) 16px',
-          height: '100dvh',
-        };
-      }
-    }
-
-    return baseStyles;
   };
 
+  // Responsive content styles
   const getContentStyles = () => {
     const baseStyles = {
       maxWidth: '1200px',

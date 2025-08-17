@@ -1,92 +1,119 @@
 import { DeviceInfo } from './types';
 
-// Common responsive values used across components
+// Common breakpoints for consistent responsive design
+export const Breakpoints = {
+  mobile: 640, // Portrait mobile
+  tablet: 1024, // Tablet and small laptops
+  desktop: 1440, // Large screens
+  landscapeRatio: 1.5, // Landscape mobile threshold
+} as const;
+
+// Responsive values for consistent UI across devices
 export const ResponsiveValues = {
   buttonSize: {
     mobile: 48,
-    landscapeMobile: 42, // Smaller than mobile but larger than desktop for touch
+    landscapeMobile: 44,
     tablet: 50,
     desktop: 50,
   },
   positioning: {
     mobile: 16,
-    landscapeMobile: 14, // Tighter positioning for limited height
+    landscapeMobile: 14,
     tablet: 18,
     desktop: 20,
   },
-  // Special positioning for bottom elements to create visual balance
   positioningBottom: {
     mobile: 20,
-    landscapeMobile: 16, // Slightly more space for balance
+    landscapeMobile: 16,
     tablet: 24,
     desktop: 26,
   },
   iconSize: {
     mobile: 18,
-    landscapeMobile: 16, // Proportionally smaller
+    landscapeMobile: 16,
     tablet: 19,
     desktop: 20,
   },
   textSizing: {
+    xs: {
+      mobile: '0.75rem',
+      landscapeMobile: '0.7rem',
+      tablet: '0.8rem',
+      desktop: '0.875rem',
+    },
     small: {
-      mobile: '1.1rem',
-      landscapeMobile: '0.85rem', // Much smaller for landscape mobile
-      tablet: '1.2rem',
-      desktop: '1.3rem',
+      mobile: '1rem',
+      landscapeMobile: '0.875rem',
+      tablet: '1.1rem',
+      desktop: '1.2rem',
     },
     medium: {
-      mobile: '1.5rem',
-      landscapeMobile: '1.1rem', // Scaled down for landscape mobile
-      tablet: '1.7rem',
-      desktop: '1.875rem',
+      mobile: '1.25rem',
+      landscapeMobile: '1.1rem',
+      tablet: '1.4rem',
+      desktop: '1.5rem',
     },
     large: {
-      mobile: '2.0rem',
-      landscapeMobile: '1.4rem', // Significantly smaller for landscape mobile
-      tablet: '3.0rem',
-      desktop: '4.0rem',
+      mobile: '1.75rem',
+      landscapeMobile: '1.4rem',
+      tablet: '2.25rem',
+      desktop: '2.5rem',
     },
     xlarge: {
-      mobile: '2.5rem',
-      landscapeMobile: '1.8rem', // Much smaller for landscape mobile
-      tablet: '3.5rem',
-      desktop: '5.0rem',
+      mobile: '2.25rem',
+      landscapeMobile: '1.8rem',
+      tablet: '3rem',
+      desktop: '3.5rem',
     },
   },
   spacing: {
+    xs: {
+      mobile: '8px',
+      landscapeMobile: '6px',
+      tablet: '10px',
+      desktop: '12px',
+    },
     small: {
       mobile: '16px',
-      landscapeMobile: '8px', // Tighter spacing for limited height
+      landscapeMobile: '12px',
       tablet: '20px',
       desktop: '24px',
     },
     medium: {
       mobile: '24px',
-      landscapeMobile: '12px', // Much tighter for landscape mobile
+      landscapeMobile: '16px',
       tablet: '32px',
       desktop: '40px',
     },
     large: {
-      mobile: '40px',
-      landscapeMobile: '20px', // Half the space for landscape mobile
+      mobile: '32px',
+      landscapeMobile: '24px',
       tablet: '48px',
       desktop: '64px',
     },
+    xlarge: {
+      mobile: '48px',
+      landscapeMobile: '32px',
+      tablet: '64px',
+      desktop: '80px',
+    },
   },
   borderRadius: {
+    small: '8px',
+    medium: '12px',
+    large: '20px',
     button: '9999px',
-    card: '20px',
-    small: '12px',
   },
   zIndex: {
     button: 1001,
     burgerMenu: 10000,
     menu: 9999,
     popup: 2000,
+    overlay: 1500,
   },
 } as const;
 
-// Responsive helper functions
+// Device detection helpers
 export const getResponsiveValue = <T>(
   deviceInfo: DeviceInfo | undefined,
   values: { mobile: T; landscapeMobile?: T; tablet: T; desktop: T }
@@ -98,7 +125,6 @@ export const getResponsiveValue = <T>(
   return values.desktop;
 };
 
-// Enhanced responsive helper that requires all device types
 export const getResponsiveValueComplete = <T>(
   deviceInfo: DeviceInfo | undefined,
   values: { mobile: T; landscapeMobile: T; tablet: T; desktop: T }
@@ -109,35 +135,41 @@ export const getResponsiveValueComplete = <T>(
   return values.desktop;
 };
 
-// Get button size based on device
+// Component-specific responsive helpers
 export const getButtonSize = (deviceInfo?: DeviceInfo) =>
   getResponsiveValueComplete(deviceInfo, ResponsiveValues.buttonSize);
 
-// Get positioning offset based on device
 export const getPositioning = (deviceInfo?: DeviceInfo) =>
   getResponsiveValueComplete(deviceInfo, ResponsiveValues.positioning);
 
-// Get bottom positioning offset for better visual balance
 export const getBottomPositioning = (deviceInfo?: DeviceInfo) =>
   getResponsiveValueComplete(deviceInfo, ResponsiveValues.positioningBottom);
 
-// Get icon size based on device
 export const getIconSize = (deviceInfo?: DeviceInfo) =>
   `${getResponsiveValueComplete(deviceInfo, ResponsiveValues.iconSize)}px`;
 
-// Get text sizing based on device and size category
 export const getTextSize = (
   deviceInfo?: DeviceInfo,
-  size: 'small' | 'medium' | 'large' | 'xlarge' = 'medium'
+  size: 'xs' | 'small' | 'medium' | 'large' | 'xlarge' = 'medium'
 ) => getResponsiveValueComplete(deviceInfo, ResponsiveValues.textSizing[size]);
 
-// Get spacing based on device and size category
 export const getSpacing = (
   deviceInfo?: DeviceInfo,
-  size: 'small' | 'medium' | 'large' = 'medium'
+  size: 'xs' | 'small' | 'medium' | 'large' | 'xlarge' = 'medium'
 ) => getResponsiveValueComplete(deviceInfo, ResponsiveValues.spacing[size]);
 
-// Common color schemes
+// CSS media query helpers for consistent breakpoints
+export const mediaQueries = {
+  mobile: `@media (max-width: ${Breakpoints.mobile - 1}px)`,
+  tabletUp: `@media (min-width: ${Breakpoints.mobile}px)`,
+  desktopUp: `@media (min-width: ${Breakpoints.desktop}px)`,
+  landscape: '@media (orientation: landscape)',
+  portrait: '@media (orientation: portrait)',
+  retina:
+    '@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)',
+} as const;
+
+// Theme color schemes
 export const ColorSchemes = {
   primary: {
     dark: '#162542',
@@ -154,7 +186,7 @@ export const ColorSchemes = {
   },
 } as const;
 
-// Button state colors helper
+// Button styling helper
 export const getButtonColors = (isDarkMode: boolean, isHovered: boolean) => ({
   backgroundColor: isHovered
     ? ColorSchemes.text.primary
@@ -168,7 +200,7 @@ export const getButtonColors = (isDarkMode: boolean, isHovered: boolean) => ({
     : ColorSchemes.text.primary,
 });
 
-// Common transitions
+// Animation transitions
 export const Transitions = {
   fast: 'all 0.15s ease',
   normal: 'all 0.2s ease-in-out',

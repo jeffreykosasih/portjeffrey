@@ -63,6 +63,7 @@ function App(): React.JSX.Element {
   const [burgerMenuSlideDirection, setBurgerMenuSlideDirection] = useState<
     'left' | 'right'
   >('right');
+  const [triggerInitialZoom, setTriggerInitialZoom] = useState<boolean>(false);
 
   const toggleTheme = (): void => {
     setIsDarkMode((prevMode) => !prevMode);
@@ -97,21 +98,22 @@ function App(): React.JSX.Element {
     setShowMainApp(true);
     setTimeout(() => {
       setIsLoading(false);
-      // Show notification after camera zoom completes (3 seconds + small buffer)
+      // Show notification after camera zoom completes (1.7 seconds + small buffer)
       setTimeout(() => {
         setShowExploreNotification(true);
-      }, 3500); // Wait for camera zoom to complete (3s) + 0.5s buffer
+      }, 2500); // Wait for camera zoom to complete (1.7s) + 0.8s buffer
     }, 100);
   };
 
   const handleExploreClick = (): void => {
     setShowMainApp(true);
+    setTriggerInitialZoom(true); // Trigger the zoom animation
     setTimeout(() => {
       setIsLoading(false);
-      // Show notification after camera zoom completes (3 seconds + small buffer)
+      // Show notification after camera zoom completes (1.7 seconds + small buffer)
       setTimeout(() => {
         setShowExploreNotification(true);
-      }, 3500); // Wait for camera zoom to complete (3s) + 0.5s buffer
+      }, 2500); // Wait for camera zoom to complete (1.7s) + 0.8s buffer
     }, 100);
   };
 
@@ -295,13 +297,14 @@ function App(): React.JSX.Element {
               <MemoizedLazyScene
                 isDarkMode={isDarkMode}
                 showIsland={true}
-                showSea={true}
+                showSea={false}
                 deviceInfo={deviceInfo}
                 onNavigateToConnect={() => openPage('connect')}
                 onNavigateToPage={(page: string) => openPage(page as PageName)}
                 onPlayClickSound={playClickSound}
                 showExploreNotification={showExploreNotification}
                 isBurgerMenuOpen={isBurgerMenuOpen}
+                triggerInitialZoom={triggerInitialZoom}
               />
 
               <div

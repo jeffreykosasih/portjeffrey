@@ -61,6 +61,7 @@ interface LazySceneProps {
   onPlayClickSound?: () => void;
   showExploreNotification?: boolean;
   isBurgerMenuOpen?: boolean;
+  triggerInitialZoom?: boolean;
 }
 
 // Simple loading fallback to prevent layout shift
@@ -106,6 +107,7 @@ export default function LazyScene({
   onPlayClickSound,
   showExploreNotification,
   isBurgerMenuOpen,
+  triggerInitialZoom,
 }: LazySceneProps): React.JSX.Element {
   return (
     <SceneErrorBoundary>
@@ -120,6 +122,7 @@ export default function LazyScene({
           onPlayClickSound={onPlayClickSound}
           showExploreNotification={showExploreNotification}
           isBurgerMenuOpen={isBurgerMenuOpen}
+          triggerInitialZoom={triggerInitialZoom}
         />
       </Suspense>
     </SceneErrorBoundary>

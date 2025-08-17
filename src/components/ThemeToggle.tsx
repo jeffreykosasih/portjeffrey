@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLightbulb, faMoon } from '@fortawesome/free-solid-svg-icons';
 import { DeviceInfo } from '../lib/types';
@@ -27,12 +27,8 @@ export default function ThemeToggle({
 }: ThemeToggleProps): React.JSX.Element | null {
   const [isHovered, setIsHovered] = React.useState(false);
 
-  // Don't render if hidden
-  if (isHidden) {
-    return null;
-  }
+  if (isHidden) return null;
 
-  // Button configuration
   const buttonPosition: ButtonPosition = 'bottom-right';
   const buttonStyles = getButtonStyles({
     position: buttonPosition,
@@ -53,17 +49,10 @@ export default function ThemeToggle({
       aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
       className='touch-target'
     >
-      {isDarkMode ? (
-        <FontAwesomeIcon
-          icon={faMoon}
-          style={{ fontSize: iconSize, color: iconColor }}
-        />
-      ) : (
-        <FontAwesomeIcon
-          icon={faLightbulb}
-          style={{ fontSize: iconSize, color: iconColor }}
-        />
-      )}
+      <FontAwesomeIcon
+        icon={isDarkMode ? faMoon : faLightbulb}
+        style={{ fontSize: iconSize, color: iconColor }}
+      />
     </button>
   );
 }

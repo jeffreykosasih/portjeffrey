@@ -8,38 +8,37 @@ import {
   getButtonColors,
   ResponsiveValues,
   Transitions,
+  getResponsiveValue,
 } from './responsiveUtils';
 
-// Button position types
 export type ButtonPosition =
   | 'top-left'
   | 'top-right'
   | 'bottom-left'
   | 'bottom-right';
 
-// Button style configuration
 export interface ButtonConfig {
   position: ButtonPosition;
   isDarkMode: boolean;
   isHovered: boolean;
   deviceInfo?: DeviceInfo;
   zIndex?: number;
+  size?: 'small' | 'medium' | 'large';
 }
 
-// Generate button styles based on configuration
+// Enhanced button styles with responsive sizing options
 export const getButtonStyles = ({
   position,
   isDarkMode,
   isHovered,
   deviceInfo,
   zIndex = ResponsiveValues.zIndex.button,
+  size = 'medium',
 }: ButtonConfig): React.CSSProperties => {
-  const size = getButtonSize(deviceInfo);
+  const buttonSize = getResponsiveButtonSize(deviceInfo, size);
   const offset = getPositioning(deviceInfo);
   const bottomOffset = getBottomPositioning(deviceInfo);
   const colors = getButtonColors(isDarkMode, isHovered);
-
-  // Position-specific styles - use special bottom positioning for visual balance
   const positionStyles = getPositionStyles(position, offset, bottomOffset);
 
   return {
@@ -52,14 +51,14 @@ export const getButtonStyles = ({
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    width: `${size}px`,
-    height: `${size}px`,
+    width: `${buttonSize}px`,
+    height: `${buttonSize}px`,
     ...colors,
     ...positionStyles,
   };
 };
 
-// Get position-specific CSS properties
+// Position-specific styles
 const getPositionStyles = (
   position: ButtonPosition,
   offset: number,
@@ -82,11 +81,29 @@ const getPositionStyles = (
   }
 };
 
-// Get responsive icon size
+// Enhanced button sizing with small/medium/large options
+const getResponsiveButtonSize = (
+  deviceInfo?: DeviceInfo,
+  size: 'small' | 'medium' | 'large' = 'medium'
+) => {
+  const baseSize = getButtonSize(deviceInfo);
+  const multipliers = { small: 0.8, medium: 1, large: 1.2 };
+  return Math.round(baseSize * multipliers[size]);
+};
+
+// Touch-friendly button sizing for mobile
+export const getTouchTargetSize = (deviceInfo?: DeviceInfo) =>
+  getResponsiveValue(deviceInfo, {
+    mobile: 44,
+    landscapeMobile: 40,
+    tablet: 48,
+    desktop: 44,
+  });
+
 export const getResponsiveIconSize = (deviceInfo?: DeviceInfo) =>
   getIconSize(deviceInfo);
 
-// Common button hover handlers
+// Hover event handlers with sound support
 export const createHoverHandlers = (
   setIsHovered: (hovered: boolean) => void,
   onHoverSound?: () => void
@@ -100,7 +117,6 @@ export const createHoverHandlers = (
   },
 });
 
-// Get icon color based on hover state
 export const getIconColor = (isDarkMode: boolean, isHovered: boolean) => {
   const colors = getButtonColors(isDarkMode, isHovered);
   return colors.color;

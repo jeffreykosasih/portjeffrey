@@ -1,23 +1,10 @@
 import { useState, useEffect } from 'react';
-
-interface DeviceInfo {
-  isMobile: boolean;
-  isTablet: boolean;
-  isDesktop: boolean;
-  isTouchDevice: boolean;
-  isLowPerformance: boolean;
-  screenWidth: number;
-  screenHeight: number;
-  devicePixelRatio: number;
-  orientation: 'portrait' | 'landscape';
-  isRetinaDisplay: boolean;
-  supportsWebGL: boolean;
-  isLandscapeMobile: boolean;
-}
+import { DeviceInfo } from '../lib/types';
+import { Breakpoints } from '../lib/responsiveUtils';
 
 const useDeviceDetection = (): DeviceInfo => {
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo>(() => {
-    // Initial values - will be updated after mount
+    // Server-side safe initial values
     const initialWidth =
       typeof window !== 'undefined' ? window.innerWidth : 1024;
     const initialHeight =
@@ -25,32 +12,11 @@ const useDeviceDetection = (): DeviceInfo => {
     const initialPixelRatio =
       typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
-    const isMobileWidth = initialWidth < 640;
-    const isTabletWidth = initialWidth >= 640 && initialWidth < 1024;
-    const isLaptopWidth = initialWidth >= 1024 && initialWidth < 1440;
-    const isDesktopWidth = initialWidth >= 1440;
-    const isLandscape = initialWidth > initialHeight;
-    const aspectRatio = initialWidth / initialHeight;
-
-    // Enhanced device detection with better breakpoints
-    const isLandscapeMobile = isMobileWidth && isLandscape && aspectRatio > 1.5;
-    const isPortraitTablet = isTabletWidth && !isLandscape;
-    const isLandscapeTablet = isTabletWidth && isLandscape;
-
-    return {
-      isMobile: isMobileWidth && !isLandscapeMobile, // Regular mobile excludes landscape mobile
-      isTablet: isTabletWidth,
-      isDesktop: isLaptopWidth || isDesktopWidth,
-      isLandscapeMobile,
-      isTouchDevice: false,
-      isLowPerformance: false,
-      screenWidth: initialWidth,
-      screenHeight: initialHeight,
-      devicePixelRatio: initialPixelRatio,
-      orientation: isLandscape ? 'landscape' : 'portrait',
-      isRetinaDisplay: initialPixelRatio > 1,
-      supportsWebGL: false,
-    };
+    return getDeviceInfoFromDimensions(
+      initialWidth,
+      initialHeight,
+      initialPixelRatio
+    );
   });
 
   const detectDevice = () => {
@@ -60,84 +26,14 @@ const useDeviceDetection = (): DeviceInfo => {
     const height = window.innerHeight;
     const pixelRatio = window.devicePixelRatio || 1;
 
-    // Detect touch capability
-    const isTouchDevice =
-      'ontouchstart' in window ||
-      navigator.maxTouchPoints > 0 ||
-      (navigator as any).msMaxTouchPoints > 0;
-
-    // Detect low performance devices
-    const isLowPerformance = (() => {
-      // Check for limited memory (less than 4GB)
-      if ('deviceMemory' in navigator) {
-        return (navigator as any).deviceMemory < 4;
-      }
-
-      // Check for slow CPU (less than 4 cores)
-      if ('hardwareConcurrency' in navigator) {
-        return navigator.hardwareConcurrency < 4;
-      }
-
-      // Fallback: assume mobile devices are lower performance
-      return width < 768;
-    })();
-
-    // Check WebGL support
-    const supportsWebGL = (() => {
-      try {
-        const canvas = document.createElement('canvas');
-        return !!(
-          canvas.getContext('webgl') ||
-          canvas.getContext('experimental-webgl') ||
-          canvas.getContext('webgl2')
-        );
-      } catch (e) {
-        return false;
-      }
-    })();
-
-    const isMobileWidth = width < 640;
-    const isTabletWidth = width >= 640 && width < 1024;
-    const isLaptopWidth = width >= 1024 && width < 1440;
-    const isDesktopWidth = width >= 1440;
-    const isLandscape = width > height;
-    const aspectRatio = width / height;
-
-    // Enhanced device detection with better breakpoints
-    const isLandscapeMobile = isMobileWidth && isLandscape && aspectRatio > 1.5;
-    const isPortraitTablet = isTabletWidth && !isLandscape;
-    const isLandscapeTablet = isTabletWidth && isLandscape;
-
-    setDeviceInfo({
-      isMobile: isMobileWidth && !isLandscapeMobile, // Regular mobile excludes landscape mobile
-      isTablet: isTabletWidth,
-      isDesktop: isLaptopWidth || isDesktopWidth,
-      isLandscapeMobile,
-      isTouchDevice,
-      isLowPerformance,
-      screenWidth: width,
-      screenHeight: height,
-      devicePixelRatio: pixelRatio,
-      orientation: isLandscape ? 'landscape' : 'portrait',
-      isRetinaDisplay: pixelRatio > 1.5, // More accurate retina detection
-      supportsWebGL,
-    });
+    setDeviceInfo(getDeviceInfoFromDimensions(width, height, pixelRatio));
   };
 
   useEffect(() => {
-    // Initial detection
     detectDevice();
 
-    // Listen for resize events
-    const handleResize = () => {
-      detectDevice();
-    };
-
-    // Listen for orientation changes
-    const handleOrientationChange = () => {
-      // Delay to ensure dimensions are updated
-      setTimeout(detectDevice, 100);
-    };
+    const handleResize = () => detectDevice();
+    const handleOrientationChange = () => setTimeout(detectDevice, 100);
 
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleOrientationChange);
@@ -149,6 +45,75 @@ const useDeviceDetection = (): DeviceInfo => {
   }, []);
 
   return deviceInfo;
+};
+
+// Helper function to determine device info from dimensions
+const getDeviceInfoFromDimensions = (
+  width: number,
+  height: number,
+  pixelRatio: number
+): DeviceInfo => {
+  const isLandscape = width > height;
+  const aspectRatio = width / height;
+
+  const isMobileWidth = width < Breakpoints.mobile;
+  const isTabletWidth =
+    width >= Breakpoints.mobile && width < Breakpoints.tablet;
+  const isDesktopWidth = width >= Breakpoints.desktop;
+  const isLandscapeMobile =
+    isMobileWidth && isLandscape && aspectRatio > Breakpoints.landscapeRatio;
+
+  // Client-side feature detection
+  const isTouchDevice =
+    typeof window !== 'undefined' &&
+    ('ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      (navigator as any).msMaxTouchPoints > 0);
+
+  const isLowPerformance =
+    typeof window !== 'undefined' &&
+    (() => {
+      if ('deviceMemory' in navigator && (navigator as any).deviceMemory < 4)
+        return true;
+      if (
+        'hardwareConcurrency' in navigator &&
+        navigator.hardwareConcurrency < 4
+      )
+        return true;
+      return width < 768;
+    })();
+
+  const supportsWebGL =
+    typeof window !== 'undefined' &&
+    (() => {
+      try {
+        const canvas = document.createElement('canvas');
+        return !!(
+          canvas.getContext('webgl') ||
+          canvas.getContext('experimental-webgl') ||
+          canvas.getContext('webgl2')
+        );
+      } catch {
+        return false;
+      }
+    })();
+
+  return {
+    isMobile: isMobileWidth && !isLandscapeMobile,
+    isTablet: isTabletWidth,
+    isDesktop:
+      isDesktopWidth ||
+      (width >= Breakpoints.tablet && width < Breakpoints.desktop),
+    isLandscapeMobile,
+    isTouchDevice,
+    isLowPerformance,
+    screenWidth: width,
+    screenHeight: height,
+    devicePixelRatio: pixelRatio,
+    orientation: isLandscape ? 'landscape' : 'portrait',
+    isRetinaDisplay: pixelRatio > 1.5,
+    supportsWebGL,
+  };
 };
 
 export default useDeviceDetection;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { SiSketchfab } from 'react-icons/si';
 import { DeviceInfo } from '../lib/types';
 import {
@@ -24,12 +24,8 @@ export default function CreditsButton({
 }: CreditsButtonProps): React.JSX.Element | null {
   const [isHovered, setIsHovered] = React.useState(false);
 
-  // Don't render if hidden
-  if (isHidden) {
-    return null;
-  }
+  if (isHidden) return null;
 
-  // Button configuration
   const buttonPosition: ButtonPosition = 'bottom-left';
   const buttonStyles = getButtonStyles({
     position: buttonPosition,

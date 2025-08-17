@@ -7,22 +7,23 @@ interface SoundRefs {
   hover: HTMLAudioElement | null;
 }
 
+// Audio paths for UI sounds
+const SOUND_PATHS = {
+  click: '/assets/audio/sound_click.mp3',
+  hover: '/assets/audio/sound_hover.wav',
+} as const;
+
 export function useClickSound(volume: number = 0.45) {
   const audioRefs = useRef<SoundRefs>({
     click: null,
     hover: null,
   });
 
-  // Initialize audio for a specific sound type
+  // Lazy audio initialization
   const initializeAudio = useCallback(
     (type: SoundType) => {
       if (!audioRefs.current[type]) {
-        const soundPaths = {
-          click: '/assets/audio/sound_click.mp3',
-          hover: '/assets/audio/sound_hover.wav',
-        };
-
-        audioRefs.current[type] = new Audio(soundPaths[type]);
+        audioRefs.current[type] = new Audio(SOUND_PATHS[type]);
         audioRefs.current[type]!.volume = volume;
         audioRefs.current[type]!.preload = 'auto';
       }
@@ -30,22 +31,23 @@ export function useClickSound(volume: number = 0.45) {
     [volume]
   );
 
+  // Play sound with autoplay policy handling
   const playSound = useCallback(
     (type: SoundType = 'click') => {
       initializeAudio(type);
 
       const audio = audioRefs.current[type];
       if (audio) {
-        // Reset audio to beginning in case it's still playing
         audio.currentTime = 0;
         audio.play().catch(() => {
-          // Sound blocked by browser autoplay policy
+          // Silently handle autoplay policy restrictions
         });
       }
     },
     [initializeAudio]
   );
 
+  // Convenience methods
   const playClickSound = useCallback(() => playSound('click'), [playSound]);
   const playHoverSound = useCallback(() => playSound('hover'), [playSound]);
 

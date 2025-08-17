@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DeviceInfo } from '../lib/types';
 import {
@@ -144,15 +144,17 @@ export default function BurgerMenu({
   }, [activePage, menuIsOpen, wasOpenBehindPage]);
 
   const toggleMenu = () => {
-    onPlayHoverSound?.(); // Use hover sound for burger menu toggle
     const newState = !menuIsOpen;
+
+    // Use requestAnimationFrame to avoid blocking the animation
+    requestAnimationFrame(() => {
+      onPlayHoverSound?.();
+      if (onHideThemeToggle) {
+        onHideThemeToggle(newState);
+      }
+    });
+
     setMenuIsOpen(newState);
-    // Hide/show theme toggle based on menu state
-    if (onHideThemeToggle) {
-      onHideThemeToggle(newState);
-    }
-    // Keep credits button visible when menu opens/closes
-    // (Remove this logic to fix the issue)
   };
 
   const handleNavigation = (page: PageName): void => {
@@ -257,43 +259,41 @@ export default function BurgerMenu({
       width: baseWidth,
       height: '100dvh', // Use dynamic viewport height for better mobile support
       background,
-      // Performance hints
-      willChange: 'transform, opacity',
+      zIndex: 9999,
       transform: 'translateZ(0)',
       backfaceVisibility: 'hidden' as const,
-      contain: 'layout paint size style',
-      zIndex: 9999,
+      willChange: 'transform',
       display: 'flex',
       flexDirection: 'column' as const,
       alignItems: 'flex-start',
       justifyContent: 'flex-start',
       gap: deviceInfo?.isLandscapeMobile
-        ? 'var(--space-xs)' // Using CSS custom property for tighter spacing
+        ? '0.5rem'
         : deviceInfo?.isMobile
-        ? 'calc(var(--space-base) - 0.0625rem)' // Using CSS custom property with calc
-        : 'var(--space-lg)', // Using CSS custom property
+        ? '0.9375rem'
+        : '1.5rem',
       paddingTop: deviceInfo?.isLandscapeMobile
-        ? 'var(--space-5xl)' // Using CSS custom property (smaller top padding)
+        ? '4rem'
         : deviceInfo?.isMobile
-        ? 'var(--space-6xl)' // Using CSS custom property
-        : '7.5rem', // Converted from 120px to rem
+        ? '5rem'
+        : '7.5rem',
       paddingBottom: deviceInfo?.isLandscapeMobile
-        ? 'calc(var(--space-xl) + 0.375rem)' // Using CSS custom property with calc
+        ? '2.375rem'
         : deviceInfo?.isMobile
         ? deviceInfo?.orientation === 'portrait'
-          ? '7.5rem' // Converted from 120px to rem (more bottom padding on portrait)
-          : 'var(--space-6xl)' // Using CSS custom property
-        : 'var(--space-3xl)', // Using CSS custom property
+          ? '7.5rem'
+          : '5rem'
+        : '3rem',
       paddingLeft: deviceInfo?.isLandscapeMobile
-        ? 'var(--space-lg)' // Using CSS custom property (tighter left padding)
+        ? '1.5rem'
         : deviceInfo?.isMobile
-        ? 'calc(var(--space-xl) + 0.375rem)' // Using CSS custom property with calc
-        : 'var(--space-3xl)', // Using CSS custom property
+        ? '2.375rem'
+        : '3rem',
       paddingRight: deviceInfo?.isLandscapeMobile
-        ? 'var(--space-base)' // Using CSS custom property (tighter right padding)
+        ? '1rem'
         : deviceInfo?.isMobile
-        ? 'var(--space-lg)' // Using CSS custom property
-        : 'calc(var(--space-xl) + 0.375rem)', // Using CSS custom property with calc
+        ? '1.5rem'
+        : '2.375rem',
       minHeight:
         deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile
           ? '100dvh'
@@ -301,52 +301,58 @@ export default function BurgerMenu({
     };
   };
 
-  // Updated menu item styling with landscape mobile support
-  const getMenuItemStyles = (isHovered: boolean, itemKey: PageName) => {
-    const isSpecificItemHovered = hoveredMenuItem === itemKey;
-    const shouldHighlight = isHovered || isSpecificItemHovered;
+  // Memoize menu styles to prevent recalculation during animations
+  const menuStyles = useMemo(() => getMenuStyles(), [deviceInfo, isDarkMode]);
 
-    const baseStyles = {
-      background: 'transparent',
-      border: 'none',
-      color: shouldHighlight ? '#FFEEA9' : '#ffffff',
-      fontWeight: '900',
-      fontFamily: 'Lato, sans-serif',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      textAlign: 'left' as const,
-      width: '100%',
-      maxWidth: '56.25rem', // Converted from 900px to rem
-      letterSpacing: '-0.02em',
-      transform: shouldHighlight ? 'scale(1.05)' : 'scale(1)',
-      padding: deviceInfo?.isLandscapeMobile
-        ? '0.125rem 0'
-        : 'var(--space-sm) 0', // Using CSS custom properties
-    };
+  // Updated menu item styling with landscape mobile support - memoized
+  const getMenuItemStyles = useMemo(
+    () => (isHovered: boolean, itemKey: PageName) => {
+      const isSpecificItemHovered = hoveredMenuItem === itemKey;
+      const shouldHighlight = isHovered || isSpecificItemHovered;
 
-    // Enhanced responsive font sizes with landscape mobile support
-    if (deviceInfo?.isLandscapeMobile) {
-      return {
-        ...baseStyles,
-        fontSize: 'var(--text-sm)', // Using CSS custom property (much smaller)
+      const baseStyles = {
+        background: 'transparent',
+        border: 'none',
+        color: shouldHighlight ? '#FFEEA9' : '#ffffff',
+        fontWeight: '900',
+        fontFamily: 'Lato, sans-serif',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        textAlign: 'left' as const,
+        width: '100%',
+        maxWidth: '56.25rem', // Converted from 900px to rem
+        letterSpacing: '-0.02em',
+        transform: shouldHighlight ? 'scale(1.05)' : 'scale(1)',
+        padding: deviceInfo?.isLandscapeMobile
+          ? '0.125rem 0'
+          : 'var(--space-sm) 0', // Using CSS custom properties
       };
-    } else if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        fontSize: 'var(--text-2xl)', // Using CSS custom property (smaller for mobile)
-      };
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        fontSize: 'calc(var(--text-2xl) + 0.2rem)', // Using CSS custom property with calc
-      };
-    } else {
-      return {
-        ...baseStyles,
-        fontSize: 'var(--text-3xl)', // Using CSS custom property (original size)
-      };
-    }
-  };
+
+      // Enhanced responsive font sizes with landscape mobile support
+      if (deviceInfo?.isLandscapeMobile) {
+        return {
+          ...baseStyles,
+          fontSize: 'var(--text-sm)', // Using CSS custom property (much smaller)
+        };
+      } else if (deviceInfo?.isMobile) {
+        return {
+          ...baseStyles,
+          fontSize: 'var(--text-2xl)', // Using CSS custom property (smaller for mobile)
+        };
+      } else if (deviceInfo?.isTablet) {
+        return {
+          ...baseStyles,
+          fontSize: 'calc(var(--text-2xl) + 0.2rem)', // Using CSS custom property with calc
+        };
+      } else {
+        return {
+          ...baseStyles,
+          fontSize: 'var(--text-3xl)', // Using CSS custom property (original size)
+        };
+      }
+    },
+    [deviceInfo, hoveredMenuItem]
+  );
 
   const menuItems = [
     { name: 'Port Jeffrey', key: 'home' as PageName },
@@ -401,32 +407,26 @@ export default function BurgerMenu({
       )}
 
       {/* Slide-out menu from right - Show when no page is active OR when home page is active */}
-      <AnimatePresence>
+      <AnimatePresence mode='wait'>
         {(!activePage || activePage === 'home') && menuIsOpen && (
           <motion.div
             initial={{
-              x: !shouldAnimate
-                ? '30%'
-                : slideDirection === 'left'
-                ? '-100%'
-                : '100%',
+              x: '100%',
               opacity: 0,
             }}
             animate={{
-              x: '30%', // Back to original positioning
+              x: '30%',
               opacity: 1,
-              transition: !shouldAnimate
-                ? { duration: 0 }
-                : {
-                    type: 'tween',
-                    ease: 'easeOut',
-                    duration: 0.5, // Slower animation (was 0.3)
-                  },
             }}
             exit={{
               x: '100%',
               opacity: 0,
-              transition: { duration: 0.5, ease: 'easeInOut' }, // Slower exit too
+            }}
+            transition={{
+              type: 'spring',
+              damping: 25,
+              stiffness: 180,
+              mass: 1.2,
             }}
             onAnimationComplete={() => {
               // Reset the flag once animation is complete
@@ -434,8 +434,7 @@ export default function BurgerMenu({
                 setWasOpenBehindPage(false);
               }
             }}
-            style={getMenuStyles()}
-            className='gpu-accelerated'
+            style={menuStyles}
           >
             {/* Menu items - back to original layout */}
             {menuItems.map((item, index) => (
@@ -448,8 +447,8 @@ export default function BurgerMenu({
                 transition={
                   shouldAnimate
                     ? {
-                        delay: index * 0.1,
-                        duration: 0.3,
+                        delay: index * 0.12,
+                        duration: 0.4,
                         ease: 'easeOut',
                       }
                     : { duration: 0 }
@@ -475,8 +474,8 @@ export default function BurgerMenu({
               transition={
                 shouldAnimate
                   ? {
-                      delay: menuItems.length * 0.1 + 0.2,
-                      duration: 0.3,
+                      delay: menuItems.length * 0.12 + 0.25,
+                      duration: 0.6,
                       ease: 'easeOut',
                     }
                   : { duration: 0 }
