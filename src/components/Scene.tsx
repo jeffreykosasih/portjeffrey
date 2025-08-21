@@ -1224,8 +1224,8 @@ function AnimatedCamera({
     if (deviceInfo?.isLandscapeMobile) {
       // Landscape mobile - bring camera much closer for better visibility
       return {
-        position: [-10, 30, -80] as [number, number, number], // Much closer position
-        fov: 55,
+        position: [-2.5, 15, -80] as [number, number, number],
+        fov: 50,
       };
     } else if (deviceInfo?.isMobile) {
       if (deviceInfo.orientation === 'portrait') {
@@ -1236,8 +1236,8 @@ function AnimatedCamera({
       } else {
         // Regular mobile landscape - legacy support
         return {
-          position: [-10, 32, -90] as [number, number, number],
-          fov: 55,
+          position: [-2.5, 15, -80] as [number, number, number],
+          fov: 50,
         };
       }
     } else if (deviceInfo?.isTablet) {
@@ -1248,8 +1248,8 @@ function AnimatedCamera({
         };
       } else {
         return {
-          position: [-10, 32, -85] as [number, number, number],
-          fov: 55,
+          position: [-2.5, 15, -80] as [number, number, number],
+          fov: 50,
         };
       }
     } else {

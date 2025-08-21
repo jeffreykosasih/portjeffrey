@@ -116,17 +116,17 @@ export default function AppLoadingScreen({
     if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
-        fontSize: '2.5rem', // Mobile portrait
+        fontSize: '2.5rem',
       };
     } else if (deviceInfo?.isLandscapeMobile) {
       return {
         ...baseStyles,
-        fontSize: '2rem', // Mobile landscape - smaller due to limited height
+        fontSize: '3rem',
       };
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
-        fontSize: deviceInfo.orientation === 'landscape' ? '3.5rem' : '4rem', // Tablet responsive
+        fontSize: deviceInfo.orientation === 'landscape' ? '3.5rem' : '4rem',
       };
     } else {
       // Desktop and larger screens
@@ -165,8 +165,8 @@ export default function AppLoadingScreen({
     } else if (deviceInfo?.isLandscapeMobile) {
       return {
         ...baseStyles,
-        fontSize: 'var(--mobile-text-base)',
-        padding: 'var(--space-sm) var(--space-lg)',
+        fontSize: 'var(--mobile-text-lg)',
+        padding: 'var(--space-md) var(--space-xl)',
         minHeight: 'var(--touch-target-sm)',
       };
     } else if (deviceInfo?.isTablet) {
@@ -246,7 +246,7 @@ export default function AppLoadingScreen({
             gap: deviceInfo?.isMobile
               ? 'var(--space-2xl)'
               : deviceInfo?.isLandscapeMobile
-              ? 'var(--space-lg)'
+              ? '3.5rem' // Better spacing for landscape mobile
               : deviceInfo?.isTablet
               ? 'var(--space-3xl)'
               : 'var(--space-4xl)', // Responsive gap based on device
@@ -264,7 +264,7 @@ export default function AppLoadingScreen({
               height: deviceInfo?.isMobile
                 ? '12rem'
                 : deviceInfo?.isLandscapeMobile
-                ? '8rem'
+                ? '4rem' // Much smaller title area for landscape mobile
                 : deviceInfo?.isTablet
                 ? '15rem'
                 : '17.5rem', // Responsive height based on device
@@ -358,7 +358,7 @@ export default function AppLoadingScreen({
               height: deviceInfo?.isMobile
                 ? 'var(--space-4xl)'
                 : deviceInfo?.isLandscapeMobile
-                ? 'var(--space-3xl)'
+                ? '2rem' // Much smaller button area for landscape mobile
                 : deviceInfo?.isTablet
                 ? 'var(--space-5xl)'
                 : 'var(--space-6xl)', // Responsive height based on device

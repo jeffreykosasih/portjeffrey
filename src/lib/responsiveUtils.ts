@@ -3,6 +3,7 @@ import { DeviceInfo } from './types';
 // Common breakpoints for consistent responsive design
 export const Breakpoints = {
   mobile: 640, // Portrait mobile
+  landscapeMobile: 900, // Landscape mobile (includes iPhone 11, etc.)
   tablet: 1024, // Tablet and small laptops
   desktop: 1440, // Large screens
   landscapeRatio: 1.5, // Landscape mobile threshold

@@ -61,7 +61,9 @@ const getDeviceInfoFromDimensions = (
     width >= Breakpoints.mobile && width < Breakpoints.tablet;
   const isDesktopWidth = width >= Breakpoints.desktop;
   const isLandscapeMobile =
-    isMobileWidth && isLandscape && aspectRatio > Breakpoints.landscapeRatio;
+    (isMobileWidth || (isLandscape && width < Breakpoints.landscapeMobile)) &&
+    isLandscape &&
+    aspectRatio > Breakpoints.landscapeRatio;
 
   // Client-side feature detection
   const isTouchDevice =
