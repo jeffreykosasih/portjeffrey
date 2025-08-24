@@ -6,6 +6,12 @@ import {
   faExternalLinkAlt,
   faRocket,
 } from '@fortawesome/free-solid-svg-icons';
+import { DeviceInfo } from '../lib/types';
+import {
+  getResponsiveValue,
+  getSpacing,
+  ResponsiveValues,
+} from '../lib/responsiveUtils';
 
 interface PortfolioPageProps {
   isVisible: boolean;
@@ -13,7 +19,8 @@ interface PortfolioPageProps {
   onOpenBurgerMenu: (slideDirection?: 'left' | 'right') => void;
   isDarkMode: boolean;
   shouldAnimateText?: boolean;
-  deviceInfo?: any;
+  deviceInfo?: DeviceInfo;
+  onPlayClickSound?: () => void;
 }
 
 export default function PortfolioPage({
@@ -23,12 +30,51 @@ export default function PortfolioPage({
   isDarkMode,
   shouldAnimateText = true,
   deviceInfo,
+  onPlayClickSound,
 }: PortfolioPageProps) {
   const [isButtonHovered, setIsButtonHovered] = React.useState(false);
 
-  // Responsive styles based on device type with landscape mobile support
+  // Unified device type detection (following ProfilePage pattern)
+  const getDeviceType = ():
+    | 'mobile-landscape'
+    | 'mobile-portrait'
+    | 'tablet'
+    | 'desktop' => {
+    if (!deviceInfo) return 'desktop';
+
+    if (
+      deviceInfo.isLandscapeMobile ||
+      (deviceInfo.isMobile && deviceInfo.orientation === 'landscape')
+    ) {
+      return 'mobile-landscape';
+    }
+    if (deviceInfo.isMobile) return 'mobile-portrait';
+    if (deviceInfo.isTablet) return 'tablet';
+    return 'desktop';
+  };
+
+  const deviceType = getDeviceType();
+
+  // Responsive styles based on device type (following ProfilePage pattern)
   const getContainerStyles = () => {
-    const baseStyles = {
+    const configs = {
+      'mobile-landscape': {
+        padding: `max(env(safe-area-inset-top), var(--space-sm)) var(--space-base) max(env(safe-area-inset-bottom), var(--space-lg)) var(--space-base)`,
+        height: '100dvh',
+      },
+      'mobile-portrait': {
+        padding: `max(env(safe-area-inset-top), var(--space-lg)) var(--space-base) max(env(safe-area-inset-bottom), var(--space-3xl)) var(--space-base)`,
+        height: '100dvh',
+      },
+      tablet: {
+        padding: 'calc(var(--space-xl) + 0.625rem) var(--space-xl)',
+      },
+      desktop: {
+        padding: 'var(--space-3xl)',
+      },
+    };
+
+    return {
       position: 'fixed' as const,
       top: 0,
       left: 0,
@@ -37,10 +83,10 @@ export default function PortfolioPage({
       backgroundColor: isDarkMode
         ? 'rgba(22, 37, 66, 0.4)'
         : 'rgba(0, 94, 128, 0.5)',
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
+      backdropFilter: 'blur(0.5rem)',
+      WebkitBackdropFilter: 'blur(0.5rem)',
       opacity: 1,
-      zIndex: 1500,
+      zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
       justifyContent: 'flex-start',
@@ -48,45 +94,7 @@ export default function PortfolioPage({
       color: '#ffffff',
       overflowY: 'auto' as const,
       overflowX: 'hidden' as const,
-    };
-
-    // Enhanced with landscape mobile support
-    if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like layout with scaled components
-      return {
-        ...baseStyles,
-        padding:
-          'max(env(safe-area-inset-top), 10px) 16px max(env(safe-area-inset-bottom), 20px) 16px',
-        height: '100dvh',
-      };
-    } else if (deviceInfo?.isMobile) {
-      if (deviceInfo.orientation === 'landscape') {
-        // Regular mobile landscape - legacy support
-        return {
-          ...baseStyles,
-          padding:
-            'max(env(safe-area-inset-top), 10px) 16px max(env(safe-area-inset-bottom), 20px) 16px',
-          height: '100dvh',
-        };
-      } else {
-        // Portrait mobile
-        return {
-          ...baseStyles,
-          padding:
-            'max(env(safe-area-inset-top), 20px) 16px max(env(safe-area-inset-bottom), 40px) 16px',
-          height: '100dvh',
-        };
-      }
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        padding: '30px 24px',
-      };
-    }
-
-    return {
-      ...baseStyles,
-      padding: '40px',
+      ...configs[deviceType],
     };
   };
 
@@ -144,6 +152,7 @@ export default function PortfolioPage({
           {/* Back button with slide left to right effect */}
           <motion.button
             onClick={() => {
+              onPlayClickSound?.();
               onClose(); // Close current page
               onOpenBurgerMenu('right'); // Open burger menu sliding from right corner
             }}
@@ -154,27 +163,31 @@ export default function PortfolioPage({
             style={{
               borderRadius: '50%',
               position: 'absolute',
-              top: deviceInfo?.isMobile
-                ? deviceInfo?.orientation === 'landscape'
-                  ? 'max(env(safe-area-inset-top), 8px)'
-                  : 'max(env(safe-area-inset-top), 16px)'
-                : '20px',
-              right: deviceInfo?.isMobile
-                ? deviceInfo?.orientation === 'landscape'
-                  ? '12px'
-                  : '16px'
-                : '20px',
+              top:
+                deviceType === 'mobile-landscape'
+                  ? 'max(env(safe-area-inset-top), var(--space-sm))'
+                  : deviceType === 'mobile-portrait'
+                  ? 'max(env(safe-area-inset-top), var(--space-base))'
+                  : 'var(--space-lg)',
+              right:
+                deviceType === 'mobile-landscape'
+                  ? 'var(--space-md)'
+                  : deviceType === 'mobile-portrait'
+                  ? 'var(--space-base)'
+                  : 'var(--space-lg)',
               zIndex: 1001,
-              width: deviceInfo?.isMobile
-                ? deviceInfo?.orientation === 'landscape'
-                  ? '40px'
-                  : '48px'
-                : '50px',
-              height: deviceInfo?.isMobile
-                ? deviceInfo?.orientation === 'landscape'
-                  ? '40px'
-                  : '48px'
-                : '50px',
+              width:
+                deviceType === 'mobile-landscape'
+                  ? 'var(--touch-target-sm)'
+                  : deviceType === 'mobile-portrait'
+                  ? 'var(--touch-target-md)'
+                  : 'var(--touch-target-lg)',
+              height:
+                deviceType === 'mobile-landscape'
+                  ? 'var(--touch-target-sm)'
+                  : deviceType === 'mobile-portrait'
+                  ? 'var(--touch-target-md)'
+                  : 'var(--touch-target-lg)',
               border: 'none',
               backgroundColor: isDarkMode ? '#162542' : '#005E80',
               color: '#ffffff',
@@ -190,7 +203,7 @@ export default function PortfolioPage({
               icon={faArrowLeft}
               style={{
                 color: '#ffffff',
-                fontSize: '20px',
+                fontSize: 'var(--text-lg)',
               }}
             />
           </motion.button>
@@ -215,29 +228,39 @@ export default function PortfolioPage({
               alignItems: 'center',
               justifyContent: deviceInfo?.isMobile ? 'flex-start' : 'center',
               minHeight: deviceInfo?.isMobile ? 'calc(100vh - 120px)' : 'auto',
-              paddingTop: deviceInfo?.isMobile ? '80px' : '20px', // Space for back button
+              paddingTop:
+                deviceType === 'mobile-landscape' ||
+                deviceType === 'mobile-portrait'
+                  ? 'var(--space-5xl)'
+                  : 'var(--space-lg)', // Space for back button
             }}
           >
             {/* Header */}
             <h1
               style={{
-                fontSize: deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'landscape'
-                    ? '1.3rem' // Reduced from 1.8rem
-                    : '2.2rem'
-                  : deviceInfo?.isTablet
-                  ? '2.5rem'
-                  : '3rem',
+                fontSize:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--text-2xl)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'var(--mobile-text-display)'
+                    : deviceType === 'tablet'
+                    ? 'var(--tablet-text-display)'
+                    : 'var(--text-6xl)',
                 fontWeight: '900',
                 fontFamily: 'Lato, sans-serif',
-                marginBottom: deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'landscape'
-                    ? '6px' // Reduced from 12px
-                    : '16px'
-                  : deviceInfo?.isTablet
-                  ? '20px'
-                  : '25px',
-                marginTop: deviceInfo?.isMobile ? '0' : '20px',
+                marginBottom:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--space-xs)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'var(--space-base)'
+                    : deviceType === 'tablet'
+                    ? 'var(--space-lg)'
+                    : 'calc(var(--space-xl) + 0.3125rem)',
+                marginTop:
+                  deviceType === 'mobile-landscape' ||
+                  deviceType === 'mobile-portrait'
+                    ? '0'
+                    : 'var(--space-lg)',
                 background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
@@ -264,19 +287,33 @@ export default function PortfolioPage({
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'stretch',
-                gap: deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'landscape'
-                    ? '8px' // Reduced from 15px
-                    : '16px'
-                  : '30px',
-                padding: deviceInfo?.isMobile ? '0 10px' : '0 20px',
+                gap:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--space-sm)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'var(--space-base)'
+                    : deviceType === 'tablet'
+                    ? 'calc(var(--space-xl) + 0.625rem)'
+                    : 'calc(var(--space-xl) + 0.625rem)',
+                padding:
+                  deviceType === 'mobile-landscape' ||
+                  deviceType === 'mobile-portrait'
+                    ? '0 var(--space-sm)'
+                    : '0 var(--space-lg)',
                 flexWrap: 'wrap',
-                marginTop: deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'landscape'
-                    ? '8px' // Reduced from 15px
-                    : '20px'
-                  : '30px',
-                marginBottom: deviceInfo?.isMobile ? '40px' : '20px', // Extra bottom margin for mobile scrolling
+                marginTop:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--space-sm)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'var(--space-lg)'
+                    : deviceType === 'tablet'
+                    ? 'calc(var(--space-xl) + 0.625rem)'
+                    : 'calc(var(--space-xl) + 0.625rem)',
+                marginBottom:
+                  deviceType === 'mobile-landscape' ||
+                  deviceType === 'mobile-portrait'
+                    ? 'var(--space-3xl)'
+                    : 'var(--space-lg)', // Extra bottom margin for mobile scrolling
               }}
             >
               {projects.map((project, index) => (
@@ -313,21 +350,30 @@ export default function PortfolioPage({
 
                     cursor: project.link ? 'pointer' : 'default',
                     flex: '1',
-                    minWidth: deviceInfo?.isMobile
-                      ? deviceInfo?.orientation === 'landscape'
-                        ? '110px'
-                        : '160px'
-                      : '225px',
-                    maxWidth: deviceInfo?.isMobile
-                      ? deviceInfo?.orientation === 'landscape'
-                        ? '140px'
-                        : '190px'
-                      : '250px',
-                    height: deviceInfo?.isMobile
-                      ? deviceInfo?.orientation === 'landscape'
-                        ? '220px'
-                        : '360px'
-                      : '520px',
+                    minWidth:
+                      deviceType === 'mobile-landscape'
+                        ? '6.875rem'
+                        : deviceType === 'mobile-portrait'
+                        ? '10rem'
+                        : deviceType === 'tablet'
+                        ? '14.0625rem'
+                        : '14.0625rem',
+                    maxWidth:
+                      deviceType === 'mobile-landscape'
+                        ? '8.75rem'
+                        : deviceType === 'mobile-portrait'
+                        ? '11.875rem'
+                        : deviceType === 'tablet'
+                        ? '15.625rem'
+                        : '15.625rem',
+                    height:
+                      deviceType === 'mobile-landscape'
+                        ? '13.75rem'
+                        : deviceType === 'mobile-portrait'
+                        ? '22.5rem'
+                        : deviceType === 'tablet'
+                        ? '32.5rem'
+                        : '32.5rem',
                     opacity: project.link ? 1 : 0.7,
                     position: 'relative',
                     overflow: 'hidden',
@@ -344,8 +390,8 @@ export default function PortfolioPage({
                       width: '100%',
                       height: '60%',
                       borderRadius: project.image
-                        ? '20px 20px 0 0'
-                        : '20px 20px 20px 20px',
+                        ? 'var(--radius-lg) var(--radius-lg) 0 0'
+                        : 'var(--radius-lg)',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
@@ -372,7 +418,11 @@ export default function PortfolioPage({
                         <FontAwesomeIcon
                           icon={(project as any).icon}
                           style={{
-                            fontSize: deviceInfo?.isMobile ? '24px' : '30px',
+                            fontSize:
+                              deviceType === 'mobile-landscape' ||
+                              deviceType === 'mobile-portrait'
+                                ? 'var(--text-2xl)'
+                                : 'calc(var(--text-2xl) + 0.375rem)',
                             color: 'rgba(255, 255, 255, 0.6)',
                           }}
                         />
@@ -411,7 +461,11 @@ export default function PortfolioPage({
                     style={{
                       height: '20%',
                       width: '100%',
-                      padding: deviceInfo?.isMobile ? '8px 12px' : '10px 16px',
+                      padding:
+                        deviceType === 'mobile-landscape' ||
+                        deviceType === 'mobile-portrait'
+                          ? 'var(--space-sm) var(--space-md)'
+                          : 'var(--space-sm) var(--space-base)',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'center',
@@ -419,7 +473,11 @@ export default function PortfolioPage({
                   >
                     <h4
                       style={{
-                        fontSize: deviceInfo?.isMobile ? '1rem' : '1.1rem',
+                        fontSize:
+                          deviceType === 'mobile-landscape' ||
+                          deviceType === 'mobile-portrait'
+                            ? 'var(--text-base)'
+                            : 'calc(var(--text-base) + 0.1rem)',
                         fontWeight: '700',
                         fontFamily: 'Lato, sans-serif',
                         marginBottom: '6px',
@@ -432,7 +490,11 @@ export default function PortfolioPage({
                     </h4>
                     <p
                       style={{
-                        fontSize: deviceInfo?.isMobile ? '0.75rem' : '0.85rem',
+                        fontSize:
+                          deviceType === 'mobile-landscape' ||
+                          deviceType === 'mobile-portrait'
+                            ? 'calc(var(--text-sm) - 0.125rem)'
+                            : 'calc(var(--text-sm) + 0.05rem)',
                         fontFamily: 'Lato, sans-serif',
                         fontWeight: '400',
                         color: 'rgba(255, 255, 255, 0.8)',
@@ -451,9 +513,11 @@ export default function PortfolioPage({
                       style={{
                         height: '20%',
                         width: '100%',
-                        padding: deviceInfo?.isMobile
-                          ? '6px 12px 12px 12px'
-                          : '8px 16px 16px 16px',
+                        padding:
+                          deviceType === 'mobile-landscape' ||
+                          deviceType === 'mobile-portrait'
+                            ? 'var(--space-xs) var(--space-md) var(--space-md) var(--space-md)'
+                            : 'var(--space-sm) var(--space-base) var(--space-base) var(--space-base)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -471,14 +535,18 @@ export default function PortfolioPage({
                           <span
                             key={tech}
                             style={{
-                              padding: deviceInfo?.isMobile
-                                ? '6px 10px'
-                                : '8px 12px',
+                              padding:
+                                deviceType === 'mobile-landscape' ||
+                                deviceType === 'mobile-portrait'
+                                  ? 'var(--space-xs) var(--space-sm)'
+                                  : 'var(--space-sm) var(--space-md)',
                               background: 'rgba(255, 255, 255, 0.1)',
-                              borderRadius: '6px',
-                              fontSize: deviceInfo?.isMobile
-                                ? '0.6rem'
-                                : '0.7rem',
+                              borderRadius: 'var(--radius-xs)',
+                              fontSize:
+                                deviceType === 'mobile-landscape' ||
+                                deviceType === 'mobile-portrait'
+                                  ? 'calc(var(--text-xs) + 0.025rem)'
+                                  : 'calc(var(--text-xs) + 0.075rem)',
                               fontWeight: '500',
                               fontFamily: 'Lato, sans-serif',
                               color: 'rgba(255, 255, 255, 0.9)',
@@ -508,13 +576,21 @@ export default function PortfolioPage({
                   : { duration: 0 }
               }
               style={{
-                marginTop: deviceInfo?.isMobile ? '15px' : '20px',
+                marginTop:
+                  deviceType === 'mobile-landscape' ||
+                  deviceType === 'mobile-portrait'
+                    ? 'calc(var(--space-md) + 0.1875rem)'
+                    : 'var(--space-lg)',
                 textAlign: 'center',
               }}
             >
               <p
                 style={{
-                  fontSize: deviceInfo?.isMobile ? '0.8rem' : '0.9rem',
+                  fontSize:
+                    deviceType === 'mobile-landscape' ||
+                    deviceType === 'mobile-portrait'
+                      ? 'var(--text-sm)'
+                      : 'calc(var(--text-sm) + 0.05rem)',
                   fontFamily: 'Lato, sans-serif',
                   fontWeight: '400',
                   color: 'rgba(255, 255, 255, 0.7)',

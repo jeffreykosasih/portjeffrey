@@ -85,7 +85,15 @@ export default function CreditsPopup({
       fontFamily: 'Lato, sans-serif',
     };
 
-    if (deviceInfo?.isMobile) {
+    if (deviceInfo?.isLandscapeMobile) {
+      return {
+        ...baseStyles,
+        width: '85vw',
+        maxWidth: '480px',
+        maxHeight: '85vh',
+        padding: '2.5rem',
+      };
+    } else if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
         width: '90vw',
@@ -110,7 +118,9 @@ export default function CreditsPopup({
   };
 
   const getTitleStyles = (): React.CSSProperties => {
-    const fontSize = deviceInfo?.isMobile
+    const fontSize = deviceInfo?.isLandscapeMobile
+      ? '1.5rem'
+      : deviceInfo?.isMobile
       ? '1.75rem'
       : deviceInfo?.isTablet
       ? '2rem'
@@ -127,28 +137,38 @@ export default function CreditsPopup({
   };
 
   const getSubtitleStyles = (): React.CSSProperties => {
-    const fontSize = deviceInfo?.isMobile
+    const fontSize = deviceInfo?.isLandscapeMobile
+      ? '0.8rem'
+      : deviceInfo?.isMobile
       ? '0.9rem'
       : deviceInfo?.isTablet
       ? '1rem'
       : '1.1rem';
 
+    const marginBottom = deviceInfo?.isLandscapeMobile ? '20px' : '30px';
+
     return {
       fontSize,
       fontWeight: '400',
       color: 'rgba(255, 255, 255, 0.8)',
-      marginBottom: '30px',
+      marginBottom,
       textAlign: 'center' as const,
       lineHeight: '1.5',
     };
   };
 
   const getCreditItemStyles = (): React.CSSProperties => {
-    const fontSize = deviceInfo?.isMobile ? '0.85rem' : '0.9rem';
+    const fontSize = deviceInfo?.isLandscapeMobile
+      ? '0.8rem'
+      : deviceInfo?.isMobile
+      ? '0.85rem'
+      : '0.9rem';
+
+    const marginBottom = deviceInfo?.isLandscapeMobile ? '12px' : '15px';
 
     return {
       fontSize,
-      marginBottom: '15px',
+      marginBottom,
       lineHeight: '1.6',
       color: '#ffffff',
     };
@@ -164,12 +184,19 @@ export default function CreditsPopup({
   };
 
   const getLicenseStyles = (): React.CSSProperties => {
-    const fontSize = deviceInfo?.isMobile ? '0.8rem' : '0.85rem';
+    const fontSize = deviceInfo?.isLandscapeMobile
+      ? '0.75rem'
+      : deviceInfo?.isMobile
+      ? '0.8rem'
+      : '0.85rem';
+
+    const marginTop = deviceInfo?.isLandscapeMobile ? '20px' : '25px';
+    const padding = deviceInfo?.isLandscapeMobile ? '16px' : '20px';
 
     return {
       fontSize,
-      marginTop: '25px',
-      padding: '20px',
+      marginTop,
+      padding,
       backgroundColor: 'rgba(255, 255, 255, 0.1)',
       borderRadius: '12px',
       color: 'rgba(255, 255, 255, 0.9)',
@@ -197,7 +224,7 @@ export default function CreditsPopup({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '20px',
+            padding: deviceInfo?.isLandscapeMobile ? '12px' : '20px',
           }}
         >
           <motion.div

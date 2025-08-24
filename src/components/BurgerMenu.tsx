@@ -1,26 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DeviceInfo } from '../lib/types';
-import {
-  getButtonStyles,
-  getResponsiveIconSize,
-  getIconColor,
-  createHoverHandlers,
-  type ButtonPosition,
-} from '../lib/buttonUtils';
 import { getResponsiveValue, ResponsiveValues } from '../lib/responsiveUtils';
 
 // Type definitions
 type PageName = 'home' | 'profile' | 'skillset' | 'portfolio' | 'connect';
-
-interface BurgerIconProps {
-  color?: string;
-}
-
-interface CloseIconProps {
-  color?: string;
-  size?: number;
-}
 
 interface BurgerMenuProps {
   isDarkMode: boolean;
@@ -37,80 +21,77 @@ interface BurgerMenuProps {
   slideDirection?: 'left' | 'right';
 }
 
-// Custom Burger Menu Icon Component (3 stripes)
-const BurgerIcon = ({
-  color = 'white',
-}: BurgerIconProps): React.JSX.Element => (
-  <div
-    style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}
-  >
-    {' '}
-    {/* Using CSS custom property */}
-    <div
-      style={{
-        width: '1.125rem', // Converted from 18px to rem
-        height: '2px', // Keep 2px for precision
-        backgroundColor: color,
-        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
-      }}
-    ></div>
-    <div
-      style={{
-        width: '1.125rem', // Converted from 18px to rem
-        height: '2px', // Keep 2px for precision
-        backgroundColor: color,
-        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
-      }}
-    ></div>
-    <div
-      style={{
-        width: '1.125rem', // Converted from 18px to rem
-        height: '2px', // Keep 2px for precision
-        backgroundColor: color,
-        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
-      }}
-    ></div>
-  </div>
-);
+// Icon Components
+interface IconProps {
+  color?: string;
+  deviceInfo?: DeviceInfo;
+}
 
-// Custom X (Close) Icon Component
-const CloseIcon = ({
-  color = 'white',
-  size = 14,
-}: CloseIconProps): React.JSX.Element => (
-  <div
-    style={{
-      position: 'relative',
-      width: `${size / 16}rem`,
-      height: `${size / 16}rem`,
-    }} // Convert px to rem
-  >
+const BurgerIcon = ({ color = 'white', deviceInfo }: IconProps) => {
+  const iconWidth = getResponsiveValue(deviceInfo, {
+    mobile: 'var(--text-base)',
+    landscapeMobile: 'var(--text-base)',
+    tablet: 'calc(var(--text-base) + 0.0625rem)',
+    desktop: 'var(--text-lg)',
+  });
+
+  return (
     <div
       style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        width: `${size / 16}rem`, // Convert px to rem
-        height: '2px', // Keep 2px for precision
-        backgroundColor: color,
-        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
-        transform: 'translate(-50%, -50%) rotate(45deg)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-xs)',
       }}
-    ></div>
+    >
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            width: iconWidth,
+            height: '2px',
+            backgroundColor: color,
+            borderRadius: 'var(--space-xs)',
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+const CloseIcon = ({ color = 'white', deviceInfo }: IconProps) => {
+  const iconSize = getResponsiveValue(deviceInfo, {
+    mobile: 14,
+    landscapeMobile: 14,
+    tablet: 15,
+    desktop: 16,
+  });
+
+  return (
     <div
       style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        width: `${size / 16}rem`, // Convert px to rem
-        height: '2px', // Keep 2px for precision
-        backgroundColor: color,
-        borderRadius: 'var(--space-xs)', // Using CSS custom property for small border radius
-        transform: 'translate(-50%, -50%) rotate(-45deg)',
+        position: 'relative',
+        width: `${iconSize / 16}rem`,
+        height: `${iconSize / 16}rem`,
       }}
-    ></div>
-  </div>
-);
+    >
+      {[45, -45].map((rotation, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            width: `${iconSize / 16}rem`,
+            height: '2px',
+            backgroundColor: color,
+            borderRadius: 'var(--space-xs)',
+            transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default function BurgerMenu({
   isDarkMode,
@@ -126,7 +107,7 @@ export default function BurgerMenu({
   onPlayHoverSound,
   slideDirection = 'right',
 }: BurgerMenuProps): React.JSX.Element {
-  // Use external state if provided, otherwise use internal state
+  // State management
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const menuIsOpen = isOpen !== undefined ? isOpen : internalIsOpen;
   const setMenuIsOpen = onOpenChange || setInternalIsOpen;
@@ -135,130 +116,168 @@ export default function BurgerMenu({
   const [hoveredMenuItem, setHoveredMenuItem] = useState<PageName | null>(null);
   const [wasOpenBehindPage, setWasOpenBehindPage] = useState(false);
 
-  // Handle when menu should be restored after page navigation
+  // Unified device type detection (following ProfilePage pattern)
+  const getDeviceType = ():
+    | 'mobile-landscape'
+    | 'mobile-portrait'
+    | 'tablet'
+    | 'desktop' => {
+    if (!deviceInfo) return 'desktop';
+
+    if (
+      deviceInfo.isLandscapeMobile ||
+      (deviceInfo.isMobile && deviceInfo.orientation === 'landscape')
+    ) {
+      return 'mobile-landscape';
+    }
+    if (deviceInfo.isMobile) return 'mobile-portrait';
+    if (deviceInfo.isTablet) return 'tablet';
+    return 'desktop';
+  };
+
+  const deviceType = getDeviceType();
+
+  // Effects and handlers
   useEffect(() => {
     if (!activePage && menuIsOpen && wasOpenBehindPage) {
-      // Menu is being shown after page closed, reset the flag
       setWasOpenBehindPage(false);
     }
   }, [activePage, menuIsOpen, wasOpenBehindPage]);
 
   const toggleMenu = () => {
     const newState = !menuIsOpen;
-
-    // Use requestAnimationFrame to avoid blocking the animation
     requestAnimationFrame(() => {
       onPlayHoverSound?.();
-      if (onHideThemeToggle) {
-        onHideThemeToggle(newState);
-      }
+      onHideThemeToggle?.(newState);
     });
-
     setMenuIsOpen(newState);
   };
 
   const handleNavigation = (page: PageName): void => {
     onPlayClickSound?.();
-    // Store that menu was open when navigating to a page (except home)
+
     if (page !== 'home' && menuIsOpen) {
       setWasOpenBehindPage(true);
-      // Actually close the menu when navigating to a page
       setMenuIsOpen(false);
-      if (onHideThemeToggle) {
-        onHideThemeToggle(true);
-      }
-      // Keep credits button visible
+      onHideThemeToggle?.(true);
     } else {
-      // When returning to home, reopen menu if it was open before
       if (page === 'home' && wasOpenBehindPage) {
-        // First ensure menu is closed, then reopen with proper animation
         setMenuIsOpen(false);
-        // Use a small delay to ensure the menu state resets before reopening
         setTimeout(() => {
           setMenuIsOpen(true);
-          if (onHideThemeToggle) {
-            onHideThemeToggle(true);
-          }
-        }, 50); // Small delay to trigger proper animation
+          onHideThemeToggle?.(true);
+        }, 50);
       } else {
-        // Close menu when navigating to home normally
         setMenuIsOpen(false);
-        if (onHideThemeToggle) {
-          onHideThemeToggle(false);
-        }
-        // Keep credits button visible
+        onHideThemeToggle?.(false);
       }
-      // Reset the flag when navigating back to home
       setWasOpenBehindPage(false);
     }
-    // Update hovered state - turn off auto-hover when clicking other menus
+
     if (page !== 'home') {
       setHoveredMenuItem(null);
     }
-    // Reset connect hover state when navigating away
     setConnectHovered(false);
-    // Then navigate
     onNavigate(page);
   };
 
-  // Button configuration using utilities
-  const buttonPosition: ButtonPosition = 'top-right';
-  const buttonStyles = getButtonStyles({
-    position: buttonPosition,
-    isDarkMode,
-    isHovered,
-    deviceInfo,
-    zIndex: ResponsiveValues.zIndex.burgerMenu,
-  });
+  // Style functions (following ProfilePage pattern)
+  const getButtonStyles = () => {
+    const configs = {
+      'mobile-landscape': {
+        top: 'max(env(safe-area-inset-top), var(--space-sm))',
+        right: 'var(--space-base)',
+        width: 'var(--touch-target-sm)',
+        height: 'var(--touch-target-sm)',
+      },
+      'mobile-portrait': {
+        top: 'max(env(safe-area-inset-top), var(--space-base))',
+        right: 'var(--space-base)',
+        width: 'var(--touch-target-md)',
+        height: 'var(--touch-target-md)',
+      },
+      tablet: {
+        top: 'var(--space-lg)',
+        right: 'var(--space-lg)',
+        width: 'var(--touch-target-lg)',
+        height: 'var(--touch-target-lg)',
+      },
+      desktop: {
+        top: 'var(--space-lg)',
+        right: 'var(--space-lg)',
+        width: 'var(--touch-target-lg)',
+        height: 'var(--touch-target-lg)',
+      },
+    };
 
-  const hoverStyles = {
-    backgroundColor: '#ffffff',
-    color: isDarkMode ? '#162542' : '#005E80',
+    const hoverStyles = isHovered
+      ? {
+          backgroundColor: '#ffffff',
+          color: isDarkMode ? '#162542' : '#005E80',
+        }
+      : {};
+
+    return {
+      position: 'fixed' as const,
+      borderRadius: '50%',
+      border: 'none',
+      backgroundColor: isDarkMode ? '#162542' : '#005E80',
+      color: '#ffffff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      zIndex: ResponsiveValues.zIndex.burgerMenu,
+      transition: 'all 0.2s ease',
+      ...configs[deviceType],
+      ...hoverStyles,
+    };
   };
 
-  // Icon configuration using utilities
-  const iconColor = getIconColor(isDarkMode, isHovered);
-  const iconSizes = {
-    burger: {
-      width: getResponsiveValue(deviceInfo, {
-        mobile: 'var(--text-base)', // Using CSS custom property
-        tablet: 'calc(var(--text-base) + 0.0625rem)', // Using CSS custom property with calc
-        desktop: 'var(--text-lg)', // Using CSS custom property
-      }),
-      height: '2px', // Keep 2px for precision
-    },
-    close: getResponsiveValue(deviceInfo, {
-      mobile: 14,
-      tablet: 15,
-      desktop: 16,
-    }),
-  };
-
-  // Updated menu styling with landscape mobile support
   const getMenuStyles = () => {
-    let baseWidth;
-
-    if (deviceInfo?.isLandscapeMobile) {
-      baseWidth = '13.75rem'; // Converted from 220px to rem
-    } else if (deviceInfo?.isMobile) {
-      baseWidth = '17.5rem'; // Converted from 280px to rem
-    } else if (deviceInfo?.isTablet) {
-      baseWidth = '18.75rem'; // Converted from 300px to rem
-    } else {
-      baseWidth = '25vw';
-    }
-
-    const background = isDarkMode
-      ? 'rgba(22, 37, 66, 0.94)'
-      : 'rgba(0, 94, 128, 0.94)';
+    const configs = {
+      'mobile-landscape': {
+        width: '13.75rem',
+        gap: '0.5rem',
+        paddingTop: '4rem',
+        paddingBottom: '2.375rem',
+        paddingLeft: '1.5rem',
+        paddingRight: '1rem',
+      },
+      'mobile-portrait': {
+        width: '17.5rem',
+        gap: '0.9375rem',
+        paddingTop: '5rem',
+        paddingBottom: '7.5rem',
+        paddingLeft: '2.375rem',
+        paddingRight: '1.5rem',
+      },
+      tablet: {
+        width: '18.75rem',
+        gap: '1.5rem',
+        paddingTop: '7.5rem',
+        paddingBottom: '3rem',
+        paddingLeft: '3rem',
+        paddingRight: '2.375rem',
+      },
+      desktop: {
+        width: '25vw',
+        gap: '1.5rem',
+        paddingTop: '7.5rem',
+        paddingBottom: '3rem',
+        paddingLeft: '3rem',
+        paddingRight: '2.375rem',
+      },
+    };
 
     return {
       position: 'fixed' as const,
       top: 0,
       right: 0,
-      width: baseWidth,
-      height: '100dvh', // Use dynamic viewport height for better mobile support
-      background,
+      height: '100dvh',
+      background: isDarkMode
+        ? 'rgba(22, 37, 66, 0.94)'
+        : 'rgba(0, 94, 128, 0.94)',
       zIndex: 9999,
       transform: 'translateZ(0)',
       backfaceVisibility: 'hidden' as const,
@@ -267,93 +286,137 @@ export default function BurgerMenu({
       flexDirection: 'column' as const,
       alignItems: 'flex-start',
       justifyContent: 'flex-start',
-      gap: deviceInfo?.isLandscapeMobile
-        ? '0.5rem'
-        : deviceInfo?.isMobile
-        ? '0.9375rem'
-        : '1.5rem',
-      paddingTop: deviceInfo?.isLandscapeMobile
-        ? '4rem'
-        : deviceInfo?.isMobile
-        ? '5rem'
-        : '7.5rem',
-      paddingBottom: deviceInfo?.isLandscapeMobile
-        ? '2.375rem'
-        : deviceInfo?.isMobile
-        ? deviceInfo?.orientation === 'portrait'
-          ? '7.5rem'
-          : '5rem'
-        : '3rem',
-      paddingLeft: deviceInfo?.isLandscapeMobile
-        ? '1.5rem'
-        : deviceInfo?.isMobile
-        ? '2.375rem'
-        : '3rem',
-      paddingRight: deviceInfo?.isLandscapeMobile
-        ? '1rem'
-        : deviceInfo?.isMobile
-        ? '1.5rem'
-        : '2.375rem',
-      minHeight:
-        deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile
-          ? '100dvh'
-          : '100vh', // Ensure minimum height
+      minHeight: deviceType.includes('mobile') ? '100dvh' : '100vh',
+      ...configs[deviceType],
     };
   };
 
-  // Memoize menu styles to prevent recalculation during animations
-  const menuStyles = useMemo(() => getMenuStyles(), [deviceInfo, isDarkMode]);
+  const getMenuItemStyles = (itemKey: PageName) => {
+    const isSpecificItemHovered = hoveredMenuItem === itemKey;
+    const shouldHighlight = isSpecificItemHovered;
 
-  // Updated menu item styling with landscape mobile support - memoized
-  const getMenuItemStyles = useMemo(
-    () => (isHovered: boolean, itemKey: PageName) => {
-      const isSpecificItemHovered = hoveredMenuItem === itemKey;
-      const shouldHighlight = isHovered || isSpecificItemHovered;
+    const configs = {
+      'mobile-landscape': {
+        fontSize: 'var(--text-sm)',
+        padding: '0.125rem 0',
+      },
+      'mobile-portrait': {
+        fontSize: 'var(--text-2xl)',
+        padding: 'var(--space-sm) 0',
+      },
+      tablet: {
+        fontSize: 'calc(var(--text-2xl) + 0.2rem)',
+        padding: 'var(--space-sm) 0',
+      },
+      desktop: {
+        fontSize: 'var(--text-3xl)',
+        padding: 'var(--space-sm) 0',
+      },
+    };
 
-      const baseStyles = {
-        background: 'transparent',
-        border: 'none',
-        color: shouldHighlight ? '#FFEEA9' : '#ffffff',
-        fontWeight: '900',
-        fontFamily: 'Lato, sans-serif',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        textAlign: 'left' as const,
-        width: '100%',
-        maxWidth: '56.25rem', // Converted from 900px to rem
-        letterSpacing: '-0.02em',
-        transform: shouldHighlight ? 'scale(1.05)' : 'scale(1)',
-        padding: deviceInfo?.isLandscapeMobile
-          ? '0.125rem 0'
-          : 'var(--space-sm) 0', // Using CSS custom properties
-      };
+    return {
+      background: 'transparent',
+      border: 'none',
+      color: shouldHighlight ? '#FFEEA9' : '#ffffff',
+      fontWeight: '900',
+      fontFamily: 'Lato, sans-serif',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      textAlign: 'left' as const,
+      width: '100%',
+      maxWidth: '56.25rem',
+      letterSpacing: '-0.02em',
+      transform: shouldHighlight ? 'scale(1.05)' : 'scale(1)',
+      ...configs[deviceType],
+    };
+  };
 
-      // Enhanced responsive font sizes with landscape mobile support
-      if (deviceInfo?.isLandscapeMobile) {
-        return {
-          ...baseStyles,
-          fontSize: 'var(--text-sm)', // Using CSS custom property (much smaller)
-        };
-      } else if (deviceInfo?.isMobile) {
-        return {
-          ...baseStyles,
-          fontSize: 'var(--text-2xl)', // Using CSS custom property (smaller for mobile)
-        };
-      } else if (deviceInfo?.isTablet) {
-        return {
-          ...baseStyles,
-          fontSize: 'calc(var(--text-2xl) + 0.2rem)', // Using CSS custom property with calc
-        };
-      } else {
-        return {
-          ...baseStyles,
-          fontSize: 'var(--text-3xl)', // Using CSS custom property (original size)
-        };
-      }
-    },
-    [deviceInfo, hoveredMenuItem]
-  );
+  const getConnectButtonContainerStyles = () => {
+    const configs = {
+      'mobile-landscape': {
+        bottom: 'max(env(safe-area-inset-bottom), var(--space-lg))',
+        left: 'var(--space-lg)',
+        right: 'var(--space-base)',
+        width: 'calc(100% - var(--space-2xl) - var(--space-xs))',
+        maxWidth: '8.75rem',
+      },
+      'mobile-portrait': {
+        bottom: 'max(env(safe-area-inset-bottom), var(--space-3xl))',
+        left: 'calc(var(--space-xl) + 0.375rem)',
+        right: 'var(--space-lg)',
+        width: 'calc(100% - var(--space-4xl) + 0.125rem)',
+        maxWidth: '13.75rem',
+      },
+      tablet: {
+        bottom: 'var(--space-4xl)',
+        left: 'var(--space-3xl)',
+        maxWidth: 'auto',
+      },
+      desktop: {
+        bottom: 'var(--space-4xl)',
+        left: 'var(--space-3xl)',
+        maxWidth: 'auto',
+      },
+    };
 
+    return {
+      position: 'absolute' as const,
+      zIndex: 100,
+      ...configs[deviceType],
+    };
+  };
+
+  const getConnectButtonStyles = () => {
+    const configs = {
+      'mobile-landscape': {
+        padding: 'var(--space-xs) var(--space-sm)',
+        fontSize: 'calc(var(--text-xs) + 0.05rem)',
+        minHeight: 'var(--space-2xl)',
+        minWidth: 'var(--space-2xl)',
+      },
+      'mobile-portrait': {
+        padding:
+          'calc(var(--space-sm) + 0.125rem) calc(var(--space-lg) - 0.125rem)',
+        fontSize: 'var(--text-sm)',
+        minHeight: 'var(--touch-target-sm)',
+        minWidth: 'var(--touch-target-sm)',
+      },
+      tablet: {
+        padding: 'var(--space-md) var(--space-lg)',
+        fontSize: 'var(--text-base)',
+        minHeight: 'var(--touch-target-sm)',
+        minWidth: 'var(--touch-target-sm)',
+      },
+      desktop: {
+        padding: 'var(--space-md) var(--space-lg)',
+        fontSize: 'var(--text-base)',
+        minHeight: 'var(--touch-target-sm)',
+        minWidth: 'var(--touch-target-sm)',
+      },
+    };
+
+    return {
+      position: 'relative' as const,
+      cursor: 'pointer',
+      fontWeight: '900',
+      fontFamily: 'Lato, sans-serif',
+      letterSpacing: '0.02em',
+      color: isDarkMode ? '#162542' : '#005E80',
+      textAlign: 'center' as const,
+      borderRadius: 'calc(var(--radius-sm) + 0.0625rem)',
+      border: 'none',
+      background: '#FAF1E6',
+      transition: 'all 0.3s ease',
+      overflow: 'hidden',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 0.125rem 0.5rem rgba(250, 241, 230, 0.25)',
+      ...configs[deviceType],
+    };
+  };
+
+  // Menu configuration
   const menuItems = [
     { name: 'Port Jeffrey', key: 'home' as PageName },
     { name: 'Profile', key: 'profile' as PageName },
@@ -361,37 +424,18 @@ export default function BurgerMenu({
     { name: 'Portfolio', key: 'portfolio' as PageName },
   ];
 
-  // Updated Burger Icon with responsive sizing
-  const ResponsiveBurgerIcon = ({ color = 'white' }) => (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--space-xs)',
-      }}
-    >
-      {' '}
-      {/* Using CSS custom property */}
-      {[...Array(3)].map((_, i) => (
-        <div
-          key={i}
-          style={{
-            width: iconSizes.burger.width,
-            height: iconSizes.burger.height,
-            backgroundColor: color,
-            borderRadius: 'var(--space-xs)', // Using CSS custom property
-          }}
-        />
-      ))}
-    </div>
-  );
+  const iconColor = isHovered
+    ? isDarkMode
+      ? '#162542'
+      : '#005E80'
+    : '#ffffff';
 
   return (
     <>
-      {/* Burger Menu Button - Hide when pages other than home are active */}
+      {/* Burger Menu Button */}
       {(!activePage || activePage === 'home') && (
         <button
-          style={isHovered ? { ...buttonStyles, ...hoverStyles } : buttonStyles}
+          style={getButtonStyles()}
           onClick={toggleMenu}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -399,29 +443,20 @@ export default function BurgerMenu({
           className='touch-target'
         >
           {menuIsOpen ? (
-            <CloseIcon color={iconColor} size={iconSizes.close} />
+            <CloseIcon color={iconColor} deviceInfo={deviceInfo} />
           ) : (
-            <ResponsiveBurgerIcon color={iconColor} />
+            <BurgerIcon color={iconColor} deviceInfo={deviceInfo} />
           )}
         </button>
       )}
 
-      {/* Slide-out menu from right - Show when no page is active OR when home page is active */}
+      {/* Slide-out Menu */}
       <AnimatePresence mode='wait'>
         {(!activePage || activePage === 'home') && menuIsOpen && (
           <motion.div
-            initial={{
-              x: '100%',
-              opacity: 0,
-            }}
-            animate={{
-              x: '30%',
-              opacity: 1,
-            }}
-            exit={{
-              x: '100%',
-              opacity: 0,
-            }}
+            initial={{ x: '100%', opacity: 0 }}
+            animate={{ x: '30%', opacity: 1 }}
+            exit={{ x: '100%', opacity: 0 }}
             transition={{
               type: 'spring',
               damping: 25,
@@ -429,19 +464,18 @@ export default function BurgerMenu({
               mass: 1.2,
             }}
             onAnimationComplete={() => {
-              // Reset the flag once animation is complete
               if (wasOpenBehindPage) {
                 setWasOpenBehindPage(false);
               }
             }}
-            style={menuStyles}
+            style={getMenuStyles()}
           >
-            {/* Menu items - back to original layout */}
+            {/* Menu Items */}
             {menuItems.map((item, index) => (
               <motion.button
                 key={item.key}
                 initial={
-                  shouldAnimate ? { opacity: 1, x: 20 } : { opacity: 1, x: 0 } // Original animation
+                  shouldAnimate ? { opacity: 1, x: 20 } : { opacity: 1, x: 0 }
                 }
                 animate={{ opacity: 1, x: 0 }}
                 transition={
@@ -456,16 +490,14 @@ export default function BurgerMenu({
                 onMouseEnter={() => setHoveredMenuItem(item.key)}
                 onMouseLeave={() => setHoveredMenuItem(null)}
                 onClick={() => handleNavigation(item.key)}
-                style={getMenuItemStyles(
-                  hoveredMenuItem === item.key,
-                  item.key
-                )}
+                style={getMenuItemStyles(item.key)}
                 className='touch-target'
               >
                 {item.name}
               </motion.button>
             ))}
 
+            {/* Connect Button */}
             <motion.div
               initial={
                 shouldAnimate ? { opacity: 1, y: 20 } : { opacity: 1, y: 0 }
@@ -480,92 +512,13 @@ export default function BurgerMenu({
                     }
                   : { duration: 0 }
               }
-              style={{
-                position: 'absolute',
-                bottom: deviceInfo?.isLandscapeMobile
-                  ? 'max(env(safe-area-inset-bottom), var(--space-lg))' // Using CSS custom property
-                  : deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'portrait'
-                    ? 'max(env(safe-area-inset-bottom), var(--space-3xl))' // Using CSS custom property
-                    : deviceInfo?.orientation === 'landscape'
-                    ? 'max(env(safe-area-inset-bottom), var(--space-md))' // Using CSS custom property
-                    : 'max(env(safe-area-inset-bottom), calc(var(--space-xl) + 0.375rem))' // Using CSS custom property with calc
-                  : 'var(--space-4xl)', // Using CSS custom property (converted from 50px)
-                left: deviceInfo?.isLandscapeMobile
-                  ? 'var(--space-lg)' // Using CSS custom property (align with tighter menu padding)
-                  : deviceInfo?.isMobile
-                  ? 'calc(var(--space-xl) + 0.375rem)' // Using CSS custom property with calc
-                  : 'var(--space-3xl)', // Using CSS custom property (align with menu padding)
-                right: deviceInfo?.isLandscapeMobile
-                  ? 'var(--space-base)' // Using CSS custom property (align with tighter menu padding)
-                  : deviceInfo?.isMobile
-                  ? 'var(--space-lg)' // Using CSS custom property
-                  : 'auto',
-                width: deviceInfo?.isLandscapeMobile
-                  ? 'calc(100% - var(--space-2xl) - var(--space-xs))' // Using CSS custom properties (account for tighter padding)
-                  : deviceInfo?.isMobile
-                  ? 'calc(100% - var(--space-4xl) + 0.125rem)' // Using CSS custom properties
-                  : 'auto', // Account for new left padding
-                zIndex: 100,
-                maxWidth: deviceInfo?.isLandscapeMobile
-                  ? '8.75rem' // Converted from 140px to rem (compact for landscape mobile)
-                  : deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'landscape'
-                    ? '7.5rem' // Converted from 120px to rem
-                    : '13.75rem' // Converted from 220px to rem
-                  : 'auto', // Prevent button from being too wide
-              }}
+              style={getConnectButtonContainerStyles()}
             >
               <button
                 onClick={() => handleNavigation('connect')}
                 onMouseEnter={() => setConnectHovered(true)}
                 onMouseLeave={() => setConnectHovered(false)}
-                style={{
-                  position: 'relative',
-                  padding: deviceInfo?.isLandscapeMobile
-                    ? 'var(--space-xs) var(--space-sm)' // Using CSS custom properties (compact padding)
-                    : deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'landscape'
-                      ? 'calc(var(--space-xs) - 0.0625rem) calc(var(--space-sm) - 0.125rem)' // Using CSS custom properties with calc
-                      : 'calc(var(--space-sm) + 0.125rem) calc(var(--space-lg) - 0.125rem)' // Using CSS custom properties with calc
-                    : 'var(--space-md) var(--space-lg)', // Using CSS custom properties
-                  cursor: 'pointer',
-                  fontSize: deviceInfo?.isLandscapeMobile
-                    ? 'calc(var(--text-xs) + 0.05rem)' // Using CSS custom property with calc (compact)
-                    : deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'landscape'
-                      ? 'calc(var(--text-xs) - 0.125rem)' // Using CSS custom property with calc
-                      : 'var(--text-sm)' // Using CSS custom property
-                    : 'var(--text-base)', // Using CSS custom property
-                  fontWeight: '900',
-                  fontFamily: 'Lato, sans-serif',
-                  letterSpacing: '0.02em',
-                  color: isDarkMode ? '#162542' : '#005E80',
-                  textAlign: 'center' as const,
-                  borderRadius: 'calc(var(--radius-sm) + 0.0625rem)', // Using CSS custom property with calc (reduced for compact look)
-                  border: 'none',
-                  background: '#FAF1E6',
-                  transition: 'all 0.3s ease',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 0.125rem 0.5rem rgba(250, 241, 230, 0.25)', // Converted to rem (reduced shadow)
-                  minHeight: deviceInfo?.isLandscapeMobile
-                    ? 'var(--space-2xl)' // Using CSS custom property (good size for landscape mobile touch targets)
-                    : deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'landscape'
-                      ? 'var(--space-xl)' // Using CSS custom property
-                      : 'var(--touch-target-sm)' // Using CSS custom property
-                    : 'var(--touch-target-sm)', // Using CSS custom property
-                  minWidth: deviceInfo?.isLandscapeMobile
-                    ? 'var(--space-2xl)' // Using CSS custom property (good size for landscape mobile touch targets)
-                    : deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'landscape'
-                      ? 'var(--space-xl)' // Using CSS custom property
-                      : 'var(--touch-target-sm)' // Using CSS custom property
-                    : 'var(--touch-target-sm)', // Using CSS custom property
-                }}
+                style={getConnectButtonStyles()}
                 className='touch-target'
               >
                 {/* Progress bar background */}
@@ -584,12 +537,7 @@ export default function BurgerMenu({
 
                 {/* Button content */}
                 <span style={{ position: 'relative', zIndex: 1 }}>
-                  {deviceInfo?.isLandscapeMobile
-                    ? 'Connect!'
-                    : deviceInfo?.isMobile &&
-                      deviceInfo?.orientation === 'landscape'
-                    ? 'Connect!'
-                    : "Let's Connect!"}
+                  Let's Connect!
                 </span>
               </button>
             </motion.div>

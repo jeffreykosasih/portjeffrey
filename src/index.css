@@ -503,3 +503,26 @@ body {
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* Bright placeholder for better visibility in ConnectPage form */
+.bright-placeholder::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 1; /* Firefox */
+}
+
+.bright-placeholder::-webkit-input-placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.bright-placeholder::-moz-placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 1;
+}
+
+.bright-placeholder:-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.bright-placeholder::-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}

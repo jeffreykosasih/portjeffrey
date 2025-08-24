@@ -246,16 +246,16 @@ export default function AppLoadingScreen({
             gap: deviceInfo?.isMobile
               ? 'var(--space-2xl)'
               : deviceInfo?.isLandscapeMobile
-              ? '3.5rem' // Better spacing for landscape mobile
+              ? '3.5rem'
               : deviceInfo?.isTablet
               ? 'var(--space-3xl)'
-              : 'var(--space-4xl)', // Responsive gap based on device
+              : 'var(--space-4xl)',
             width: '100%',
             maxWidth: deviceInfo?.isMobile
               ? '90%'
               : deviceInfo?.isTablet
               ? '80%'
-              : '100%', // Prevent overflow on small screens
+              : '100%',
           }}
         >
           {/* Dots or Title Area */}

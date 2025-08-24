@@ -21,12 +21,12 @@
 
 .pc-card {
   position: relative;
-  width: 120%;
-  height: 32.5rem; /* Converted from 520px */
-  border-radius: 1.5rem; /* Converted from 24px */
+  width: 100%;
+  height: 32.5rem;
+  border-radius: var(--radius-2xl); /* 24px using CSS var */
   overflow: hidden;
   background: var(--behind-gradient);
-  border: 2px solid rgba(30, 144, 255, 0.8); /* Keep 2px for precision */
+  border: 2px solid rgba(30, 144, 255, 0.8);
   transition: transform 0.1s ease-out;
   transform-style: preserve-3d;
   transform: rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
@@ -42,11 +42,11 @@
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 1.5rem; /* Converted from 24px */
+  border-radius: var(--radius-2xl); /* 24px using CSS var */
   overflow: hidden;
   background: var(--inner-gradient);
-  backdrop-filter: blur(1.25rem); /* Converted from 20px */
-  -webkit-backdrop-filter: blur(1.25rem); /* Converted from 20px */
+  backdrop-filter: blur(1.25rem);
+  -webkit-backdrop-filter: blur(1.25rem);
 }
 
 .pc-shine {
@@ -106,7 +106,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 1.5rem; /* Converted from 24px */
+  border-radius: var(--radius-2xl); /* 24px using CSS var */
   z-index: 1;
 }
 
@@ -123,14 +123,14 @@
     rgba(0, 0, 0, 0.1) 50%,
     rgba(0, 0, 0, 0.4) 100%
   );
-  border-radius: 1.5rem; /* Converted from 24px */
+  border-radius: var(--radius-2xl); /* 24px using CSS var */
   z-index: 2;
 }
 
 .pc-content {
   position: relative;
   z-index: 3;
-  padding: 2rem; /* Converted from 32px */
+  padding: var(--space-2xl); /* 32px using CSS var */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -145,45 +145,49 @@
 }
 
 .pc-header h3 {
-  font-size: 2.25rem; /* Converted from 36px */
+  font-size: var(--text-4xl); /* 36px using CSS var */
   font-weight: 700;
   color: white;
-  margin: 0 0 0.75rem 0; /* Converted from 12px */
-  text-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.8); /* Converted from 4px 20px */
-  letter-spacing: -0.03125rem; /* Converted from -0.5px */
+  margin: 0 0 var(--space-md) 0; /* 12px using CSS var */
+  text-shadow: 0 var(--space-xs) var(--space-lg) rgba(0, 0, 0, 0.8);
+  letter-spacing: -0.03125rem;
   font-family: 'Lato', sans-serif;
 }
 
 .pc-header p {
-  font-size: 1.125rem; /* Converted from 18px */
+  font-size: var(--text-lg); /* 18px using CSS var */
   color: rgba(255, 255, 255, 0.95);
   margin: 0;
   font-weight: 400;
-  text-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.7); /* Converted from 2px 10px */
+  text-shadow: 0 var(--space-xs) var(--space-lg) rgba(0, 0, 0, 0.7);
   font-family: 'Lato', sans-serif;
 }
 
-/* Centered contact button - smaller */
+/* Centered contact button */
 .pc-contact-btn {
-  padding: 0.625rem 1.5rem; /* Converted from 10px 24px */
+  padding: var(--space-md) var(--space-xl); /* 12px 24px using CSS vars */
   background: #3b74c5;
   border: none;
-  border-radius: 0.625rem; /* Converted from 10px */
+  border-radius: var(--radius-lg); /* 12px using CSS var */
   color: white;
   font-weight: 600;
-  font-size: 0.875rem; /* Converted from 14px */
+  font-size: var(--text-sm); /* 14px using CSS var */
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 0.25rem 0.9375rem rgba(59, 116, 197, 0.8); /* Converted from 4px 15px */
-  min-width: 7.5rem; /* Converted from 120px */
+  box-shadow: 0 var(--space-xs) var(--space-lg) rgba(59, 116, 197, 0.8);
+  min-width: 7.5rem;
+  min-height: var(--touch-target-sm); /* Proper touch target */
   margin-top: auto;
   font-family: 'Lato', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pc-contact-btn:hover {
-  transform: translateY(-0.125rem); /* Converted from -2px */
+  transform: translateY(-var(--space-xs)); /* -4px using CSS var */
   background: #6f6d65;
-  box-shadow: 0 0.5rem 1.5625rem rgba(111, 109, 101, 0.8); /* Converted from 8px 25px */
+  box-shadow: 0 var(--space-sm) var(--space-xl) rgba(111, 109, 101, 0.8);
 }
 
 @keyframes pulse {
@@ -196,76 +200,76 @@
   }
 }
 
-/* Responsive adjustments */
+/* Mobile portrait adjustments */
 @media (max-width: 48rem) {
-  /* Converted from 768px */
   .pc-card {
-    height: 25rem; /* Converted from 400px - reduced height for better mobile fit */
+    height: 25rem; /* Reduced height for mobile */
   }
 
   .pc-content {
-    padding: 1.5rem; /* Converted from 24px - reduced padding for mobile */
+    padding: var(--space-xl); /* 24px using CSS var */
   }
 
   .pc-header h3 {
-    font-size: 1.625rem; /* Converted from 26px - slightly smaller for mobile */
-    margin-bottom: 0.5rem; /* Converted from 8px */
+    font-size: var(--text-3xl); /* 30px using CSS var */
+    margin-bottom: var(--space-sm); /* 8px using CSS var */
   }
 
   .pc-header p {
-    font-size: 0.9375rem; /* Converted from 15px */
+    font-size: var(--text-base); /* 16px using CSS var */
   }
 
   .pc-contact-btn {
-    padding: 0.5rem 1.25rem; /* Converted from 8px 20px */
-    font-size: 0.8125rem; /* Converted from 13px */
-    min-width: 6.25rem; /* Converted from 100px */
+    padding: var(--space-sm) var(--space-lg); /* 8px 20px using CSS vars */
+    font-size: var(--text-sm); /* 14px using CSS var */
+    min-width: 6.25rem;
+    min-height: var(--touch-target-sm); /* Proper touch target */
   }
 }
 
-/* Landscape mobile specific adjustments */
+/* Mobile landscape - Desktop-like appearance */
 @media (max-width: 48rem) and (orientation: landscape) {
-  /* Converted from 768px */
   .pc-card-wrapper {
-    max-width: 12.5rem; /* Converted from 200px - ultra compact for landscape */
+    max-width: 20rem; /* Desktop-like size */
   }
 
   .pc-card {
-    height: 13.75rem; /* Converted from 220px - even smaller height for landscape */
+    width: 100%;
+    height: 24rem; /* Better proportions for landscape */
   }
 
   .pc-content {
-    padding: 0.5rem; /* Converted from 8px - ultra compact padding */
+    padding: var(--space-xl); /* 24px using CSS var */
   }
 
   .pc-header h3 {
-    font-size: 1rem; /* Converted from 16px - smaller title for landscape */
-    margin-bottom: 0.125rem; /* Converted from 2px - reduced margin */
+    font-size: var(
+      --text-4xl
+    ); /* 36px using CSS var - larger for desktop-like */
+    margin-bottom: var(--space-sm); /* 8px using CSS var */
   }
 
   .pc-header p {
-    font-size: 0.6875rem; /* Converted from 11px - smaller text */
+    font-size: var(--text-xl); /* 20px using CSS var - larger subtitle */
   }
 
   .pc-contact-btn {
-    padding: 0.1875rem 0.625rem; /* Converted from 3px 10px - smaller padding */
-    font-size: 0.625rem; /* Converted from 10px - smaller font */
-    min-width: 4.375rem; /* Converted from 70px - smaller min-width */
+    padding: var(--space-sm) var(--space-lg); /* 8px 20px using CSS vars */
+    font-size: var(--text-sm); /* 14px using CSS var */
+    min-width: 6rem;
+    min-height: var(--touch-target-sm); /* Proper touch target */
   }
 }
 
-/* Portrait mobile specific adjustments */
+/* Mobile portrait specific adjustments */
 @media (max-width: 48rem) and (orientation: portrait) {
-  /* Converted from 768px */
   .pc-card-wrapper {
-    max-width: min(
-      28.125rem,
-      /* Converted from 450px */ 90vw
-    ); /* Responsive width for portrait - increased from 350px */
+    max-width: min(28.125rem, 90vw); /* Responsive width */
   }
 
   .pc-card {
-    height: 26.25rem; /* Converted from 420px - appropriate height for portrait */
+    width: 100%;
+    height: 26.25rem; /* Good height for portrait */
   }
 }
 

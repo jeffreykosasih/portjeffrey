@@ -8,7 +8,6 @@ import { DeviceInfo } from '../lib/types';
 import {
   getResponsiveValue,
   getSpacing,
-  getTextSize,
   ResponsiveValues,
 } from '../lib/responsiveUtils';
 
@@ -33,8 +32,28 @@ export default function ProfilePage({
   deviceInfo,
   onPlayClickSound,
 }: ProfilePageProps) {
-  const [isButtonHovered, setIsButtonHovered] = React.useState(false);
   const [showLongStory, setShowLongStory] = React.useState(false);
+
+  // Unified device type detection
+  const getDeviceType = ():
+    | 'mobile-landscape'
+    | 'mobile-portrait'
+    | 'tablet'
+    | 'desktop' => {
+    if (!deviceInfo) return 'desktop';
+
+    if (
+      deviceInfo.isLandscapeMobile ||
+      (deviceInfo.isMobile && deviceInfo.orientation === 'landscape')
+    ) {
+      return 'mobile-landscape';
+    }
+    if (deviceInfo.isMobile) return 'mobile-portrait';
+    if (deviceInfo.isTablet) return 'tablet';
+    return 'desktop';
+  };
+
+  const deviceType = getDeviceType();
 
   // Responsive container styles
   const getContainerStyles = () => {
@@ -59,7 +78,8 @@ export default function ProfilePage({
       zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
-      justifyContent: deviceInfo?.isLandscapeMobile ? 'center' : 'flex-start',
+      justifyContent:
+        deviceType === 'mobile-landscape' ? 'center' : 'flex-start',
       alignItems: 'center',
       color: '#ffffff',
       padding: `max(env(safe-area-inset-top), ${padding}) ${padding} max(env(safe-area-inset-bottom), ${padding}) ${padding}`,
@@ -69,268 +89,191 @@ export default function ProfilePage({
 
   // Responsive content styles
   const getContentStyles = () => {
-    const baseStyles = {
+    const isHorizontal =
+      deviceType === 'mobile-landscape' || deviceType === 'desktop';
+
+    const styles = {
+      'mobile-landscape': {
+        flexDirection: 'row' as const,
+        gap: 'var(--space-4xl)', // 48px using CSS var
+        alignItems: 'flex-start',
+        height: 'fit-content',
+        maxHeight: '90vh',
+      },
+      'mobile-portrait': {
+        flexDirection: 'column' as const,
+        gap: 'var(--space-2xl)', // 32px using CSS var
+        alignItems: 'center',
+      },
+      tablet: {
+        flexDirection: 'column' as const,
+        gap: 'var(--space-4xl)', // 48px using CSS var
+        alignItems: 'center',
+      },
+      desktop: {
+        flexDirection: 'row' as const,
+        gap: 'var(--space-5xl)', // 64px using CSS var
+        alignItems: 'flex-start',
+      },
+    };
+
+    return {
       maxWidth: '1200px',
       width: '100%',
       display: 'flex',
       justifyContent: 'center',
-      alignItems: 'flex-start',
+      ...styles[deviceType],
     };
-
-    if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like horizontal layout with better spacing
-      return {
-        ...baseStyles,
-        flexDirection: 'row' as const,
-        gap: '40px', // More generous spacing like desktop
-        alignItems: 'center',
-        height: 'fit-content',
-        maxHeight: '90vh', // More room for content
-      };
-    } else if (deviceInfo?.isMobile) {
-      if (deviceInfo.orientation === 'landscape') {
-        // Regular mobile landscape - legacy support
-        return {
-          ...baseStyles,
-          flexDirection: 'row' as const,
-          gap: '20px',
-          alignItems: 'center',
-          height: 'fit-content',
-          maxHeight: '90vh',
-        };
-      } else {
-        // Portrait mobile - vertical layout
-        return {
-          ...baseStyles,
-          flexDirection: 'column' as const,
-          gap: '24px',
-          alignItems: 'center',
-        };
-      }
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        flexDirection: 'column' as const,
-        gap: '48px',
-        alignItems: 'center',
-      };
-    } else {
-      return {
-        ...baseStyles,
-        flexDirection: 'row' as const,
-        gap: '64px',
-      };
-    }
   };
 
   const getTextContainerStyles = () => {
-    const baseStyles = {
-      fontSize: '1.5rem',
-      lineHeight: '1.8',
+    const configs = {
+      'mobile-landscape': {
+        flex: 1,
+        fontSize: 'var(--text-xl)', // 20px - proper mobile landscape size
+        lineHeight: '1.7',
+        paddingRight: 'var(--space-xl)', // 24px using CSS var
+        textAlign: 'left' as const,
+        minWidth: '17.5rem', // 280px in rem
+      },
+      'mobile-portrait': {
+        fontSize: 'var(--text-lg)', // 18px using CSS var
+        lineHeight: '1.6',
+        textAlign: 'center' as const,
+        maxWidth: '85%',
+      },
+      tablet: {
+        flex: 'none',
+        fontSize: 'var(--text-2xl)', // 24px using CSS var
+        lineHeight: '1.7',
+        textAlign: 'center' as const,
+      },
+      desktop: {
+        flex: 1,
+        fontSize: 'var(--text-2xl)', // 24px using CSS var
+        lineHeight: '1.8',
+        paddingRight: 'var(--space-2xl)', // 32px using CSS var
+        textAlign: 'left' as const,
+        minWidth: '20rem', // 320px in rem
+      },
+    };
+
+    return {
       fontFamily: 'Lato, sans-serif',
       fontWeight: '300',
       color: 'rgba(255, 255, 255, 0.9)',
-      textAlign: 'left' as const,
+      ...configs[deviceType],
     };
-
-    if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like layout with larger, more readable text
-      return {
-        ...baseStyles,
-        flex: 1,
-        fontSize: '1.2rem', // Larger, more desktop-like text
-        lineHeight: '1.6',
-        paddingRight: '30px',
-        textAlign: 'left' as const,
-        maxWidth: '65%', // Better text-to-card ratio
-      };
-    } else if (deviceInfo?.isMobile) {
-      if (deviceInfo.orientation === 'landscape') {
-        // Regular mobile landscape - legacy support with ultra compact text
-        return {
-          ...baseStyles,
-          flex: 1,
-          fontSize: '0.75rem',
-          lineHeight: '1.3',
-          paddingRight: '12px',
-          textAlign: 'left' as const,
-          maxWidth: '50%',
-        };
-      } else {
-        // Portrait mobile - larger text, centered
-        return {
-          ...baseStyles,
-          flex: 'none',
-          minWidth: 'auto',
-          fontSize: '1.0rem',
-          lineHeight: '1.6',
-          paddingRight: '0px',
-          textAlign: 'center' as const,
-          maxWidth: '100%',
-        };
-      }
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        flex: 'none',
-        minWidth: 'auto',
-        fontSize: '1.3rem',
-        lineHeight: '1.7',
-        paddingRight: '0px',
-        textAlign: 'center' as const,
-      };
-    } else {
-      return {
-        ...baseStyles,
-        flex: 1,
-        minWidth: '320px',
-        paddingRight: '32px',
-      };
-    }
   };
 
   const getTitleStyles = () => {
-    const baseStyles = {
+    const configs = {
+      'mobile-landscape': {
+        fontSize: 'var(--text-5xl)', // 48px - proper mobile landscape display
+        marginBottom: 'var(--space-xl)', // 24px using CSS var
+        lineHeight: '1.1',
+      },
+      'mobile-portrait': {
+        fontSize: 'var(--mobile-text-display)', // 40px - dedicated mobile display size
+        marginBottom: 'var(--space-base)', // 16px using CSS var
+        marginTop: 'var(--space-base)', // 16px using CSS var
+        lineHeight: '1.2',
+      },
+      tablet: {
+        fontSize: 'var(--tablet-text-display)', // 56px using CSS var
+        marginBottom: 'var(--space-xl)', // 24px using CSS var
+      },
+      desktop: {
+        fontSize: 'var(--text-6xl)', // 60px using CSS var
+        marginBottom: 'var(--space-2xl)', // 32px using CSS var
+      },
+    };
+
+    return {
       fontWeight: '900',
       fontFamily: 'Lato, sans-serif',
-      marginBottom: '30px',
       background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
       WebkitBackgroundClip: 'text',
       backgroundClip: 'text',
       color: 'transparent',
       letterSpacing: '-0.02em',
+      ...configs[deviceType],
     };
-
-    if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like title size but appropriately scaled
-      return {
-        ...baseStyles,
-        fontSize: '2.2rem', // Much larger, more desktop-like
-        marginBottom: '20px', // Better spacing
-        lineHeight: '1.2',
-      };
-    } else if (deviceInfo?.isMobile) {
-      if (deviceInfo.orientation === 'landscape') {
-        // Regular mobile landscape - much smaller title and spacing
-        return {
-          ...baseStyles,
-          fontSize: '1.4rem',
-          marginBottom: '6px',
-          lineHeight: '1.1',
-        };
-      } else {
-        // Portrait mobile
-        return {
-          ...baseStyles,
-          fontSize: '1.8rem',
-          marginBottom: '20px',
-          marginTop: '20px',
-          lineHeight: '1.2',
-        };
-      }
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        fontSize: '3rem',
-        marginBottom: '25px',
-      };
-    } else {
-      return {
-        ...baseStyles,
-        fontSize: '4rem',
-      };
-    }
   };
 
   const getProfileCardStyles = () => {
-    if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - larger, more desktop-like card sizing
-      return {
-        flex: 'none',
-        minWidth: '240px', // Larger size for better desktop-like experience
-        maxWidth: '280px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      };
-    } else if (deviceInfo?.isMobile) {
-      if (deviceInfo.orientation === 'landscape') {
-        // Regular mobile landscape - much smaller card for minimal height usage
-        return {
-          flex: 'none',
-          minWidth: '160px',
-          maxWidth: '180px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        };
-      } else {
-        // Portrait mobile - centered card
-        return {
-          flex: 'none',
-          minWidth: 'auto',
-          maxWidth: '300px',
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        };
-      }
-    } else if (deviceInfo?.isTablet) {
-      return {
-        flex: 'none',
+    const configs = {
+      'mobile-landscape': {
+        minWidth: '16.25rem', // 260px in rem
+        maxWidth: '20rem', // 320px in rem
+      },
+      'mobile-portrait': {
         minWidth: 'auto',
-        maxWidth: '400px',
+        maxWidth: '12.5rem', // 200px in rem
         width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      };
-    } else {
-      return {
-        flex: 'none',
-        minWidth: '300px',
-        maxWidth: '400px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      };
-    }
+      },
+      tablet: {
+        minWidth: 'auto',
+        maxWidth: '25rem', // 400px in rem
+        width: '100%',
+      },
+      desktop: {
+        minWidth: '18.75rem', // 300px in rem
+        maxWidth: '25rem', // 400px in rem
+      },
+    };
+
+    return {
+      flex: 'none',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      ...configs[deviceType],
+    };
   };
 
-  // Using inline styles to match Portfolio and Connect pages exactly
-  const getBackButtonStyles = () => ({
-    borderRadius: '50%',
-    position: 'absolute' as const,
-    top: deviceInfo?.isMobile
-      ? deviceInfo?.orientation === 'landscape'
-        ? 'max(env(safe-area-inset-top), 8px)'
-        : 'max(env(safe-area-inset-top), 16px)'
-      : '20px',
-    right: deviceInfo?.isMobile
-      ? deviceInfo?.orientation === 'landscape'
-        ? '12px'
-        : '16px'
-      : '20px',
-    zIndex: 1001,
-    width: deviceInfo?.isMobile
-      ? deviceInfo?.orientation === 'landscape'
-        ? '40px'
-        : '48px'
-      : '50px',
-    height: deviceInfo?.isMobile
-      ? deviceInfo?.orientation === 'landscape'
-        ? '40px'
-        : '48px'
-      : '50px',
-    border: 'none',
-    backgroundColor: isDarkMode ? '#162542' : '#005E80',
-    color: '#ffffff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-  });
+  const getBackButtonStyles = () => {
+    const configs = {
+      'mobile-landscape': {
+        top: 'max(env(safe-area-inset-top), var(--space-sm))', // 8px using CSS var
+        right: 'var(--space-md)', // 12px using CSS var
+        width: 'var(--touch-target-sm)', // 44px - proper touch target
+        height: 'var(--touch-target-sm)',
+      },
+      'mobile-portrait': {
+        top: 'max(env(safe-area-inset-top), var(--space-base))', // 16px using CSS var
+        right: 'var(--space-base)', // 16px using CSS var
+        width: 'var(--touch-target-md)', // 48px - comfortable touch target
+        height: 'var(--touch-target-md)',
+      },
+      tablet: {
+        top: 'var(--space-lg)', // 20px using CSS var
+        right: 'var(--space-lg)',
+        width: 'var(--touch-target-lg)', // 56px - large touch target
+        height: 'var(--touch-target-lg)',
+      },
+      desktop: {
+        top: 'var(--space-lg)', // 20px using CSS var
+        right: 'var(--space-lg)',
+        width: 'var(--touch-target-lg)', // 56px - consistent with tablet
+        height: 'var(--touch-target-lg)',
+      },
+    };
+
+    return {
+      borderRadius: '50%',
+      position: 'absolute' as const,
+      zIndex: 1001,
+      border: 'none',
+      backgroundColor: isDarkMode ? '#162542' : '#005E80',
+      color: '#ffffff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      ...configs[deviceType],
+    };
+  };
 
   return (
     <>
@@ -346,16 +289,14 @@ export default function ProfilePage({
             {/* Back button with slide left to right effect */}
             <motion.button
               onClick={() => {
-                onPlayClickSound?.(); // Play click sound
-                onClose(); // Close current page
-                onOpenBurgerMenu('right'); // Open burger menu sliding from right corner
+                onPlayClickSound?.();
+                onClose();
+                onOpenBurgerMenu('right');
               }}
               initial={{ x: 20 }}
               animate={{ x: 0 }}
               whileHover={{ x: -5 }}
               style={getBackButtonStyles()}
-              onMouseEnter={() => setIsButtonHovered(true)}
-              onMouseLeave={() => setIsButtonHovered(false)}
             >
               <FontAwesomeIcon
                 icon={faArrowLeft}
@@ -384,7 +325,7 @@ export default function ProfilePage({
               <motion.div
                 initial={
                   shouldAnimateText
-                    ? { opacity: 0, x: deviceInfo?.isMobile ? 0 : -50 }
+                    ? { opacity: 0, x: deviceType.includes('mobile') ? 0 : -50 }
                     : { opacity: 1, x: 0 }
                 }
                 animate={{ opacity: 1, x: 0 }}
@@ -422,8 +363,11 @@ export default function ProfilePage({
                     fontFamily: 'inherit',
                     fontWeight: '900',
                     cursor: 'pointer',
-                    padding: '0',
-                    margin: '0',
+                    padding: 'var(--space-xs)', // Better touch target
+                    margin: 'var(--space-xs) 0',
+                    borderRadius: 'var(--radius-sm)', // Subtle rounding
+                    minHeight: 'var(--touch-target-sm)', // Proper touch target
+                    transition: 'all 0.2s ease',
                   }}
                 >
                   read more...
@@ -434,7 +378,7 @@ export default function ProfilePage({
               <motion.div
                 initial={
                   shouldAnimateText
-                    ? { opacity: 0, x: deviceInfo?.isMobile ? 0 : 50 }
+                    ? { opacity: 0, x: deviceType.includes('mobile') ? 0 : 50 }
                     : { opacity: 1, x: 0 }
                 }
                 animate={{ opacity: 1, x: 0 }}

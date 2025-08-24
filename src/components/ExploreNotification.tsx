@@ -34,9 +34,8 @@ export default function ExploreNotification({
   const getNotificationStyles = () => {
     const baseStyles = {
       position: 'fixed' as const,
-      top: '80%',
       left: '37.5%',
-      transform: 'translate(-50%, -50%)',
+      transform: 'translateX(-50%)',
       zIndex: 15000,
       borderRadius: 'var(--radius-xl)', // Using CSS custom property
       border: 'none',
@@ -61,22 +60,28 @@ export default function ExploreNotification({
     if (deviceInfo?.isLandscapeMobile) {
       return {
         ...baseStyles,
-        padding: 'var(--space-lg) var(--space-xl)', // Using CSS custom properties
-        fontSize: 'var(--text-base)', // Using CSS custom property
-        maxWidth: '22.5rem', // Converted from 360px to rem
-        gap: 'var(--space-base)', // Using CSS custom property
+        left: '32.5%',
+        top: '50%',
+        padding: 'var(--space-lg) var(--space-xl)',
+        fontSize: 'var(--text-base)',
+        maxWidth: '22.5rem',
+        gap: 'var(--space-base)',
       };
     } else if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
-        padding: 'var(--space-xl) calc(var(--space-xl) + 0.25rem)', // Using CSS custom properties with calc
-        fontSize: 'calc(var(--text-base) + 0.05rem)', // Using CSS custom property with calc
-        maxWidth: '23.75rem', // Converted from 380px to rem
-        gap: 'calc(var(--space-base) + 0.125rem)', // Using CSS custom property with calc
+        left: '30%',
+        top: '75%',
+        padding: 'var(--space-xl) calc(var(--space-xl) + 0.25rem)',
+        maxWidth: '23.75rem',
+        gap: 'calc(var(--space-base) + 0.125rem)',
+        marginLeft: 'max(env(safe-area-inset-left), 1rem)',
+        marginRight: 'max(env(safe-area-inset-right), 1rem)',
       };
     } else if (deviceInfo?.isTablet) {
       return {
         ...baseStyles,
+        top: '75%',
         padding: 'calc(var(--space-xl) + 0.25rem) var(--space-2xl)', // Using CSS custom properties with calc
         fontSize: 'calc(var(--text-base) + 0.15rem)', // Using CSS custom property with calc
         maxWidth: '26.25rem', // Converted from 420px to rem
@@ -85,6 +90,7 @@ export default function ExploreNotification({
     } else {
       return {
         ...baseStyles,
+        top: '80%',
         padding: 'var(--space-2xl) var(--space-3xl)', // Using CSS custom properties
         fontSize: 'var(--text-xl)', // Using CSS custom property
         maxWidth: '30rem', // Converted from 480px to rem

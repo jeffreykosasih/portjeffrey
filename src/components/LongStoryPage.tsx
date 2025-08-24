@@ -2,20 +2,12 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-
-interface DeviceInfo {
-  isMobile: boolean;
-  isTablet: boolean;
-  isDesktop: boolean;
-  isTouchDevice: boolean;
-  isLowPerformance: boolean;
-  screenWidth: number;
-  screenHeight: number;
-  devicePixelRatio: number;
-  orientation: 'portrait' | 'landscape';
-  isRetinaDisplay: boolean;
-  supportsWebGL: boolean;
-}
+import { DeviceInfo } from '../lib/types';
+import {
+  getResponsiveValue,
+  getSpacing,
+  ResponsiveValues,
+} from '../lib/responsiveUtils';
 
 interface LongStoryPageProps {
   isVisible: boolean;
@@ -23,6 +15,7 @@ interface LongStoryPageProps {
   isDarkMode: boolean;
   shouldAnimateText?: boolean;
   deviceInfo?: DeviceInfo;
+  onPlayClickSound?: () => void;
 }
 
 export default function LongStoryPage({
@@ -31,12 +24,49 @@ export default function LongStoryPage({
   isDarkMode,
   shouldAnimateText = true,
   deviceInfo,
+  onPlayClickSound,
 }: LongStoryPageProps) {
   const [isButtonHovered, setIsButtonHovered] = React.useState(false);
 
-  // Responsive styles based on device type (same as ProfilePage)
+  // Unified device type detection (following ProfilePage pattern)
+  const getDeviceType = ():
+    | 'mobile-landscape'
+    | 'mobile-portrait'
+    | 'tablet'
+    | 'desktop' => {
+    if (!deviceInfo) return 'desktop';
+
+    if (
+      deviceInfo.isLandscapeMobile ||
+      (deviceInfo.isMobile && deviceInfo.orientation === 'landscape')
+    ) {
+      return 'mobile-landscape';
+    }
+    if (deviceInfo.isMobile) return 'mobile-portrait';
+    if (deviceInfo.isTablet) return 'tablet';
+    return 'desktop';
+  };
+
+  const deviceType = getDeviceType();
+
+  // Responsive styles based on device type (following ProfilePage pattern)
   const getContainerStyles = () => {
-    const baseStyles = {
+    const configs = {
+      'mobile-landscape': {
+        padding: 'var(--space-lg) var(--space-base)',
+      },
+      'mobile-portrait': {
+        padding: 'var(--space-lg) var(--space-base)',
+      },
+      tablet: {
+        padding: 'calc(var(--space-xl) + 0.375rem) var(--space-xl)',
+      },
+      desktop: {
+        padding: 'var(--space-3xl)',
+      },
+    };
+
+    return {
       position: 'fixed' as const,
       top: 0,
       left: 0,
@@ -45,33 +75,17 @@ export default function LongStoryPage({
       backgroundColor: isDarkMode
         ? 'rgba(22, 37, 66, 0.7)'
         : 'rgba(0, 94, 128, 0.7)',
-      backdropFilter: 'blur(0.5rem)', // Converted from 8px to rem
-      WebkitBackdropFilter: 'blur(0.5rem)', // Converted from 8px to rem
+      backdropFilter: 'blur(0.5rem)',
+      WebkitBackdropFilter: 'blur(0.5rem)',
       opacity: 0.95,
-      zIndex: 1500,
+      zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
       justifyContent: 'center',
       alignItems: 'center',
       color: '#ffffff',
+      ...configs[deviceType],
     };
-
-    if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        padding: 'var(--space-lg) var(--space-base)', // Using CSS custom properties
-      };
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        padding: 'calc(var(--space-xl) + 0.375rem) var(--space-xl)', // Using CSS custom properties with calc
-      };
-    } else {
-      return {
-        ...baseStyles,
-        padding: 'var(--space-3xl)', // Using CSS custom property
-      };
-    }
   };
 
   const getContentStyles = () => {
@@ -87,71 +101,102 @@ export default function LongStoryPage({
   };
 
   const getTextContainerStyles = () => {
-    const baseStyles = {
-      fontSize: 'var(--text-2xl)', // Using CSS custom property
-      lineHeight: '1.8',
+    const configs = {
+      'mobile-landscape': {
+        fontSize: 'var(--text-md)',
+        lineHeight: '1.5',
+        maxWidth: '80%',
+        margin: '0 auto',
+        paddingLeft: 'var(--space-md)',
+        paddingRight: 'var(--space-md)',
+      },
+      'mobile-portrait': {
+        fontSize: 'var(--text-lg)',
+        lineHeight: '1.8',
+      },
+      tablet: {
+        fontSize: 'calc(var(--text-xl) + 0.05rem)',
+        lineHeight: '1.7',
+      },
+      desktop: {
+        fontSize: 'var(--text-2xl)',
+        lineHeight: '1.8',
+      },
+    };
+
+    return {
       fontFamily: 'Lato, sans-serif',
       fontWeight: '300',
       color: 'rgba(255, 255, 255, 0.9)',
       textAlign: 'center' as const,
+      ...configs[deviceType],
     };
-
-    if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        fontSize: 'var(--text-lg)', // Using CSS custom property
-        lineHeight: '1.6',
-      };
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        fontSize: 'calc(var(--text-xl) + 0.05rem)', // Using CSS custom property with calc
-        lineHeight: '1.7',
-      };
-    } else {
-      return baseStyles;
-    }
   };
 
   const getTitleStyles = () => {
-    const baseStyles = {
+    const configs = {
+      'mobile-landscape': {
+        fontSize: 'var(--text-3xl)',
+        marginBottom: 'var(--space-lg)',
+      },
+      'mobile-portrait': {
+        fontSize: 'calc(var(--text-4xl) - 0.25rem)',
+        marginBottom: 'var(--space-lg)',
+      },
+      tablet: {
+        fontSize: 'var(--text-5xl)',
+        marginBottom: 'calc(var(--space-xl) + 0.0625rem)',
+      },
+      desktop: {
+        fontSize: 'var(--text-6xl)',
+        marginBottom: 'calc(var(--space-xl) + 0.375rem)',
+      },
+    };
+
+    return {
       fontWeight: '700',
       fontFamily: 'Lato, sans-serif',
-      marginBottom: 'calc(var(--space-xl) + 0.375rem)', // Using CSS custom property with calc
       background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
       WebkitBackgroundClip: 'text',
       backgroundClip: 'text',
       color: 'transparent',
       letterSpacing: '-0.02em',
+      ...configs[deviceType],
     };
-
-    if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        fontSize: 'calc(var(--text-4xl) - 0.25rem)', // Using CSS custom property with calc (converted from 2.5rem)
-        marginBottom: 'var(--space-lg)', // Using CSS custom property
-      };
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        fontSize: 'var(--text-5xl)', // Using CSS custom property (converted from 3rem)
-        marginBottom: 'calc(var(--space-xl) + 0.0625rem)', // Using CSS custom property with calc
-      };
-    } else {
-      return {
-        ...baseStyles,
-        fontSize: 'var(--text-6xl)', // Using CSS custom property (converted from 4rem)
-      };
-    }
   };
 
   const getBackButtonStyles = () => {
-    const baseStyles = {
+    const configs = {
+      'mobile-landscape': {
+        top: 'var(--space-base)',
+        right: 'var(--space-base)',
+        width: 'var(--touch-target-md)',
+        height: 'var(--touch-target-md)',
+      },
+      'mobile-portrait': {
+        top: 'var(--space-base)',
+        right: 'var(--space-base)',
+        width: 'var(--touch-target-md)',
+        height: 'var(--touch-target-md)',
+      },
+      tablet: {
+        top: 'var(--space-lg)',
+        right: 'var(--space-lg)',
+        width: 'var(--space-4xl)',
+        height: 'var(--space-4xl)',
+      },
+      desktop: {
+        top: 'var(--space-lg)',
+        right: 'var(--space-lg)',
+        width: 'var(--space-4xl)',
+        height: 'var(--space-4xl)',
+      },
+    };
+
+    return {
       borderRadius: '50%',
       position: 'absolute' as const,
       zIndex: 1001,
-      width: 'var(--space-4xl)', // Using CSS custom property (converted from 50px)
-      height: 'var(--space-4xl)', // Using CSS custom property (converted from 50px)
       border: 'none',
       backgroundColor: isDarkMode ? '#162542' : '#005E80',
       color: '#ffffff',
@@ -159,23 +204,8 @@ export default function LongStoryPage({
       alignItems: 'center',
       justifyContent: 'center',
       cursor: 'pointer',
+      ...configs[deviceType],
     };
-
-    if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        top: 'var(--space-base)', // Using CSS custom property
-        right: 'var(--space-base)', // Using CSS custom property
-        width: 'var(--touch-target-md)', // Using CSS custom property
-        height: 'var(--touch-target-md)', // Using CSS custom property
-      };
-    } else {
-      return {
-        ...baseStyles,
-        top: 'var(--space-lg)', // Using CSS custom property
-        right: 'var(--space-lg)', // Using CSS custom property
-      };
-    }
   };
 
   return (
@@ -190,7 +220,10 @@ export default function LongStoryPage({
         >
           {/* Back button */}
           <motion.button
-            onClick={onClose}
+            onClick={() => {
+              onPlayClickSound?.();
+              onClose();
+            }}
             initial={{ x: 20 }}
             animate={{ x: 0 }}
             whileHover={{ x: -5 }}
@@ -203,9 +236,11 @@ export default function LongStoryPage({
               icon={faArrowLeft}
               style={{
                 color: '#ffffff',
-                fontSize: deviceInfo?.isMobile
-                  ? 'var(--text-lg)'
-                  : 'var(--text-xl)', // Using CSS custom properties
+                fontSize:
+                  deviceType === 'mobile-landscape' ||
+                  deviceType === 'mobile-portrait'
+                    ? 'var(--text-lg)'
+                    : 'var(--text-xl)',
               }}
             />
           </motion.button>

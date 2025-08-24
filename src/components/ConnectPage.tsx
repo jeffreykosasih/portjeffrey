@@ -4,6 +4,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { faLinkedin, faGithub } from '@fortawesome/free-brands-svg-icons';
 import emailjs from '@emailjs/browser';
+import { DeviceInfo } from '../lib/types';
+import {
+  getResponsiveValue,
+  getSpacing,
+  ResponsiveValues,
+} from '../lib/responsiveUtils';
 
 // Gmail Icon Component
 const GmailIcon = ({ style }: { style?: React.CSSProperties }) => (
@@ -22,7 +28,8 @@ interface ConnectPageProps {
   onOpenBurgerMenu: (slideDirection?: 'left' | 'right') => void;
   isDarkMode: boolean;
   shouldAnimateText?: boolean;
-  deviceInfo?: any;
+  deviceInfo?: DeviceInfo;
+  onPlayClickSound?: () => void;
 }
 
 export default function ConnectPage({
@@ -32,7 +39,28 @@ export default function ConnectPage({
   isDarkMode,
   shouldAnimateText = true,
   deviceInfo,
+  onPlayClickSound,
 }: ConnectPageProps) {
+  // Unified device type detection (following ProfilePage pattern)
+  const getDeviceType = ():
+    | 'mobile-landscape'
+    | 'mobile-portrait'
+    | 'tablet'
+    | 'desktop' => {
+    if (!deviceInfo) return 'desktop';
+
+    if (
+      deviceInfo.isLandscapeMobile ||
+      (deviceInfo.isMobile && deviceInfo.orientation === 'landscape')
+    ) {
+      return 'mobile-landscape';
+    }
+    if (deviceInfo.isMobile) return 'mobile-portrait';
+    if (deviceInfo.isTablet) return 'tablet';
+    return 'desktop';
+  };
+
+  const deviceType = getDeviceType();
   // Initialize EmailJS
   React.useEffect(() => {
     emailjs.init('xikWb0cmK5mzktYbT');
@@ -58,9 +86,30 @@ export default function ConnectPage({
     message?: string;
   }>({});
 
-  // Responsive styles based on device type with landscape mobile support
+  // Responsive styles based on device type (following ProfilePage pattern)
   const getContainerStyles = () => {
-    const baseStyles = {
+    const configs = {
+      'mobile-landscape': {
+        padding: 'var(--space-lg) var(--space-xl)',
+        paddingTop: 'max(var(--space-lg), env(safe-area-inset-top))',
+        paddingBottom: 'max(var(--space-lg), env(safe-area-inset-bottom))',
+        height: '100dvh',
+      },
+      'mobile-portrait': {
+        padding: 'var(--space-base) var(--space-lg)',
+        paddingTop: 'max(var(--space-base), env(safe-area-inset-top))',
+        paddingBottom: 'max(var(--space-5xl), env(safe-area-inset-bottom))', // Extra bottom padding for mobile
+        height: '100dvh',
+      },
+      tablet: {
+        padding: 'calc(var(--space-xl) + 0.625rem) var(--space-xl)',
+      },
+      desktop: {
+        padding: 'var(--space-3xl)',
+      },
+    };
+
+    return {
       position: 'fixed' as const,
       top: 0,
       left: 0,
@@ -72,7 +121,7 @@ export default function ConnectPage({
       backdropFilter: 'blur(0.5rem)',
       WebkitBackdropFilter: 'blur(0.5rem)',
       opacity: 0.95,
-      zIndex: 1500,
+      zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
       justifyContent: 'flex-start',
@@ -80,37 +129,10 @@ export default function ConnectPage({
       color: '#ffffff',
       overflowY: 'auto' as const,
       overflowX: 'hidden' as const,
-      WebkitOverflowScrolling: 'touch',
-      scrollbarWidth: 'none',
-      msOverflowStyle: 'none',
-    };
-
-    // Enhanced with landscape mobile support
-    if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like layout with scaled components
-      return {
-        ...baseStyles,
-        padding:
-          'max(env(safe-area-inset-top), calc(var(--space-xl) + 0.375rem)) var(--space-xl) max(env(safe-area-inset-bottom), calc(var(--space-xl) + 0.375rem)) var(--space-xl)',
-        height: '100dvh',
-      };
-    } else if (deviceInfo?.isMobile) {
-      return {
-        ...baseStyles,
-        padding:
-          'max(env(safe-area-inset-top), var(--space-lg)) var(--space-base) max(env(safe-area-inset-bottom), var(--space-6xl)) var(--space-base)',
-        height: '100dvh',
-      };
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        padding: 'calc(var(--space-xl) + 0.375rem) var(--space-xl)',
-      };
-    }
-
-    return {
-      ...baseStyles,
-      padding: 'var(--space-3xl)',
+      WebkitOverflowScrolling: 'touch' as any,
+      scrollbarWidth: 'none' as any,
+      msOverflowStyle: 'none' as any,
+      ...configs[deviceType],
     };
   };
 
@@ -262,6 +284,7 @@ export default function ConnectPage({
             {/* Back button with slide left to right effect */}
             <motion.button
               onClick={() => {
+                onPlayClickSound?.();
                 onClose();
                 onOpenBurgerMenu('right'); // Open burger menu sliding from right corner
               }}
@@ -272,35 +295,27 @@ export default function ConnectPage({
               style={{
                 borderRadius: '50%',
                 position: 'absolute',
-                top: deviceInfo?.isLandscapeMobile
-                  ? 'max(env(safe-area-inset-top), var(--space-lg))' // Using CSS custom property
-                  : deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'landscape'
-                    ? 'max(env(safe-area-inset-top), var(--space-sm))' // Using CSS custom property
-                    : 'max(env(safe-area-inset-top), var(--space-base))' // Using CSS custom property
-                  : 'var(--space-lg)', // Using CSS custom property
-                right: deviceInfo?.isLandscapeMobile
-                  ? 'var(--space-lg)' // Using CSS custom property
-                  : deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'landscape'
-                    ? 'var(--space-md)' // Using CSS custom property
-                    : 'var(--space-base)' // Using CSS custom property
-                  : 'var(--space-lg)', // Using CSS custom property
+                top:
+                  deviceType === 'mobile-landscape' ||
+                  deviceType === 'mobile-portrait'
+                    ? 'var(--space-lg)'
+                    : 'var(--space-xl)',
+                right:
+                  deviceType === 'mobile-landscape' ||
+                  deviceType === 'mobile-portrait'
+                    ? 'var(--space-lg)'
+                    : 'var(--space-xl)',
                 zIndex: 1001,
-                width: deviceInfo?.isLandscapeMobile
-                  ? 'var(--space-4xl)' // Using CSS custom property
-                  : deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'landscape'
-                    ? 'var(--space-3xl)' // Using CSS custom property
-                    : 'var(--touch-target-md)' // Using CSS custom property
-                  : 'var(--space-4xl)', // Using CSS custom property
-                height: deviceInfo?.isLandscapeMobile
-                  ? 'var(--space-4xl)' // Using CSS custom property
-                  : deviceInfo?.isMobile
-                  ? deviceInfo?.orientation === 'landscape'
-                    ? 'var(--space-3xl)' // Using CSS custom property
-                    : 'var(--touch-target-md)' // Using CSS custom property
-                  : 'var(--space-4xl)', // Using CSS custom property
+                width:
+                  deviceType === 'mobile-landscape' ||
+                  deviceType === 'mobile-portrait'
+                    ? 'var(--touch-target-md)'
+                    : 'var(--touch-target-lg)',
+                height:
+                  deviceType === 'mobile-landscape' ||
+                  deviceType === 'mobile-portrait'
+                    ? 'var(--touch-target-md)'
+                    : 'var(--touch-target-lg)',
                 border: 'none',
                 backgroundColor: isDarkMode ? '#162542' : '#005E80',
                 color: '#ffffff',
@@ -316,7 +331,7 @@ export default function ConnectPage({
                 icon={faArrowLeft}
                 style={{
                   color: '#ffffff',
-                  fontSize: '20px',
+                  fontSize: 'var(--text-lg)',
                 }}
               />
             </motion.button>
@@ -341,31 +356,30 @@ export default function ConnectPage({
             >
               <h1
                 style={{
-                  fontSize: deviceInfo?.isLandscapeMobile
-                    ? '2.5rem' // Desktop-like title size for landscape mobile
-                    : deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'landscape'
-                      ? '1.3rem'
-                      : '2.2rem'
-                    : deviceInfo?.isTablet
-                    ? '2.5rem'
-                    : '3rem',
+                  fontSize:
+                    deviceType === 'mobile-landscape'
+                      ? 'var(--text-5xl)'
+                      : deviceType === 'mobile-portrait'
+                      ? 'var(--mobile-text-display)'
+                      : deviceType === 'tablet'
+                      ? 'var(--tablet-text-display)'
+                      : 'var(--text-6xl)',
                   fontWeight: '900',
                   fontFamily: 'Lato, sans-serif',
-                  marginBottom: deviceInfo?.isLandscapeMobile
-                    ? '20px' // Desktop-like spacing for landscape mobile
-                    : deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'landscape'
-                      ? '6px'
-                      : '16px'
-                    : deviceInfo?.isTablet
-                    ? '20px'
-                    : '25px',
-                  marginTop: deviceInfo?.isLandscapeMobile
-                    ? '10px' // Desktop-like top margin for landscape mobile
-                    : deviceInfo?.isMobile
-                    ? '0'
-                    : '20px',
+                  marginBottom:
+                    deviceType === 'mobile-landscape'
+                      ? 'var(--space-lg)'
+                      : deviceType === 'mobile-portrait'
+                      ? 'var(--space-base)'
+                      : deviceType === 'tablet'
+                      ? 'var(--space-lg)'
+                      : 'calc(var(--space-xl) + 0.3125rem)',
+                  marginTop:
+                    deviceType === 'mobile-landscape'
+                      ? 'var(--space-sm)'
+                      : deviceType === 'mobile-portrait'
+                      ? '0'
+                      : 'var(--space-lg)',
                   background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
@@ -379,31 +393,31 @@ export default function ConnectPage({
 
               <p
                 style={{
-                  fontSize: deviceInfo?.isLandscapeMobile
-                    ? '1.2rem' // Desktop-like font size for landscape mobile
-                    : deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'landscape'
-                      ? '0.75rem' // Reduced from 0.9rem
-                      : '1.0rem' // Reduced from 1.1rem for portrait
-                    : deviceInfo?.isTablet
-                    ? '1.3rem'
-                    : '1.5rem',
-                  lineHeight: deviceInfo?.isLandscapeMobile
-                    ? '1.6' // Desktop-like line height for landscape mobile
-                    : deviceInfo?.isMobile &&
-                      deviceInfo?.orientation === 'landscape'
-                    ? '1.3' // Reduced from 1.5
-                    : '1.8',
+                  fontSize:
+                    deviceType === 'mobile-landscape'
+                      ? 'var(--text-xl)'
+                      : deviceType === 'mobile-portrait'
+                      ? 'var(--text-base)'
+                      : deviceType === 'tablet'
+                      ? 'calc(var(--text-xl) + 0.1875rem)'
+                      : 'var(--text-2xl)',
+                  lineHeight:
+                    deviceType === 'mobile-landscape'
+                      ? '1.6'
+                      : deviceType === 'mobile-portrait'
+                      ? '1.8'
+                      : deviceType === 'tablet'
+                      ? '1.8'
+                      : '1.8',
                   fontFamily: 'Lato, sans-serif',
-                  marginBottom: deviceInfo?.isLandscapeMobile
-                    ? '35px' // Desktop-like spacing for landscape mobile
-                    : deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'portrait'
-                      ? '24px' // Reduced from 30px for portrait
-                      : '30px' // Keep landscape the same
-                    : deviceInfo?.isTablet
-                    ? '40px'
-                    : '50px',
+                  marginBottom:
+                    deviceType === 'mobile-landscape'
+                      ? 'calc(var(--space-2xl) + 0.1875rem)'
+                      : deviceType === 'mobile-portrait'
+                      ? 'var(--space-xl)'
+                      : deviceType === 'tablet'
+                      ? 'var(--space-3xl)'
+                      : 'calc(var(--space-3xl) + 0.125rem)',
                   fontWeight: '300',
                   color: 'rgba(255, 255, 255, 0.9)',
                 }}
@@ -415,24 +429,24 @@ export default function ConnectPage({
               {/* Two Column Layout */}
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: deviceInfo?.isLandscapeMobile
-                    ? 'repeat(auto-fit, minmax(350px, 1fr))' // Desktop-like two-column layout for landscape mobile
-                    : deviceInfo?.isMobile
-                    ? '1fr'
-                    : deviceInfo?.isTablet
-                    ? '1fr'
-                    : 'repeat(auto-fit, minmax(400px, 1fr))',
-                  gap: deviceInfo?.isLandscapeMobile
-                    ? '50px' // Desktop-like gap for landscape mobile
-                    : deviceInfo?.isMobile
-                    ? deviceInfo?.orientation === 'portrait'
-                      ? '32px' // Reduced from 40px for portrait
-                      : '40px' // Keep landscape the same
-                    : deviceInfo?.isTablet
-                    ? '50px'
-                    : '60px',
-                  alignItems: 'start',
+                  display: 'flex',
+                  flexDirection:
+                    deviceType === 'mobile-landscape' ||
+                    deviceType === 'mobile-portrait' ||
+                    deviceType === 'tablet'
+                      ? 'column'
+                      : 'row',
+                  gap:
+                    deviceType === 'mobile-landscape'
+                      ? 'var(--space-2xl)'
+                      : deviceType === 'mobile-portrait'
+                      ? 'var(--space-xl)'
+                      : deviceType === 'tablet'
+                      ? 'var(--space-3xl)'
+                      : 'calc(var(--space-4xl) - 0.25rem)',
+                  alignItems: 'stretch',
+                  justifyContent: 'center',
+                  maxWidth: '100%',
                 }}
               >
                 {/* Contact Methods */}
@@ -448,29 +462,46 @@ export default function ConnectPage({
                       ? { duration: 0.6, delay: 0.4 }
                       : { duration: 0 }
                   }
+                  style={{
+                    flex:
+                      deviceType === 'mobile-landscape' ||
+                      deviceType === 'mobile-portrait' ||
+                      deviceType === 'tablet'
+                        ? '1'
+                        : '1',
+                    minWidth: '0', // Prevent flex item overflow
+                    width: '100%',
+                  }}
                 >
                   <h2
                     style={{
-                      fontSize: deviceInfo?.isLandscapeMobile
-                        ? '1.8rem' // Desktop-like font size for landscape mobile
-                        : deviceInfo?.isMobile
-                        ? '1.5rem'
-                        : deviceInfo?.isTablet
-                        ? '1.75rem'
-                        : '2rem',
+                      fontSize:
+                        deviceType === 'mobile-landscape'
+                          ? 'calc(var(--text-2xl) - 0.25rem)'
+                          : deviceType === 'mobile-portrait'
+                          ? 'var(--text-2xl)'
+                          : deviceType === 'tablet'
+                          ? 'calc(var(--text-2xl) - 0.125rem)'
+                          : 'var(--text-3xl)',
                       fontWeight: '700',
                       fontFamily: 'Lato, sans-serif',
-                      marginBottom: deviceInfo?.isLandscapeMobile
-                        ? '25px' // Desktop-like spacing for landscape mobile
-                        : deviceInfo?.isMobile
-                        ? '20px'
-                        : '30px',
+                      marginBottom:
+                        deviceType === 'mobile-landscape'
+                          ? 'calc(var(--space-xl) + 0.3125rem)'
+                          : deviceType === 'mobile-portrait'
+                          ? 'var(--space-lg)'
+                          : deviceType === 'tablet'
+                          ? 'calc(var(--space-xl) + 0.625rem)'
+                          : 'calc(var(--space-xl) + 0.625rem)',
                       color: '#ffffff',
-                      textAlign: deviceInfo?.isLandscapeMobile
-                        ? 'left' // Desktop-like alignment for landscape mobile
-                        : deviceInfo?.isMobile
-                        ? 'center'
-                        : 'left',
+                      textAlign:
+                        deviceType === 'mobile-landscape'
+                          ? 'left'
+                          : deviceType === 'mobile-portrait'
+                          ? 'center'
+                          : deviceType === 'tablet'
+                          ? 'center'
+                          : 'left',
                     }}
                   >
                     Links
@@ -480,7 +511,7 @@ export default function ConnectPage({
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '15px',
+                      gap: 'calc(var(--space-md) + 0.1875rem)',
                     }}
                   >
                     {contactMethods.map((method, index) => (
@@ -500,12 +531,19 @@ export default function ConnectPage({
                               : isDarkMode
                               ? 'rgba(255, 255, 255, 0.1)'
                               : 'rgba(255, 255, 255, 0.1)',
-                          borderRadius: deviceInfo?.isMobile ? '12px' : '15px',
-                          padding: deviceInfo?.isLandscapeMobile
-                            ? '12px 20px 15px 20px' // Desktop-like padding for landscape mobile
-                            : deviceInfo?.isMobile
-                            ? '12px 16px 15px 16px'
-                            : '12px 20px 15px 20px',
+                          borderRadius:
+                            deviceType === 'mobile-landscape' ||
+                            deviceType === 'mobile-portrait'
+                              ? 'var(--radius-md)'
+                              : 'calc(var(--radius-md) + 0.1875rem)',
+                          padding:
+                            deviceType === 'mobile-landscape'
+                              ? 'var(--space-md) var(--space-lg) calc(var(--space-md) + 0.1875rem) var(--space-lg)'
+                              : deviceType === 'mobile-portrait'
+                              ? 'var(--space-md) var(--space-base) calc(var(--space-md) + 0.1875rem) var(--space-base)'
+                              : deviceType === 'tablet'
+                              ? 'var(--space-md) var(--space-lg) calc(var(--space-md) + 0.1875rem) var(--space-lg)'
+                              : 'var(--space-md) var(--space-lg) calc(var(--space-md) + 0.1875rem) var(--space-lg)',
                           border: 'none',
                           cursor: 'pointer',
                           transform:
@@ -517,11 +555,14 @@ export default function ConnectPage({
                           alignItems: 'center',
                           textAlign: 'left',
                           width: '100%',
-                          gap: deviceInfo?.isLandscapeMobile
-                            ? '18px' // Desktop-like gap for landscape mobile
-                            : deviceInfo?.isMobile
-                            ? '16px'
-                            : '20px',
+                          gap:
+                            deviceType === 'mobile-landscape'
+                              ? 'calc(var(--space-base) + 0.125rem)'
+                              : deviceType === 'mobile-portrait'
+                              ? 'var(--space-base)'
+                              : deviceType === 'tablet'
+                              ? 'var(--space-lg)'
+                              : 'var(--space-lg)',
                           willChange: 'transform, background-color, opacity',
                         }}
                         onMouseEnter={() => setHoveredCardIndex(index)}
@@ -529,11 +570,14 @@ export default function ConnectPage({
                       >
                         <div
                           style={{
-                            fontSize: deviceInfo?.isLandscapeMobile
-                              ? '1.4rem' // Desktop-like icon size for landscape mobile
-                              : deviceInfo?.isMobile
-                              ? '1.25rem'
-                              : '1.5rem',
+                            fontSize:
+                              deviceType === 'mobile-landscape'
+                                ? 'var(--text-2xl)'
+                                : deviceType === 'mobile-portrait'
+                                ? 'var(--text-xl)'
+                                : deviceType === 'tablet'
+                                ? 'var(--text-2xl)'
+                                : 'var(--text-2xl)',
                             flexShrink: 0,
                           }}
                         >
@@ -542,16 +586,17 @@ export default function ConnectPage({
                         <div>
                           <h3
                             style={{
-                              fontSize: deviceInfo?.isLandscapeMobile
-                                ? '1.1rem' // Desktop-like title font size for landscape mobile
-                                : deviceInfo?.isMobile
-                                ? '1rem'
-                                : deviceInfo?.isTablet
-                                ? '1.1rem'
-                                : '1.2rem',
+                              fontSize:
+                                deviceType === 'mobile-landscape'
+                                  ? 'calc(var(--text-base) + 0.0625rem)'
+                                  : deviceType === 'mobile-portrait'
+                                  ? 'var(--text-base)'
+                                  : deviceType === 'tablet'
+                                  ? 'calc(var(--text-base) + 0.0625rem)'
+                                  : 'var(--text-xl)',
                               fontWeight: '600',
                               fontFamily: 'Lato, sans-serif',
-                              marginBottom: '5px',
+                              marginBottom: 'var(--space-xs)',
                               color: '#ffffff',
                             }}
                           >
@@ -559,11 +604,14 @@ export default function ConnectPage({
                           </h3>
                           <p
                             style={{
-                              fontSize: deviceInfo?.isLandscapeMobile
-                                ? '0.85rem' // Desktop-like description font size for landscape mobile
-                                : deviceInfo?.isMobile
-                                ? '0.8rem'
-                                : '0.9rem',
+                              fontSize:
+                                deviceType === 'mobile-landscape'
+                                  ? 'calc(var(--text-sm) + 0.05rem)'
+                                  : deviceType === 'mobile-portrait'
+                                  ? 'var(--text-sm)'
+                                  : deviceType === 'tablet'
+                                  ? 'calc(var(--text-sm) + 0.05rem)'
+                                  : 'calc(var(--text-sm) + 0.05rem)',
                               color: 'rgba(255, 255, 255, 0.7)',
                               fontFamily: 'Lato, sans-serif',
                               margin: 0,
@@ -590,19 +638,36 @@ export default function ConnectPage({
                       ? { duration: 0.6, delay: 0.6 }
                       : { duration: 0 }
                   }
+                  style={{
+                    flex:
+                      deviceType === 'mobile-landscape' ||
+                      deviceType === 'mobile-portrait' ||
+                      deviceType === 'tablet'
+                        ? '1'
+                        : '1',
+                    minWidth: '0', // Prevent flex item overflow
+                    width: '100%',
+                  }}
                 >
                   <h2
                     style={{
-                      fontSize: deviceInfo?.isMobile
-                        ? '1.5rem'
-                        : deviceInfo?.isTablet
-                        ? '1.75rem'
-                        : '2rem',
+                      fontSize:
+                        deviceType === 'mobile-landscape'
+                          ? 'calc(var(--text-2xl) - 0.25rem)'
+                          : deviceType === 'mobile-portrait'
+                          ? 'var(--text-2xl)'
+                          : deviceType === 'tablet'
+                          ? 'calc(var(--text-2xl) - 0.125rem)'
+                          : 'var(--text-3xl)',
                       fontWeight: '700',
                       fontFamily: 'Lato, sans-serif',
-                      marginBottom: deviceInfo?.isMobile ? '20px' : '30px',
+                      marginBottom: 'var(--space-lg)',
                       color: '#ffffff',
-                      textAlign: deviceInfo?.isMobile ? 'center' : 'left',
+                      textAlign:
+                        deviceType === 'mobile-landscape' ||
+                        deviceType === 'mobile-portrait'
+                          ? 'center'
+                          : 'left',
                     }}
                   >
                     Straight from site
@@ -610,7 +675,7 @@ export default function ConnectPage({
 
                   <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
                     {/* Name Field */}
-                    <div style={{ marginBottom: '20px' }}>
+                    <div style={{ marginBottom: 'var(--space-lg)' }}>
                       <input
                         type='text'
                         name='name'
@@ -620,21 +685,26 @@ export default function ConnectPage({
                         className='bright-placeholder'
                         style={{
                           width: '100%',
-                          padding: deviceInfo?.isMobile
-                            ? '12px 16px'
-                            : '15px 20px',
-                          borderRadius: deviceInfo?.isMobile ? '10px' : '12px',
+                          padding:
+                            deviceType === 'mobile-landscape' ||
+                            deviceType === 'mobile-portrait'
+                              ? 'calc(var(--space-md) + 0.125rem) var(--space-base)' // Slightly larger padding for better touch
+                              : 'calc(var(--space-md) + 0.1875rem) var(--space-lg)',
+                          borderRadius: 'var(--radius-md)',
                           border: formErrors.name
                             ? '2px solid #ef4444'
                             : '2px solid rgba(255, 255, 255, 0.2)',
-                          backgroundColor: isDarkMode
-                            ? 'rgba(255, 255, 255, 0.1)'
-                            : 'rgba(255, 255, 255, 0.1)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
-                          fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
+                          fontSize:
+                            deviceType === 'mobile-landscape' ||
+                            deviceType === 'mobile-portrait'
+                              ? '1rem'
+                              : 'var(--text-base)', // 16px prevents zoom on iOS
                           fontFamily: 'Lato, sans-serif',
                           outline: 'none',
                           transition: 'border-color 0.3s ease',
+                          boxSizing: 'border-box',
                         }}
                         onFocus={(e) => {
                           e.target.style.borderColor =
@@ -661,7 +731,7 @@ export default function ConnectPage({
                     </div>
 
                     {/* Email Field */}
-                    <div style={{ marginBottom: '20px' }}>
+                    <div style={{ marginBottom: 'var(--space-lg)' }}>
                       <input
                         type='email'
                         name='email'
@@ -671,21 +741,26 @@ export default function ConnectPage({
                         className='bright-placeholder'
                         style={{
                           width: '100%',
-                          padding: deviceInfo?.isMobile
-                            ? '12px 16px'
-                            : '15px 20px',
-                          borderRadius: deviceInfo?.isMobile ? '10px' : '12px',
+                          padding:
+                            deviceType === 'mobile-landscape' ||
+                            deviceType === 'mobile-portrait'
+                              ? 'calc(var(--space-md) + 0.125rem) var(--space-base)' // Slightly larger padding for better touch
+                              : 'calc(var(--space-md) + 0.1875rem) var(--space-lg)',
+                          borderRadius: 'var(--radius-md)',
                           border: formErrors.email
                             ? '2px solid #ef4444'
                             : '2px solid rgba(255, 255, 255, 0.2)',
-                          backgroundColor: isDarkMode
-                            ? 'rgba(255, 255, 255, 0.1)'
-                            : 'rgba(255, 255, 255, 0.1)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
-                          fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
+                          fontSize:
+                            deviceType === 'mobile-landscape' ||
+                            deviceType === 'mobile-portrait'
+                              ? '1rem'
+                              : 'var(--text-base)', // 16px prevents zoom on iOS
                           fontFamily: 'Lato, sans-serif',
                           outline: 'none',
                           transition: 'border-color 0.3s ease',
+                          boxSizing: 'border-box',
                         }}
                         onFocus={(e) => {
                           e.target.style.borderColor =
@@ -712,7 +787,7 @@ export default function ConnectPage({
                     </div>
 
                     {/* Message Field */}
-                    <div style={{ marginBottom: '20px' }}>
+                    <div style={{ marginBottom: 'var(--space-lg)' }}>
                       <textarea
                         name='message'
                         placeholder='Your Message'
@@ -722,25 +797,38 @@ export default function ConnectPage({
                         className='bright-placeholder'
                         style={{
                           width: '100%',
-                          padding: deviceInfo?.isMobile
-                            ? '12px 16px'
-                            : '15px 20px',
-                          borderRadius: deviceInfo?.isMobile ? '10px' : '12px',
+                          padding:
+                            deviceType === 'mobile-landscape' ||
+                            deviceType === 'mobile-portrait'
+                              ? 'calc(var(--space-md) + 0.125rem) var(--space-base)' // Slightly larger padding for better touch
+                              : 'calc(var(--space-md) + 0.1875rem) var(--space-lg)',
+                          borderRadius: 'var(--radius-md)',
                           border: formErrors.message
                             ? '2px solid #ef4444'
                             : '2px solid rgba(255, 255, 255, 0.2)',
-                          backgroundColor: isDarkMode
-                            ? 'rgba(255, 255, 255, 0.1)'
-                            : 'rgba(255, 255, 255, 0.1)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
-                          fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
+                          fontSize:
+                            deviceType === 'mobile-landscape' ||
+                            deviceType === 'mobile-portrait'
+                              ? '1rem'
+                              : 'var(--text-base)', // 16px prevents zoom on iOS
                           fontFamily: 'Lato, sans-serif',
                           outline: 'none',
                           transition: 'border-color 0.3s ease',
                           resize: 'vertical',
-                          minHeight: deviceInfo?.isMobile ? '100px' : '120px',
-                          maxHeight: deviceInfo?.isMobile ? '300px' : '400px',
+                          minHeight:
+                            deviceType === 'mobile-landscape' ||
+                            deviceType === 'mobile-portrait'
+                              ? '7.5rem'
+                              : '7.5rem', // Increase mobile min height
+                          maxHeight:
+                            deviceType === 'mobile-landscape' ||
+                            deviceType === 'mobile-portrait'
+                              ? '18.75rem'
+                              : '25rem',
                           overflowY: 'auto',
+                          boxSizing: 'border-box',
                         }}
                         onFocus={(e) => {
                           e.target.style.borderColor =
@@ -772,10 +860,12 @@ export default function ConnectPage({
                       disabled={isSubmitting}
                       style={{
                         width: '100%',
-                        padding: deviceInfo?.isMobile
-                          ? '12px 24px'
-                          : '15px 30px',
-                        borderRadius: deviceInfo?.isMobile ? '10px' : '12px',
+                        padding:
+                          deviceType === 'mobile-landscape' ||
+                          deviceType === 'mobile-portrait'
+                            ? 'var(--space-base) var(--space-xl)' // Larger padding for better touch
+                            : 'calc(var(--space-md) + 0.1875rem) calc(var(--space-xl) + 0.625rem)',
+                        borderRadius: '12px',
                         border: isSubmitting ? '2px solid #ffffff' : 'none',
                         backgroundColor: isSubmitting
                           ? 'rgba(255, 255, 255, 0.9)'
@@ -787,7 +877,11 @@ export default function ConnectPage({
                             ? '#162542'
                             : '#005E80'
                           : '#ffffff',
-                        fontSize: deviceInfo?.isMobile ? '1rem' : '1.1rem',
+                        fontSize:
+                          deviceType === 'mobile-landscape' ||
+                          deviceType === 'mobile-portrait'
+                            ? '1rem'
+                            : 'calc(var(--text-base) + 0.0625rem)',
                         fontWeight: '600',
                         fontFamily: 'Lato, sans-serif',
                         cursor: isSubmitting ? 'not-allowed' : 'pointer',
@@ -795,11 +889,21 @@ export default function ConnectPage({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: deviceInfo?.isMobile ? '8px' : '10px',
+                        gap:
+                          deviceType === 'mobile-landscape' ||
+                          deviceType === 'mobile-portrait'
+                            ? 'var(--space-sm)'
+                            : 'var(--space-sm)',
                         opacity: 1,
                         boxShadow: isSubmitting
                           ? '0 4px 12px rgba(255, 255, 255, 0.3)'
                           : 'none',
+                        minHeight:
+                          deviceType === 'mobile-landscape' ||
+                          deviceType === 'mobile-portrait'
+                            ? 'var(--touch-target-md)'
+                            : 'auto', // Minimum touch target
+                        boxSizing: 'border-box',
                       }}
                       onMouseEnter={(e) => {
                         if (!isSubmitting) {
@@ -844,15 +948,39 @@ export default function ConnectPage({
                   transition={{ duration: 0.3 }}
                   style={{
                     position: 'fixed',
-                    bottom: deviceInfo?.isMobile ? '20px' : '30px',
-                    right: deviceInfo?.isMobile ? '20px' : '30px',
-                    left: deviceInfo?.isMobile ? '20px' : 'auto',
+                    bottom:
+                      deviceType === 'mobile-landscape' ||
+                      deviceType === 'mobile-portrait'
+                        ? 'var(--space-lg)'
+                        : 'calc(var(--space-xl) + 0.625rem)',
+                    right:
+                      deviceType === 'mobile-landscape' ||
+                      deviceType === 'mobile-portrait'
+                        ? 'var(--space-lg)'
+                        : 'calc(var(--space-xl) + 0.625rem)',
+                    left:
+                      deviceType === 'mobile-landscape' ||
+                      deviceType === 'mobile-portrait'
+                        ? 'var(--space-lg)'
+                        : 'auto',
                     background:
                       submitStatus === 'error' ? '#ef4444' : '#32d74b',
                     color: '#ffffff',
-                    padding: deviceInfo?.isMobile ? '16px 20px' : '20px 30px',
-                    borderRadius: deviceInfo?.isMobile ? '10px' : '12px',
-                    fontSize: deviceInfo?.isMobile ? '0.9rem' : '1rem',
+                    padding:
+                      deviceType === 'mobile-landscape' ||
+                      deviceType === 'mobile-portrait'
+                        ? 'var(--space-base) var(--space-lg)'
+                        : 'var(--space-lg) calc(var(--space-xl) + 0.625rem)',
+                    borderRadius:
+                      deviceType === 'mobile-landscape' ||
+                      deviceType === 'mobile-portrait'
+                        ? 'var(--space-sm)'
+                        : 'var(--radius-md)',
+                    fontSize:
+                      deviceType === 'mobile-landscape' ||
+                      deviceType === 'mobile-portrait'
+                        ? 'calc(var(--text-sm) + 0.05rem)'
+                        : 'var(--text-base)',
                     fontWeight: '600',
                     fontFamily: 'Lato, sans-serif',
                     boxShadow:
@@ -862,7 +990,11 @@ export default function ConnectPage({
                     zIndex: 2000,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: deviceInfo?.isMobile ? '8px' : '10px',
+                    gap:
+                      deviceType === 'mobile-landscape' ||
+                      deviceType === 'mobile-portrait'
+                        ? 'var(--space-sm)'
+                        : 'var(--space-sm)',
                   }}
                 >
                   <FontAwesomeIcon icon={faEnvelope} />

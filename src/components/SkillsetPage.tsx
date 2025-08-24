@@ -8,6 +8,11 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { DeviceInfo } from '../lib/types';
 import {
+  getResponsiveValue,
+  getSpacing,
+  ResponsiveValues,
+} from '../lib/responsiveUtils';
+import {
   faJs,
   faReact,
   faFigma,
@@ -178,9 +183,55 @@ export default function SkillsetPage({
   const [isButtonHovered, setIsButtonHovered] = React.useState(false);
   const [showAdobePopup, setShowAdobePopup] = useState(false);
 
-  // Responsive styling based on device
+  // Unified device type detection (following ProfilePage pattern)
+  const getDeviceType = ():
+    | 'mobile-landscape'
+    | 'mobile-portrait'
+    | 'tablet'
+    | 'desktop' => {
+    if (!deviceInfo) return 'desktop';
+
+    if (
+      deviceInfo.isLandscapeMobile ||
+      (deviceInfo.isMobile && deviceInfo.orientation === 'landscape')
+    ) {
+      return 'mobile-landscape';
+    }
+    if (deviceInfo.isMobile) return 'mobile-portrait';
+    if (deviceInfo.isTablet) return 'tablet';
+    return 'desktop';
+  };
+
+  const deviceType = getDeviceType();
+
+  // Responsive styling based on device (following ProfilePage pattern)
   const getContainerStyles = () => {
-    const baseStyles = {
+    const configs = {
+      'mobile-landscape': {
+        padding: `max(env(safe-area-inset-top), var(--space-lg)) var(--space-xl) max(env(safe-area-inset-bottom), var(--space-lg)) var(--space-xl)`,
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100dvh',
+      },
+      'mobile-portrait': {
+        padding: `max(env(safe-area-inset-top), var(--space-lg)) var(--space-base) max(env(safe-area-inset-bottom), var(--space-3xl)) var(--space-base)`,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        height: '100dvh',
+      },
+      tablet: {
+        padding: 'var(--space-3xl) var(--space-xl)',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      desktop: {
+        padding: 'var(--space-3xl)',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+    };
+
+    return {
       position: 'fixed' as const,
       top: 0,
       left: 0,
@@ -189,157 +240,127 @@ export default function SkillsetPage({
       backgroundColor: isDarkMode
         ? 'rgba(22, 37, 66, 0.4)'
         : 'rgba(0, 94, 128, 0.5)',
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
+      backdropFilter: 'blur(0.5rem)',
+      WebkitBackdropFilter: 'blur(0.5rem)',
       opacity: 1,
-      zIndex: 1500,
+      zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
       color: '#ffffff',
       fontFamily: 'Lato, sans-serif',
       overflowY: 'auto' as const,
+      ...configs[deviceType],
     };
-
-    if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like layout with better spacing
-      return {
-        ...baseStyles,
-        padding:
-          'max(env(safe-area-inset-top), 20px) 24px max(env(safe-area-inset-bottom), 20px) 24px',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100dvh',
-      };
-    } else if (deviceInfo?.isMobile) {
-      if (deviceInfo.orientation === 'landscape') {
-        return {
-          ...baseStyles,
-          padding:
-            'max(env(safe-area-inset-top), 10px) 16px max(env(safe-area-inset-bottom), 20px) 16px',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-          height: '100dvh',
-        };
-      } else {
-        // Portrait mobile
-        return {
-          ...baseStyles,
-          padding:
-            'max(env(safe-area-inset-top), 20px) 16px max(env(safe-area-inset-bottom), 40px) 16px',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-          height: '100dvh',
-        };
-      }
-    } else {
-      return {
-        ...baseStyles,
-        padding: '40px',
-        justifyContent: 'center',
-        alignItems: 'center',
-      };
-    }
   };
 
   const getTitleStyles = () => {
-    const baseStyles = {
+    const configs = {
+      'mobile-landscape': {
+        fontSize: 'var(--text-5xl)',
+        marginBottom: 'var(--space-lg)',
+        marginTop: 'var(--space-sm)',
+      },
+      'mobile-portrait': {
+        fontSize: 'var(--mobile-text-display)',
+        marginBottom: 'var(--space-lg)',
+        marginTop: 'var(--space-lg)',
+      },
+      tablet: {
+        fontSize: 'var(--tablet-text-display)',
+        marginBottom: 'calc(var(--space-xl) + 0.3125rem)',
+      },
+      desktop: {
+        fontSize: 'var(--text-6xl)',
+        marginBottom: 'calc(var(--space-xl) + 0.625rem)',
+      },
+    };
+
+    return {
       fontWeight: '900',
       fontFamily: 'Lato, sans-serif',
-      marginBottom: '30px',
       background: 'linear-gradient(45deg, #ffffff, #e2e8f0)',
       WebkitBackgroundClip: 'text',
       backgroundClip: 'text',
       color: 'transparent',
       letterSpacing: '-0.02em',
       textAlign: 'center' as const,
+      ...configs[deviceType],
     };
-
-    if (deviceInfo?.isLandscapeMobile) {
-      // Landscape mobile - desktop-like title size but scaled appropriately
-      return {
-        ...baseStyles,
-        fontSize: '2.5rem', // Larger, more desktop-like
-        marginBottom: '20px',
-        marginTop: '10px',
-      };
-    } else if (deviceInfo?.isMobile) {
-      if (deviceInfo.orientation === 'landscape') {
-        return {
-          ...baseStyles,
-          fontSize: '1.2rem', // Reduced from 1.6rem
-          marginBottom: '4px', // Reduced from 10px
-          marginTop: '2px', // Reduced from 5px
-        };
-      } else {
-        return {
-          ...baseStyles,
-          fontSize: '2.2rem',
-          marginBottom: '20px',
-          marginTop: '20px',
-        };
-      }
-    } else if (deviceInfo?.isTablet) {
-      return {
-        ...baseStyles,
-        fontSize: '3rem',
-        marginBottom: '25px',
-      };
-    } else {
-      return {
-        ...baseStyles,
-        fontSize: '4rem',
-      };
-    }
   };
 
   const getCategoryButtonStyles = (category: SkillCategory) => {
     const isActive = activeCategory === category;
-    const baseStyles = {
-      padding: deviceInfo?.isLandscapeMobile
-        ? '12px 24px' // Desktop-like padding for landscape mobile
-        : deviceInfo?.isMobile
-        ? deviceInfo?.orientation === 'landscape'
-          ? '6px 12px' // Reduced landscape padding
-          : '12px 24px'
-        : '15px 30px',
-      margin: deviceInfo?.isLandscapeMobile
-        ? '0 8px' // Better spacing for landscape mobile
-        : deviceInfo?.isMobile
-        ? deviceInfo?.orientation === 'landscape'
-          ? '0 3px' // Reduced landscape margin
-          : '0 6px'
-        : '0 10px',
-      borderRadius: '12px',
+    const configs = {
+      'mobile-landscape': {
+        padding: 'var(--space-md) var(--space-xl)',
+        margin: '0 var(--space-sm)',
+        fontSize: 'var(--text-base)',
+      },
+      'mobile-portrait': {
+        padding: 'var(--space-md) var(--space-xl)',
+        margin: '0 var(--space-xs)',
+        fontSize: 'var(--text-sm)',
+      },
+      tablet: {
+        padding:
+          'calc(var(--space-md) + 0.1875rem) calc(var(--space-xl) + 0.375rem)',
+        margin: '0 var(--space-sm)',
+        fontSize: 'var(--text-base)',
+      },
+      desktop: {
+        padding:
+          'calc(var(--space-md) + 0.1875rem) calc(var(--space-xl) + 0.375rem)',
+        margin: '0 var(--space-sm)',
+        fontSize: 'var(--text-base)',
+      },
+    };
+
+    return {
+      borderRadius: 'var(--radius-md)',
       border: 'none',
       backgroundColor: isActive
         ? 'rgba(255, 255, 255, 0.2)'
         : 'rgba(255, 255, 255, 0.2)',
       color: '#ffffff',
       fontWeight: '600',
-      fontSize: deviceInfo?.isLandscapeMobile
-        ? '1rem' // Desktop-like font size for landscape mobile
-        : deviceInfo?.isMobile
-        ? '0.9rem'
-        : '1rem',
       fontFamily: 'Lato, sans-serif',
       cursor: 'pointer',
       transition: 'all 0.15s ease',
-      boxShadow: isActive ? '0 4px 15px rgba(255, 255, 255, 0.2)' : 'none',
+      boxShadow: isActive
+        ? '0 0.25rem 0.9375rem rgba(255, 255, 255, 0.2)'
+        : 'none',
+      ...configs[deviceType],
     };
-
-    return baseStyles;
   };
 
   const getFooterStyles = () => {
+    const configs = {
+      'mobile-landscape': {
+        fontSize: 'var(--text-sm)',
+        padding: 'var(--space-lg) var(--space-base)',
+      },
+      'mobile-portrait': {
+        fontSize: 'var(--text-sm)',
+        padding: 'var(--space-lg) var(--space-base)',
+      },
+      tablet: {
+        fontSize: 'var(--text-base)',
+        padding: 'var(--space-lg) var(--space-3xl)',
+      },
+      desktop: {
+        fontSize: 'var(--text-base)',
+        padding: 'var(--space-lg) var(--space-3xl)',
+      },
+    };
+
     return {
-      fontSize: deviceInfo?.isMobile ? '0.8rem' : '0.9rem',
       lineHeight: '1.6',
       fontFamily: 'Lato, sans-serif',
       fontWeight: '400',
       color: 'rgba(255, 255, 255, 0.7)',
       textAlign: 'center' as const,
-      padding: deviceInfo?.isMobile ? '20px 16px' : '20px 40px',
       marginTop: 'auto',
+      ...configs[deviceType],
     };
   };
 
@@ -354,20 +375,22 @@ export default function SkillsetPage({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: deviceInfo?.isLandscapeMobile
-            ? '40px' // Desktop-like spacing for landscape mobile
-            : deviceInfo?.isMobile
-            ? deviceInfo.orientation === 'landscape'
-              ? '20px'
-              : '25px'
-            : '50px',
-          padding: deviceInfo?.isLandscapeMobile
-            ? '30px' // Better padding for landscape mobile
-            : deviceInfo?.isMobile
-            ? deviceInfo.orientation === 'landscape'
-              ? '15px'
-              : '20px'
-            : '40px',
+          gap:
+            deviceType === 'mobile-landscape'
+              ? 'var(--space-3xl)'
+              : deviceType === 'mobile-portrait'
+              ? 'calc(var(--space-xl) + 0.5625rem)'
+              : deviceType === 'tablet'
+              ? 'var(--space-4xl)'
+              : 'var(--space-4xl)',
+          padding:
+            deviceType === 'mobile-landscape'
+              ? 'calc(var(--space-xl) + 0.375rem)'
+              : deviceType === 'mobile-portrait'
+              ? 'var(--space-lg)'
+              : deviceType === 'tablet'
+              ? 'var(--space-3xl)'
+              : 'var(--space-3xl)',
         }}
       >
         {skillsData.languages.map((skill, index) => (
@@ -388,53 +411,64 @@ export default function SkillsetPage({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: deviceInfo?.isLandscapeMobile
-                ? '35px 25px' // Desktop-like padding for landscape mobile
-                : deviceInfo?.isMobile
-                ? '30px 20px'
-                : '40px 30px',
-              borderRadius: '24px',
+              padding:
+                deviceType === 'mobile-landscape'
+                  ? 'calc(var(--space-2xl) + 0.1875rem) calc(var(--space-xl) + 0.0625rem)'
+                  : deviceType === 'mobile-portrait'
+                  ? 'calc(var(--space-xl) + 0.625rem) var(--space-lg)'
+                  : deviceType === 'tablet'
+                  ? 'var(--space-3xl) calc(var(--space-xl) + 0.625rem)'
+                  : 'var(--space-3xl) calc(var(--space-xl) + 0.625rem)',
+              borderRadius: 'var(--radius-lg)',
               backgroundColor: isDarkMode
                 ? 'rgba(255, 255, 255, 0.15)'
                 : 'rgba(255, 255, 255, 0.15)',
               cursor: 'pointer',
-              minWidth: deviceInfo?.isLandscapeMobile
-                ? '160px' // Larger cards for landscape mobile
-                : deviceInfo?.isMobile
-                ? '140px'
-                : '180px',
+              minWidth:
+                deviceType === 'mobile-landscape'
+                  ? '10rem'
+                  : deviceType === 'mobile-portrait'
+                  ? '8.75rem'
+                  : deviceType === 'tablet'
+                  ? '11.25rem'
+                  : '11.25rem',
             }}
           >
             <div
               style={{
-                fontSize: deviceInfo?.isLandscapeMobile
-                  ? '70px' // Larger icons for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? '60px'
-                  : '80px',
-                marginBottom: '20px',
+                fontSize:
+                  deviceType === 'mobile-landscape'
+                    ? 'calc(var(--text-6xl) + 0.625rem)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'calc(var(--text-5xl) + 0.75rem)'
+                    : deviceType === 'tablet'
+                    ? 'calc(var(--text-6xl) + 1.25rem)'
+                    : 'calc(var(--text-6xl) + 1.25rem)',
+                marginBottom: 'var(--space-lg)',
               }}
             >
               {skill.icon}
             </div>
             <h4
               style={{
-                fontSize: deviceInfo?.isLandscapeMobile
-                  ? '1.2rem' // Desktop-like title size for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? deviceInfo.orientation === 'landscape'
-                    ? '0.9rem'
-                    : '1rem'
-                  : '1.4rem',
+                fontSize:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--text-xl)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'var(--text-base)'
+                    : deviceType === 'tablet'
+                    ? 'var(--text-2xl)'
+                    : 'var(--text-2xl)',
                 fontWeight: '700',
                 fontFamily: 'Lato, sans-serif',
-                marginBottom: deviceInfo?.isLandscapeMobile
-                  ? '8px' // Better spacing for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? deviceInfo.orientation === 'landscape'
-                    ? '4px'
-                    : '6px'
-                  : '10px',
+                marginBottom:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--space-sm)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'var(--space-xs)'
+                    : deviceType === 'tablet'
+                    ? 'var(--space-sm)'
+                    : 'var(--space-sm)',
                 color: '#ffffff',
                 textAlign: 'center',
               }}
@@ -443,13 +477,14 @@ export default function SkillsetPage({
             </h4>
             <p
               style={{
-                fontSize: deviceInfo?.isLandscapeMobile
-                  ? '0.9rem' // Larger description text for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? deviceInfo.orientation === 'landscape'
-                    ? '0.7rem'
-                    : '0.8rem'
-                  : '1rem',
+                fontSize:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--text-sm)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'calc(var(--text-sm) - 0.05rem)'
+                    : deviceType === 'tablet'
+                    ? 'var(--text-base)'
+                    : 'var(--text-base)',
                 fontFamily: 'Lato, sans-serif',
                 fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.8)',
@@ -478,31 +513,39 @@ export default function SkillsetPage({
         transition={{ duration: 0.2, delay: 0.05 }}
         style={{
           display: 'grid',
-          gridTemplateColumns: deviceInfo?.isLandscapeMobile
-            ? 'repeat(3, 1fr)' // Desktop-like 3-column layout for landscape mobile
-            : deviceInfo?.isMobile
-            ? deviceInfo.orientation === 'landscape'
+          gridTemplateColumns:
+            deviceType === 'mobile-landscape'
               ? 'repeat(3, 1fr)'
-              : 'repeat(2, 1fr)'
-            : 'repeat(3, 1fr)',
-          gridTemplateRows: deviceInfo?.isLandscapeMobile
-            ? 'repeat(2, 1fr)' // 2 rows for landscape mobile
-            : deviceInfo?.isMobile && deviceInfo.orientation === 'landscape'
-            ? 'repeat(2, 1fr)'
-            : 'auto',
-          gap: deviceInfo?.isLandscapeMobile
-            ? '20px' // Desktop-like spacing for landscape mobile
-            : deviceInfo?.isMobile
-            ? deviceInfo.orientation === 'landscape'
-              ? '8px' // Reduced from 15px
-              : '16px'
-            : '30px',
+              : deviceType === 'mobile-portrait'
+              ? 'repeat(2, 1fr)'
+              : deviceType === 'tablet'
+              ? 'repeat(3, 1fr)'
+              : 'repeat(3, 1fr)',
+          gridTemplateRows:
+            deviceType === 'mobile-landscape'
+              ? 'repeat(2, 1fr)'
+              : deviceType === 'mobile-portrait'
+              ? 'auto'
+              : deviceType === 'tablet'
+              ? 'auto'
+              : 'auto',
+          gap:
+            deviceType === 'mobile-landscape'
+              ? 'var(--space-lg)'
+              : deviceType === 'mobile-portrait'
+              ? 'var(--space-base)'
+              : deviceType === 'tablet'
+              ? 'calc(var(--space-xl) + 0.625rem)'
+              : 'calc(var(--space-xl) + 0.625rem)',
           width: '100%',
-          maxWidth: deviceInfo?.isLandscapeMobile
-            ? '500px' // Larger max width for landscape mobile
-            : deviceInfo?.isMobile
-            ? '380px'
-            : '600px',
+          maxWidth:
+            deviceType === 'mobile-landscape'
+              ? '31.25rem'
+              : deviceType === 'mobile-portrait'
+              ? '23.75rem'
+              : deviceType === 'tablet'
+              ? '37.5rem'
+              : '37.5rem',
           justifyItems: 'center',
           alignContent: 'center',
         }}
@@ -525,85 +568,97 @@ export default function SkillsetPage({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: deviceInfo?.isLandscapeMobile
-                ? '20px 15px' // Desktop-like padding for landscape mobile
-                : deviceInfo?.isMobile
-                ? deviceInfo.orientation === 'landscape'
-                  ? '8px 6px' // Reduced from 12px 8px
-                  : '16px 10px'
-                : '28px 20px',
-              borderRadius: '16px',
+              padding:
+                deviceType === 'mobile-landscape'
+                  ? 'var(--space-lg) calc(var(--space-md) + 0.1875rem)'
+                  : deviceType === 'mobile-portrait'
+                  ? 'var(--space-base) var(--space-sm)'
+                  : deviceType === 'tablet'
+                  ? 'calc(var(--space-xl) + 0.75rem) var(--space-lg)'
+                  : 'calc(var(--space-xl) + 0.75rem) var(--space-lg)',
+              borderRadius: 'var(--radius-md)',
               backgroundColor: isDarkMode
                 ? 'rgba(255, 255, 255, 0.1)'
                 : 'rgba(255, 255, 255, 0.1)',
               cursor: 'pointer',
               width: '100%',
-              maxWidth: deviceInfo?.isLandscapeMobile
-                ? '140px' // Desktop-like size for landscape mobile
-                : deviceInfo?.isMobile
-                ? deviceInfo.orientation === 'landscape'
-                  ? '100px' // Reduced from 120px
-                  : '140px'
-                : '180px',
-              minHeight: deviceInfo?.isLandscapeMobile
-                ? '120px' // Desktop-like height for landscape mobile
-                : deviceInfo?.isMobile
-                ? deviceInfo.orientation === 'landscape'
-                  ? '80px' // Reduced from 100px
-                  : '120px'
-                : '160px',
+              maxWidth:
+                deviceType === 'mobile-landscape'
+                  ? '8.75rem'
+                  : deviceType === 'mobile-portrait'
+                  ? '8.75rem'
+                  : deviceType === 'tablet'
+                  ? '11.25rem'
+                  : '11.25rem',
+              minHeight:
+                deviceType === 'mobile-landscape'
+                  ? '7.5rem'
+                  : deviceType === 'mobile-portrait'
+                  ? '7.5rem'
+                  : deviceType === 'tablet'
+                  ? '10rem'
+                  : '10rem',
             }}
           >
             <div
               style={{
-                width: deviceInfo?.isLandscapeMobile
-                  ? '48px' // Desktop-like icon size for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? deviceInfo.orientation === 'landscape'
-                    ? '28px' // Reduced from 35px
-                    : '42px'
-                  : '60px',
-                height: deviceInfo?.isLandscapeMobile
-                  ? '48px' // Desktop-like icon size for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? deviceInfo.orientation === 'landscape'
-                    ? '28px' // Reduced from 35px
-                    : '42px'
-                  : '60px',
-                borderRadius: '12px',
+                width:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--space-4xl)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'calc(var(--space-2xl) + 0.625rem)'
+                    : deviceType === 'tablet'
+                    ? 'calc(var(--space-4xl) - 0.25rem)'
+                    : 'calc(var(--space-4xl) - 0.25rem)',
+                height:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--space-4xl)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'calc(var(--space-2xl) + 0.625rem)'
+                    : deviceType === 'tablet'
+                    ? 'calc(var(--space-4xl) - 0.25rem)'
+                    : 'calc(var(--space-4xl) - 0.25rem)',
+                borderRadius: 'var(--radius-md)',
                 backgroundColor: skill.color,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: deviceInfo?.isLandscapeMobile
-                  ? '10px' // Desktop-like spacing for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? deviceInfo.orientation === 'landscape'
-                    ? '4px' // Reduced from 8px
-                    : '10px'
-                  : '14px',
+                marginBottom:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--space-sm)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'var(--space-sm)'
+                    : deviceType === 'tablet'
+                    ? 'calc(var(--space-md) + 0.125rem)'
+                    : 'calc(var(--space-md) + 0.125rem)',
               }}
             >
               {typeof skill.icon === 'object' ? (
                 <FontAwesomeIcon
                   icon={skill.icon}
                   style={{
-                    fontSize: deviceInfo?.isLandscapeMobile
-                      ? '24px' // Desktop-like font size for landscape mobile
-                      : deviceInfo?.isMobile
-                      ? '22px'
-                      : '26px',
+                    fontSize:
+                      deviceType === 'mobile-landscape'
+                        ? 'var(--text-2xl)'
+                        : deviceType === 'mobile-portrait'
+                        ? 'calc(var(--text-xl) + 0.125rem)'
+                        : deviceType === 'tablet'
+                        ? 'calc(var(--text-2xl) + 0.125rem)'
+                        : 'calc(var(--text-2xl) + 0.125rem)',
                     color: skill.textColor || '#ffffff',
                   }}
                 />
               ) : (
                 <skill.icon
                   style={{
-                    fontSize: deviceInfo?.isLandscapeMobile
-                      ? '24px' // Desktop-like font size for landscape mobile
-                      : deviceInfo?.isMobile
-                      ? '22px'
-                      : '26px',
+                    fontSize:
+                      deviceType === 'mobile-landscape'
+                        ? 'var(--text-2xl)'
+                        : deviceType === 'mobile-portrait'
+                        ? 'calc(var(--text-xl) + 0.125rem)'
+                        : deviceType === 'tablet'
+                        ? 'calc(var(--text-2xl) + 0.125rem)'
+                        : 'calc(var(--text-2xl) + 0.125rem)',
                     color: skill.textColor || '#ffffff',
                   }}
                 />
@@ -611,21 +666,24 @@ export default function SkillsetPage({
             </div>
             <h4
               style={{
-                fontSize: deviceInfo?.isLandscapeMobile
-                  ? '0.95rem' // Desktop-like font size for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? deviceInfo.orientation === 'landscape'
-                    ? '0.7rem' // Reduced for landscape
-                    : '0.85rem'
-                  : '1rem',
+                fontSize:
+                  deviceType === 'mobile-landscape'
+                    ? 'calc(var(--text-base) - 0.05rem)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'calc(var(--text-sm) + 0.05rem)'
+                    : deviceType === 'tablet'
+                    ? 'var(--text-base)'
+                    : 'var(--text-base)',
                 fontWeight: '700',
                 fontFamily: 'Lato, sans-serif',
-                marginBottom: deviceInfo?.isLandscapeMobile
-                  ? '6px' // Desktop-like spacing for landscape mobile
-                  : deviceInfo?.isMobile &&
-                    deviceInfo.orientation === 'landscape'
-                  ? '3px'
-                  : '6px',
+                marginBottom:
+                  deviceType === 'mobile-landscape'
+                    ? 'var(--space-xs)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'var(--space-xs)'
+                    : deviceType === 'tablet'
+                    ? 'var(--space-xs)'
+                    : 'var(--space-xs)',
                 color: '#ffffff',
                 textAlign: 'center',
               }}
@@ -634,13 +692,14 @@ export default function SkillsetPage({
             </h4>
             <p
               style={{
-                fontSize: deviceInfo?.isLandscapeMobile
-                  ? '0.75rem' // Desktop-like font size for landscape mobile
-                  : deviceInfo?.isMobile
-                  ? deviceInfo.orientation === 'landscape'
-                    ? '0.6rem' // Reduced for landscape
-                    : '0.7rem'
-                  : '0.8rem',
+                fontSize:
+                  deviceType === 'mobile-landscape'
+                    ? 'calc(var(--text-sm) - 0.125rem)'
+                    : deviceType === 'mobile-portrait'
+                    ? 'calc(var(--text-sm) - 0.125rem)'
+                    : deviceType === 'tablet'
+                    ? 'calc(var(--text-sm) - 0.05rem)'
+                    : 'calc(var(--text-sm) - 0.05rem)',
                 fontFamily: 'Lato, sans-serif',
                 fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.8)',
@@ -928,27 +987,31 @@ export default function SkillsetPage({
             style={{
               borderRadius: '50%',
               position: 'absolute',
-              top: deviceInfo?.isMobile
-                ? deviceInfo?.orientation === 'landscape'
-                  ? 'max(env(safe-area-inset-top), 8px)'
-                  : 'max(env(safe-area-inset-top), 16px)'
-                : '20px',
-              right: deviceInfo?.isMobile
-                ? deviceInfo?.orientation === 'landscape'
-                  ? '12px'
-                  : '16px'
-                : '20px',
+              top:
+                deviceType === 'mobile-landscape'
+                  ? 'max(env(safe-area-inset-top), var(--space-sm))'
+                  : deviceType === 'mobile-portrait'
+                  ? 'max(env(safe-area-inset-top), var(--space-base))'
+                  : 'var(--space-lg)',
+              right:
+                deviceType === 'mobile-landscape'
+                  ? 'var(--space-md)'
+                  : deviceType === 'mobile-portrait'
+                  ? 'var(--space-base)'
+                  : 'var(--space-lg)',
               zIndex: 1001,
-              width: deviceInfo?.isMobile
-                ? deviceInfo?.orientation === 'landscape'
-                  ? '40px'
-                  : '48px'
-                : '50px',
-              height: deviceInfo?.isMobile
-                ? deviceInfo?.orientation === 'landscape'
-                  ? '40px'
-                  : '48px'
-                : '50px',
+              width:
+                deviceType === 'mobile-landscape'
+                  ? 'var(--touch-target-sm)'
+                  : deviceType === 'mobile-portrait'
+                  ? 'var(--touch-target-md)'
+                  : 'var(--touch-target-lg)',
+              height:
+                deviceType === 'mobile-landscape'
+                  ? 'var(--touch-target-sm)'
+                  : deviceType === 'mobile-portrait'
+                  ? 'var(--touch-target-md)'
+                  : 'var(--touch-target-lg)',
               border: 'none',
               backgroundColor: isDarkMode ? '#162542' : '#005E80',
               color: '#ffffff',
