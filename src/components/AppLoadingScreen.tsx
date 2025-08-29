@@ -116,7 +116,7 @@ export default function AppLoadingScreen({
     if (deviceInfo?.isMobile) {
       return {
         ...baseStyles,
-        fontSize: '2.5rem',
+        fontSize: '3.5rem',
       };
     } else if (deviceInfo?.isLandscapeMobile) {
       return {

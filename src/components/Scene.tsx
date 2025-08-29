@@ -736,7 +736,7 @@ function SimpleBoat({
   return (
     <group
       ref={boatRef}
-      position={[-15, 1, -40]}
+      position={[-15, 1, -42.5]}
       scale={[6, 6, 6]}
       rotation={[0, 5, 0]}
     >

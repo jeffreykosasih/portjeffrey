@@ -75,9 +75,8 @@ export default function LongStoryPage({
       backgroundColor: isDarkMode
         ? 'rgba(22, 37, 66, 0.7)'
         : 'rgba(0, 94, 128, 0.7)',
-      backdropFilter: 'blur(0.5rem)',
-      WebkitBackdropFilter: 'blur(0.5rem)',
-      opacity: 0.95,
+      backdropFilter: 'blur(2rem)',
+      opacity: 1,
       zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,

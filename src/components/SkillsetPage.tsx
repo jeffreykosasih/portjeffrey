@@ -209,25 +209,17 @@ export default function SkillsetPage({
     const configs = {
       'mobile-landscape': {
         padding: `max(env(safe-area-inset-top), var(--space-lg)) var(--space-xl) max(env(safe-area-inset-bottom), var(--space-lg)) var(--space-xl)`,
-        justifyContent: 'center',
-        alignItems: 'center',
         height: '100dvh',
       },
       'mobile-portrait': {
         padding: `max(env(safe-area-inset-top), var(--space-lg)) var(--space-base) max(env(safe-area-inset-bottom), var(--space-3xl)) var(--space-base)`,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
         height: '100dvh',
       },
       tablet: {
         padding: 'var(--space-3xl) var(--space-xl)',
-        justifyContent: 'center',
-        alignItems: 'center',
       },
       desktop: {
         padding: 'var(--space-3xl)',
-        justifyContent: 'center',
-        alignItems: 'center',
       },
     };
 
@@ -241,13 +233,13 @@ export default function SkillsetPage({
         ? 'rgba(22, 37, 66, 0.4)'
         : 'rgba(0, 94, 128, 0.5)',
       backdropFilter: 'blur(0.5rem)',
-      WebkitBackdropFilter: 'blur(0.5rem)',
       opacity: 1,
       zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
+      justifyContent: 'center',
+      alignItems: 'center',
       color: '#ffffff',
-      fontFamily: 'Lato, sans-serif',
       overflowY: 'auto' as const,
       ...configs[deviceType],
     };
@@ -271,7 +263,7 @@ export default function SkillsetPage({
       },
       desktop: {
         fontSize: 'var(--text-6xl)',
-        marginBottom: 'calc(var(--space-xl) + 0.625rem)',
+        marginTop: 'var(--space-2xl)',
       },
     };
 

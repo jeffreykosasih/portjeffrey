@@ -21,7 +21,7 @@
 
 .pc-card {
   position: relative;
-  width: 100%;
+  width: 110%;
   height: 32.5rem;
   border-radius: var(--radius-2xl); /* 24px using CSS var */
   overflow: hidden;
@@ -270,6 +270,28 @@
   .pc-card {
     width: 100%;
     height: 26.25rem; /* Good height for portrait */
+  }
+
+  .pc-content {
+    padding: var(--space-lg); /* 20px - slightly reduced padding */
+  }
+
+  .pc-header h3 {
+    font-size: var(--text-2xl); /* 24px - smaller for portrait */
+    margin-bottom: var(--space-xs); /* 4px - tighter spacing */
+    line-height: 1.2;
+  }
+
+  .pc-header p {
+    font-size: var(--text-sm); /* 14px - smaller subtitle */
+    line-height: 1.4;
+  }
+
+  .pc-contact-btn {
+    padding: var(--space-xs) var(--space-md); /* 4px 12px - more compact */
+    font-size: var(--text-xs); /* 12px - smaller button text */
+    min-width: 5rem; /* Slightly smaller min-width */
+    margin-top: var(--space-md); /* 12px - controlled spacing */
   }
 }
 

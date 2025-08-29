@@ -119,19 +119,14 @@ export default function ConnectPage({
         ? 'rgba(22, 37, 66, 0.4)'
         : 'rgba(0, 94, 128, 0.5)',
       backdropFilter: 'blur(0.5rem)',
-      WebkitBackdropFilter: 'blur(0.5rem)',
-      opacity: 0.95,
+      opacity: 1,
       zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
-      justifyContent: 'flex-start',
+      justifyContent: 'center',
       alignItems: 'center',
       color: '#ffffff',
       overflowY: 'auto' as const,
-      overflowX: 'hidden' as const,
-      WebkitOverflowScrolling: 'touch' as any,
-      scrollbarWidth: 'none' as any,
-      msOverflowStyle: 'none' as any,
       ...configs[deviceType],
     };
   };

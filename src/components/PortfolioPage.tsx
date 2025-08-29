@@ -84,16 +84,14 @@ export default function PortfolioPage({
         ? 'rgba(22, 37, 66, 0.4)'
         : 'rgba(0, 94, 128, 0.5)',
       backdropFilter: 'blur(0.5rem)',
-      WebkitBackdropFilter: 'blur(0.5rem)',
       opacity: 1,
       zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
-      justifyContent: 'flex-start',
+      justifyContent: 'center',
       alignItems: 'center',
       color: '#ffffff',
       overflowY: 'auto' as const,
-      overflowX: 'hidden' as const,
       ...configs[deviceType],
     };
   };

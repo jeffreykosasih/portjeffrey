@@ -78,8 +78,7 @@ export default function ProfilePage({
       zIndex: ResponsiveValues.zIndex.overlay,
       display: 'flex',
       flexDirection: 'column' as const,
-      justifyContent:
-        deviceType === 'mobile-landscape' ? 'center' : 'flex-start',
+      justifyContent: 'center',
       alignItems: 'center',
       color: '#ffffff',
       padding: `max(env(safe-area-inset-top), ${padding}) ${padding} max(env(safe-area-inset-bottom), ${padding}) ${padding}`,
@@ -96,24 +95,22 @@ export default function ProfilePage({
       'mobile-landscape': {
         flexDirection: 'row' as const,
         gap: 'var(--space-4xl)', // 48px using CSS var
-        alignItems: 'flex-start',
+        alignItems: 'flex-center',
         height: 'fit-content',
         maxHeight: '90vh',
       },
       'mobile-portrait': {
         flexDirection: 'column' as const,
-        gap: 'var(--space-2xl)', // 32px using CSS var
+        gap: 'var(--space-2xl)',
         alignItems: 'center',
       },
       tablet: {
         flexDirection: 'column' as const,
-        gap: 'var(--space-4xl)', // 48px using CSS var
+        gap: 'var(--space-4xl)',
         alignItems: 'center',
       },
       desktop: {
         flexDirection: 'row' as const,
-        gap: 'var(--space-5xl)', // 64px using CSS var
-        alignItems: 'flex-start',
       },
     };
 
@@ -137,10 +134,10 @@ export default function ProfilePage({
         minWidth: '17.5rem', // 280px in rem
       },
       'mobile-portrait': {
-        fontSize: 'var(--text-lg)', // 18px using CSS var
-        lineHeight: '1.6',
+        fontSize: 'var(--text-base)', // 16px - smaller for better fitting
+        lineHeight: '1.5',
         textAlign: 'center' as const,
-        maxWidth: '85%',
+        maxWidth: '90%',
       },
       tablet: {
         flex: 'none',
@@ -204,22 +201,25 @@ export default function ProfilePage({
   const getProfileCardStyles = () => {
     const configs = {
       'mobile-landscape': {
-        minWidth: '16.25rem', // 260px in rem
-        maxWidth: '20rem', // 320px in rem
+        minWidth: '16.25rem',
+        maxWidth: '20rem',
       },
       'mobile-portrait': {
         minWidth: 'auto',
-        maxWidth: '12.5rem', // 200px in rem
+        maxWidth: '18rem',
+        minHeight: 'auto',
+        height: 'auto',
         width: '100%',
+        maxHeight: '28rem',
       },
       tablet: {
         minWidth: 'auto',
-        maxWidth: '25rem', // 400px in rem
+        maxWidth: '25rem',
         width: '100%',
       },
       desktop: {
-        minWidth: '18.75rem', // 300px in rem
-        maxWidth: '25rem', // 400px in rem
+        minWidth: '18.75rem',
+        maxWidth: '25rem',
       },
     };
 
