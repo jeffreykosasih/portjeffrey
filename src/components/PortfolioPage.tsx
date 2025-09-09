@@ -34,7 +34,7 @@ export default function PortfolioPage({
 }: PortfolioPageProps) {
   const [isButtonHovered, setIsButtonHovered] = React.useState(false);
 
-  // Unified device type detection (following ProfilePage pattern)
+  // Enhanced device type detection with iPhone-specific breakpoints
   const getDeviceType = ():
     | 'mobile-landscape'
     | 'mobile-portrait'
@@ -42,9 +42,13 @@ export default function PortfolioPage({
     | 'desktop' => {
     if (!deviceInfo) return 'desktop';
 
+    // Enhanced landscape mobile detection for iPhone 12 Pro and similar devices
     if (
       deviceInfo.isLandscapeMobile ||
-      (deviceInfo.isMobile && deviceInfo.orientation === 'landscape')
+      (deviceInfo.isMobile && deviceInfo.orientation === 'landscape') ||
+      (window.innerWidth <= 900 &&
+        window.innerHeight <= 450 &&
+        window.innerWidth > window.innerHeight)
     ) {
       return 'mobile-landscape';
     }
@@ -112,7 +116,7 @@ export default function PortfolioPage({
         'Main site with island theme where I learn some three.js and movement!',
       link: 'https://jefri.dev',
       status: 'Completed',
-      image: '/assets/images/profile.jpg',
+      image: '/assets/images/project_island.jpg',
       tech: ['Motion', 'Node.js', 'React', 'Tailwind', 'TypeScript'],
     },
     {
@@ -238,7 +242,7 @@ export default function PortfolioPage({
               style={{
                 fontSize:
                   deviceType === 'mobile-landscape'
-                    ? 'var(--text-2xl)'
+                    ? 'var(--text-2xl)' // Proportionate header for compact desktop style
                     : deviceType === 'mobile-portrait'
                     ? 'var(--mobile-text-display)'
                     : deviceType === 'tablet'
@@ -248,7 +252,7 @@ export default function PortfolioPage({
                 fontFamily: 'Lato, sans-serif',
                 marginBottom:
                   deviceType === 'mobile-landscape'
-                    ? 'var(--space-xs)'
+                    ? 'var(--space-xs)' // Compact spacing for desktop-style layout
                     : deviceType === 'mobile-portrait'
                     ? 'var(--space-base)'
                     : deviceType === 'tablet'
@@ -287,15 +291,16 @@ export default function PortfolioPage({
                 alignItems: 'stretch',
                 gap:
                   deviceType === 'mobile-landscape'
-                    ? 'var(--space-sm)'
+                    ? 'var(--space-md)' // Smaller gap for horizontal layout
                     : deviceType === 'mobile-portrait'
                     ? 'var(--space-base)'
                     : deviceType === 'tablet'
                     ? 'calc(var(--space-xl) + 0.625rem)'
                     : 'calc(var(--space-xl) + 0.625rem)',
                 padding:
-                  deviceType === 'mobile-landscape' ||
-                  deviceType === 'mobile-portrait'
+                  deviceType === 'mobile-landscape'
+                    ? '0 var(--space-base)' // Reduced padding
+                    : deviceType === 'mobile-portrait'
                     ? '0 var(--space-sm)'
                     : '0 var(--space-lg)',
                 flexWrap: 'wrap',
@@ -310,8 +315,10 @@ export default function PortfolioPage({
                 marginBottom:
                   deviceType === 'mobile-landscape' ||
                   deviceType === 'mobile-portrait'
-                    ? 'var(--space-3xl)'
-                    : 'var(--space-lg)', // Extra bottom margin for mobile scrolling
+                    ? 'var(--space-lg)'
+                    : 'var(--space-lg)',
+                maxWidth: deviceType === 'mobile-landscape' ? '95vw' : '1200px',
+                width: '100%',
               }}
             >
               {projects.map((project, index) => (
@@ -350,7 +357,7 @@ export default function PortfolioPage({
                     flex: '1',
                     minWidth:
                       deviceType === 'mobile-landscape'
-                        ? '6.875rem'
+                        ? '9rem' // Compact desktop-style size (144px)
                         : deviceType === 'mobile-portrait'
                         ? '10rem'
                         : deviceType === 'tablet'
@@ -358,7 +365,7 @@ export default function PortfolioPage({
                         : '14.0625rem',
                     maxWidth:
                       deviceType === 'mobile-landscape'
-                        ? '8.75rem'
+                        ? '11rem' // Smaller maximum width (176px) for horizontal layout
                         : deviceType === 'mobile-portrait'
                         ? '11.875rem'
                         : deviceType === 'tablet'
@@ -366,7 +373,7 @@ export default function PortfolioPage({
                         : '15.625rem',
                     height:
                       deviceType === 'mobile-landscape'
-                        ? '13.75rem'
+                        ? '20rem' // Increased height to prevent text overlap (320px)
                         : deviceType === 'mobile-portrait'
                         ? '22.5rem'
                         : deviceType === 'tablet'
@@ -386,7 +393,7 @@ export default function PortfolioPage({
                   <div
                     style={{
                       width: '100%',
-                      height: '60%',
+                      height: deviceType === 'mobile-landscape' ? '55%' : '60%', // Reduced image area for mobile landscape
                       borderRadius: project.image
                         ? 'var(--radius-lg) var(--radius-lg) 0 0'
                         : 'var(--radius-lg)',
@@ -454,14 +461,15 @@ export default function PortfolioPage({
                     )}
                   </div>
 
-                  {/* Title & Description Section - 20% */}
+                  {/* Title & Description Section */}
                   <div
                     style={{
-                      height: '20%',
+                      height: deviceType === 'mobile-landscape' ? '25%' : '20%', // More space for text on mobile landscape
                       width: '100%',
                       padding:
-                        deviceType === 'mobile-landscape' ||
-                        deviceType === 'mobile-portrait'
+                        deviceType === 'mobile-landscape'
+                          ? 'var(--space-md) var(--space-md) var(--space-sm) var(--space-md)' // More top padding for better separation
+                          : deviceType === 'mobile-portrait'
                           ? 'var(--space-sm) var(--space-md)'
                           : 'var(--space-sm) var(--space-base)',
                       display: 'flex',
@@ -472,16 +480,21 @@ export default function PortfolioPage({
                     <h4
                       style={{
                         fontSize:
-                          deviceType === 'mobile-landscape' ||
-                          deviceType === 'mobile-portrait'
+                          deviceType === 'mobile-landscape'
+                            ? 'var(--text-base)' // Compact size for horizontal cards
+                            : deviceType === 'mobile-portrait'
                             ? 'var(--text-base)'
                             : 'calc(var(--text-base) + 0.1rem)',
                         fontWeight: '700',
                         fontFamily: 'Lato, sans-serif',
-                        marginBottom: '6px',
+                        marginBottom:
+                          deviceType === 'mobile-landscape' ? '8px' : '6px', // More space between title and description
                         color: '#ffffff',
                         textAlign: 'center',
-                        margin: 0,
+                        marginTop: 0,
+                        marginLeft: 0,
+                        marginRight: 0,
+                        lineHeight: '1.3',
                       }}
                     >
                       {project.title}
@@ -489,8 +502,9 @@ export default function PortfolioPage({
                     <p
                       style={{
                         fontSize:
-                          deviceType === 'mobile-landscape' ||
-                          deviceType === 'mobile-portrait'
+                          deviceType === 'mobile-landscape'
+                            ? 'calc(var(--text-sm) - 0.125rem)' // Smaller text for compact cards
+                            : deviceType === 'mobile-portrait'
                             ? 'calc(var(--text-sm) - 0.125rem)'
                             : 'calc(var(--text-sm) + 0.05rem)',
                         fontFamily: 'Lato, sans-serif',
@@ -505,15 +519,17 @@ export default function PortfolioPage({
                     </p>
                   </div>
 
-                  {/* Technology Tags Section - 20% */}
+                  {/* Technology Tags Section */}
                   {project.tech && (
                     <div
                       style={{
-                        height: '20%',
+                        height:
+                          deviceType === 'mobile-landscape' ? '20%' : '20%', // Maintain proportion for tags
                         width: '100%',
                         padding:
-                          deviceType === 'mobile-landscape' ||
-                          deviceType === 'mobile-portrait'
+                          deviceType === 'mobile-landscape'
+                            ? 'var(--space-xs) var(--space-md) var(--space-lg) var(--space-md)' // More bottom padding for proper spacing
+                            : deviceType === 'mobile-portrait'
                             ? 'var(--space-xs) var(--space-md) var(--space-md) var(--space-md)'
                             : 'var(--space-sm) var(--space-base) var(--space-base) var(--space-base)',
                         display: 'flex',
@@ -525,7 +541,7 @@ export default function PortfolioPage({
                         style={{
                           display: 'flex',
                           flexWrap: 'wrap',
-                          gap: '4px',
+                          gap: '4px', // Consistent compact gap
                           justifyContent: 'center',
                         }}
                       >
@@ -534,15 +550,17 @@ export default function PortfolioPage({
                             key={tech}
                             style={{
                               padding:
-                                deviceType === 'mobile-landscape' ||
-                                deviceType === 'mobile-portrait'
+                                deviceType === 'mobile-landscape'
+                                  ? 'var(--space-xs) var(--space-sm)' // Compact padding for horizontal cards
+                                  : deviceType === 'mobile-portrait'
                                   ? 'var(--space-xs) var(--space-sm)'
                                   : 'var(--space-sm) var(--space-md)',
                               background: 'rgba(255, 255, 255, 0.1)',
                               borderRadius: 'var(--radius-xs)',
                               fontSize:
-                                deviceType === 'mobile-landscape' ||
-                                deviceType === 'mobile-portrait'
+                                deviceType === 'mobile-landscape'
+                                  ? 'var(--text-xs)' // Cleaner font size for mobile landscape
+                                  : deviceType === 'mobile-portrait'
                                   ? 'calc(var(--text-xs) + 0.025rem)'
                                   : 'calc(var(--text-xs) + 0.075rem)',
                               fontWeight: '500',
@@ -585,8 +603,9 @@ export default function PortfolioPage({
               <p
                 style={{
                   fontSize:
-                    deviceType === 'mobile-landscape' ||
-                    deviceType === 'mobile-portrait'
+                    deviceType === 'mobile-landscape'
+                      ? 'var(--text-sm)' // Proportionate footer text for compact layout
+                      : deviceType === 'mobile-portrait'
                       ? 'var(--text-sm)'
                       : 'calc(var(--text-sm) + 0.05rem)',
                   fontFamily: 'Lato, sans-serif',

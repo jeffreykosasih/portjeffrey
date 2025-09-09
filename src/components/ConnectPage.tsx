@@ -96,9 +96,9 @@ export default function ConnectPage({
         height: '100dvh',
       },
       'mobile-portrait': {
-        padding: 'var(--space-base) var(--space-lg)',
-        paddingTop: 'max(var(--space-base), env(safe-area-inset-top))',
-        paddingBottom: 'max(var(--space-5xl), env(safe-area-inset-bottom))', // Extra bottom padding for mobile
+        padding: 'var(--space-sm) var(--space-base)',
+        paddingTop: 'max(var(--space-sm), env(safe-area-inset-top))',
+        paddingBottom: 'max(var(--space-base), env(safe-area-inset-bottom))', // Reduced bottom padding for mobile
         height: '100dvh',
       },
       tablet: {
@@ -363,9 +363,9 @@ export default function ConnectPage({
                   fontFamily: 'Lato, sans-serif',
                   marginBottom:
                     deviceType === 'mobile-landscape'
-                      ? 'var(--space-lg)'
-                      : deviceType === 'mobile-portrait'
                       ? 'var(--space-base)'
+                      : deviceType === 'mobile-portrait'
+                      ? 'var(--space-sm)'
                       : deviceType === 'tablet'
                       ? 'var(--space-lg)'
                       : 'calc(var(--space-xl) + 0.3125rem)',
@@ -407,9 +407,9 @@ export default function ConnectPage({
                   fontFamily: 'Lato, sans-serif',
                   marginBottom:
                     deviceType === 'mobile-landscape'
-                      ? 'calc(var(--space-2xl) + 0.1875rem)'
-                      : deviceType === 'mobile-portrait'
                       ? 'var(--space-xl)'
+                      : deviceType === 'mobile-portrait'
+                      ? 'var(--space-base)'
                       : deviceType === 'tablet'
                       ? 'var(--space-3xl)'
                       : 'calc(var(--space-3xl) + 0.125rem)',
@@ -433,9 +433,9 @@ export default function ConnectPage({
                       : 'row',
                   gap:
                     deviceType === 'mobile-landscape'
-                      ? 'var(--space-2xl)'
+                      ? 'var(--space-lg)'
                       : deviceType === 'mobile-portrait'
-                      ? 'var(--space-xl)'
+                      ? 'var(--space-base)'
                       : deviceType === 'tablet'
                       ? 'var(--space-3xl)'
                       : 'calc(var(--space-4xl) - 0.25rem)',
@@ -482,9 +482,9 @@ export default function ConnectPage({
                       fontFamily: 'Lato, sans-serif',
                       marginBottom:
                         deviceType === 'mobile-landscape'
-                          ? 'calc(var(--space-xl) + 0.3125rem)'
+                          ? 'var(--space-base)'
                           : deviceType === 'mobile-portrait'
-                          ? 'var(--space-lg)'
+                          ? 'var(--space-sm)'
                           : deviceType === 'tablet'
                           ? 'calc(var(--space-xl) + 0.625rem)'
                           : 'calc(var(--space-xl) + 0.625rem)',
@@ -506,7 +506,12 @@ export default function ConnectPage({
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: 'calc(var(--space-md) + 0.1875rem)',
+                      gap:
+                        deviceType === 'mobile-portrait'
+                          ? 'var(--space-sm)'
+                          : deviceType === 'mobile-landscape'
+                          ? 'var(--space-base)'
+                          : 'calc(var(--space-md) + 0.1875rem)',
                     }}
                   >
                     {contactMethods.map((method, index) => (
@@ -533,9 +538,9 @@ export default function ConnectPage({
                               : 'calc(var(--radius-md) + 0.1875rem)',
                           padding:
                             deviceType === 'mobile-landscape'
-                              ? 'var(--space-md) var(--space-lg) calc(var(--space-md) + 0.1875rem) var(--space-lg)'
+                              ? 'var(--space-sm) var(--space-base)'
                               : deviceType === 'mobile-portrait'
-                              ? 'var(--space-md) var(--space-base) calc(var(--space-md) + 0.1875rem) var(--space-base)'
+                              ? 'var(--space-sm) var(--space-base)'
                               : deviceType === 'tablet'
                               ? 'var(--space-md) var(--space-lg) calc(var(--space-md) + 0.1875rem) var(--space-lg)'
                               : 'var(--space-md) var(--space-lg) calc(var(--space-md) + 0.1875rem) var(--space-lg)',
@@ -656,7 +661,12 @@ export default function ConnectPage({
                           : 'var(--text-3xl)',
                       fontWeight: '700',
                       fontFamily: 'Lato, sans-serif',
-                      marginBottom: 'var(--space-lg)',
+                      marginBottom:
+                        deviceType === 'mobile-portrait'
+                          ? 'var(--space-sm)'
+                          : deviceType === 'mobile-landscape'
+                          ? 'var(--space-base)'
+                          : 'var(--space-lg)',
                       color: '#ffffff',
                       textAlign:
                         deviceType === 'mobile-landscape' ||
@@ -670,7 +680,16 @@ export default function ConnectPage({
 
                   <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
                     {/* Name Field */}
-                    <div style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div
+                      style={{
+                        marginBottom:
+                          deviceType === 'mobile-portrait'
+                            ? 'var(--space-base)'
+                            : deviceType === 'mobile-landscape'
+                            ? 'var(--space-base)'
+                            : 'var(--space-lg)',
+                      }}
+                    >
                       <input
                         type='text'
                         name='name'
@@ -726,7 +745,16 @@ export default function ConnectPage({
                     </div>
 
                     {/* Email Field */}
-                    <div style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div
+                      style={{
+                        marginBottom:
+                          deviceType === 'mobile-portrait'
+                            ? 'var(--space-base)'
+                            : deviceType === 'mobile-landscape'
+                            ? 'var(--space-base)'
+                            : 'var(--space-lg)',
+                      }}
+                    >
                       <input
                         type='email'
                         name='email'
@@ -782,13 +810,28 @@ export default function ConnectPage({
                     </div>
 
                     {/* Message Field */}
-                    <div style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div
+                      style={{
+                        marginBottom:
+                          deviceType === 'mobile-portrait'
+                            ? 'var(--space-base)'
+                            : deviceType === 'mobile-landscape'
+                            ? 'var(--space-base)'
+                            : 'var(--space-lg)',
+                      }}
+                    >
                       <textarea
                         name='message'
                         placeholder='Your Message'
                         value={formData.message}
                         onChange={handleInputChange}
-                        rows={5}
+                        rows={
+                          deviceType === 'mobile-portrait'
+                            ? 3
+                            : deviceType === 'mobile-landscape'
+                            ? 3
+                            : 5
+                        }
                         className='bright-placeholder'
                         style={{
                           width: '100%',
@@ -813,10 +856,11 @@ export default function ConnectPage({
                           transition: 'border-color 0.3s ease',
                           resize: 'vertical',
                           minHeight:
-                            deviceType === 'mobile-landscape' ||
-                            deviceType === 'mobile-portrait'
-                              ? '7.5rem'
-                              : '7.5rem', // Increase mobile min height
+                            deviceType === 'mobile-landscape'
+                              ? '5rem'
+                              : deviceType === 'mobile-portrait'
+                              ? '4rem'
+                              : '7.5rem', // Reduced mobile min height to fit content
                           maxHeight:
                             deviceType === 'mobile-landscape' ||
                             deviceType === 'mobile-portrait'

@@ -308,7 +308,7 @@ export default function SkillsetPage({
     };
 
     return {
-      borderRadius: 'var(--radius-md)',
+      borderRadius: 'var(--radius-lg)',
       border: 'none',
       backgroundColor: isActive
         ? 'rgba(255, 255, 255, 0.2)'
@@ -568,7 +568,7 @@ export default function SkillsetPage({
                   : deviceType === 'tablet'
                   ? 'calc(var(--space-xl) + 0.75rem) var(--space-lg)'
                   : 'calc(var(--space-xl) + 0.75rem) var(--space-lg)',
-              borderRadius: 'var(--radius-md)',
+              borderRadius: 'var(--radius-lg)',
               backgroundColor: isDarkMode
                 ? 'rgba(255, 255, 255, 0.1)'
                 : 'rgba(255, 255, 255, 0.1)',
@@ -610,7 +610,7 @@ export default function SkillsetPage({
                     : deviceType === 'tablet'
                     ? 'calc(var(--space-4xl) - 0.25rem)'
                     : 'calc(var(--space-4xl) - 0.25rem)',
-                borderRadius: 'var(--radius-md)',
+                borderRadius: 'var(--radius-lg)',
                 backgroundColor: skill.color,
                 display: 'flex',
                 alignItems: 'center',
@@ -725,7 +725,7 @@ export default function SkillsetPage({
               alignItems: 'center',
               justifyContent: 'center',
               padding: deviceInfo?.isMobile ? '20px 12px' : '28px 20px',
-              borderRadius: '20px',
+              borderRadius: 'var(--radius-lg)',
               backgroundColor: isDarkMode
                 ? 'rgba(255, 255, 255, 0.1)'
                 : 'rgba(255, 255, 255, 0.05)',
@@ -801,7 +801,7 @@ export default function SkillsetPage({
               transition={{ duration: 0.2 }}
               style={{
                 backgroundColor: isDarkMode ? '#162542' : '#005E80',
-                borderRadius: '24px',
+                borderRadius: 'var(--radius-lg)',
                 padding: deviceInfo?.isMobile ? '30px 20px' : '40px 30px',
                 maxWidth: '600px',
                 width: '100%',
@@ -822,7 +822,7 @@ export default function SkillsetPage({
                   right: '20px',
                   width: '40px',
                   height: '40px',
-                  borderRadius: '50%',
+                  borderRadius: 'var(--radius-lg)',
                   border: 'none',
                   backgroundColor: isDarkMode
                     ? 'rgba(255, 255, 255, 0.1)'
@@ -878,7 +878,7 @@ export default function SkillsetPage({
                       flexDirection: 'column',
                       alignItems: 'center',
                       padding: deviceInfo?.isMobile ? '20px 15px' : '25px 20px',
-                      borderRadius: '16px',
+                      borderRadius: 'var(--radius-lg)',
                       backgroundColor: isDarkMode
                         ? 'rgba(255, 255, 255, 0.04)'
                         : 'rgba(255, 255, 255, 0.04)',
@@ -889,7 +889,7 @@ export default function SkillsetPage({
                       style={{
                         width: '50px',
                         height: '50px',
-                        borderRadius: '12px',
+                        borderRadius: 'var(--radius-lg)',
                         backgroundColor: app.color,
                         display: 'flex',
                         alignItems: 'center',
