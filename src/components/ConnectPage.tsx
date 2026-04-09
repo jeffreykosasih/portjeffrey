@@ -183,7 +183,7 @@ export default function ConnectPage({
           name: formData.name, // For subject: {{name}}
           from_name: formData.name, // For content: {{from_name}}
           from_email: formData.email, // For content: {{from_email}}
-          to_email: 'workwithjefri@gmail.com', // For recipient
+          to_email: 'jeffreyko1998@gmail.com', // For recipient
           message: formData.message, // For content: {{message}}
           sent_date: now.toLocaleDateString('en-US', {
             weekday: 'long',
@@ -245,14 +245,14 @@ export default function ConnectPage({
       icon: (
         <GmailIcon style={{ color: '#ffffff', fontSize: 'var(--text-2xl)' }} />
       ), // Using CSS custom property
-      description: 'workwithjefri@gmail.com',
+      description: 'jeffreyko1998@gmail.com',
       hoverColor: '#EA4335', // Gmail red
-      link: 'mailto:workwithjefri@gmail.com',
+      link: 'mailto:jeffreyko1998@gmail.com',
     },
     {
       title: 'LinkedIn',
       icon: <FontAwesomeIcon icon={faLinkedin} style={{ color: '#ffffff' }} />,
-      description: 'Professionally I have to do this',
+      description: 'Professional Networking',
       hoverColor: '#0077B5', // LinkedIn blue
       link: 'https://linkedin.com/in/jeffreykosasih',
     },

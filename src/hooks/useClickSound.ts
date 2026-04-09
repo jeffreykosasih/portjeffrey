@@ -1,55 +1,66 @@
 import { useRef, useCallback } from 'react';
 
-type SoundType = 'click' | 'hover';
+type UseClickSoundOptions = number | { click?: number };
 
 interface SoundRefs {
   click: HTMLAudioElement | null;
-  hover: HTMLAudioElement | null;
 }
 
 // Audio paths for UI sounds
 const SOUND_PATHS = {
   click: '/assets/audio/sound_click.mp3',
-  hover: '/assets/audio/sound_hover.wav',
 } as const;
 
-export function useClickSound(volume: number = 0.45) {
+const clampVolume = (volume: number): number => Math.min(Math.max(volume, 0), 1);
+
+export function useClickSound(options: UseClickSoundOptions = 0.45) {
   const audioRefs = useRef<SoundRefs>({
     click: null,
-    hover: null,
   });
+
+  const getVolumeForType = useCallback(
+    (): number => {
+      if (typeof options === 'number') {
+        return clampVolume(options);
+      }
+
+      const fallbackVolume = 0.45;
+      const volume = options.click ?? fallbackVolume;
+      return clampVolume(volume);
+    },
+    [options]
+  );
 
   // Lazy audio initialization
   const initializeAudio = useCallback(
-    (type: SoundType) => {
-      if (!audioRefs.current[type]) {
-        audioRefs.current[type] = new Audio(SOUND_PATHS[type]);
-        audioRefs.current[type]!.volume = volume;
-        audioRefs.current[type]!.preload = 'auto';
+    () => {
+      if (!audioRefs.current.click) {
+        audioRefs.current.click = new Audio(SOUND_PATHS.click);
+        audioRefs.current.click.volume = getVolumeForType();
+        audioRefs.current.click.preload = 'auto';
       }
     },
-    [volume]
+    [getVolumeForType]
   );
 
   // Play sound with autoplay policy handling
   const playSound = useCallback(
-    (type: SoundType = 'click') => {
-      initializeAudio(type);
+    () => {
+      initializeAudio();
 
-      const audio = audioRefs.current[type];
+      const audio = audioRefs.current.click;
       if (audio) {
+        audio.volume = getVolumeForType();
         audio.currentTime = 0;
         audio.play().catch(() => {
           // Silently handle autoplay policy restrictions
         });
       }
     },
-    [initializeAudio]
+    [getVolumeForType, initializeAudio]
   );
 
-  // Convenience methods
-  const playClickSound = useCallback(() => playSound('click'), [playSound]);
-  const playHoverSound = useCallback(() => playSound('hover'), [playSound]);
+  const playClickSound = useCallback(() => playSound(), [playSound]);
 
-  return { playClickSound, playHoverSound, playSound };
+  return { playClickSound, playSound };
 }

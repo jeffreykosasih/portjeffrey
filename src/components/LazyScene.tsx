@@ -59,9 +59,10 @@ interface LazySceneProps {
   onNavigateToConnect?: () => void;
   onNavigateToPage?: (page: string) => void;
   onPlayClickSound?: () => void;
-  showExploreNotification?: boolean;
   isBurgerMenuOpen?: boolean;
   triggerInitialZoom?: boolean;
+  showHomeButtons?: boolean;
+  homeButtonsIntroDelayMs?: number;
 }
 
 // Simple loading fallback to prevent layout shift
@@ -105,9 +106,10 @@ export default function LazyScene({
   onNavigateToConnect,
   onNavigateToPage,
   onPlayClickSound,
-  showExploreNotification,
   isBurgerMenuOpen,
   triggerInitialZoom,
+  showHomeButtons,
+  homeButtonsIntroDelayMs,
 }: LazySceneProps): React.JSX.Element {
   return (
     <SceneErrorBoundary>
@@ -120,9 +122,10 @@ export default function LazyScene({
           onNavigateToConnect={onNavigateToConnect}
           onNavigateToPage={onNavigateToPage}
           onPlayClickSound={onPlayClickSound}
-          showExploreNotification={showExploreNotification}
           isBurgerMenuOpen={isBurgerMenuOpen}
           triggerInitialZoom={triggerInitialZoom}
+          showHomeButtons={showHomeButtons}
+          homeButtonsIntroDelayMs={homeButtonsIntroDelayMs}
         />
       </Suspense>
     </SceneErrorBoundary>

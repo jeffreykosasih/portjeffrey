@@ -14,7 +14,6 @@ import PortfolioPage from './components/PortfolioPage';
 import ConnectPage from './components/ConnectPage';
 import AppLoadingScreen from './components/AppLoadingScreen';
 import ClickSpark from './components/ClickSpark';
-import ExploreNotification from './components/ExploreNotification';
 
 import OceanAudio from './components/OceanAudio';
 import useDeviceDetection from './hooks/useDeviceDetection';
@@ -29,11 +28,10 @@ const MemoizedThemeToggle = React.memo(ThemeToggle);
 const MemoizedBurgerMenu = React.memo(BurgerMenu);
 const MemoizedCreditsButton = React.memo(CreditsButton);
 const MemoizedCreditsPopup = React.memo(CreditsPopup);
-const MemoizedExploreNotification = React.memo(ExploreNotification);
 
 function App(): React.JSX.Element {
   const deviceInfo = useDeviceDetection();
-  const { playClickSound, playHoverSound } = useClickSound(5.45);
+  const { playClickSound } = useClickSound(0.5);
 
   const getInitialTheme = (): boolean => {
     const currentHour = new Date().getHours();
@@ -58,7 +56,7 @@ function App(): React.JSX.Element {
     useState<boolean>(false);
   const [isCreditsPopupVisible, setIsCreditsPopupVisible] =
     useState<boolean>(false);
-  const [showExploreNotification, setShowExploreNotification] =
+  const [shouldDelayHomeButtonsOnce, setShouldDelayHomeButtonsOnce] =
     useState<boolean>(false);
   const [burgerMenuSlideDirection, setBurgerMenuSlideDirection] = useState<
     'left' | 'right'
@@ -75,7 +73,7 @@ function App(): React.JSX.Element {
 
   const openPage = (pageName: PageName): void => {
     setShouldAnimatePageText(true);
-    setActivePage(pageName);
+    setActivePage(pageName === 'home' ? null : pageName);
   };
 
   const closePage = (): void => {
@@ -96,26 +94,30 @@ function App(): React.JSX.Element {
 
   const handleLoadingComplete = (): void => {
     setShowMainApp(true);
+    setShouldDelayHomeButtonsOnce(false);
     setTimeout(() => {
       setIsLoading(false);
-      // Show notification after camera zoom completes (1.7 seconds + small buffer)
-      setTimeout(() => {
-        setShowExploreNotification(true);
-      }, 2500); // Wait for camera zoom to complete (1.7s) + 0.8s buffer
     }, 100);
   };
 
   const handleExploreClick = (): void => {
     setShowMainApp(true);
+    setShouldDelayHomeButtonsOnce(true);
     setTriggerInitialZoom(true); // Trigger the zoom animation
     setTimeout(() => {
       setIsLoading(false);
-      // Show notification after camera zoom completes (1.7 seconds + small buffer)
-      setTimeout(() => {
-        setShowExploreNotification(true);
-      }, 2500); // Wait for camera zoom to complete (1.7s) + 0.8s buffer
     }, 100);
   };
+
+  useEffect(() => {
+    if (!shouldDelayHomeButtonsOnce) return;
+
+    const timer = window.setTimeout(() => {
+      setShouldDelayHomeButtonsOnce(false);
+    }, 3200);
+
+    return () => window.clearTimeout(timer);
+  }, [shouldDelayHomeButtonsOnce]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -285,11 +287,7 @@ function App(): React.JSX.Element {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
-                style={{
-                  ...jefriTextStyles,
-                  filter: showExploreNotification ? 'blur(2px)' : 'none',
-                  transition: 'filter 0.3s ease-in-out',
-                }}
+                style={jefriTextStyles}
               >
                 Jefri
               </motion.div>
@@ -302,9 +300,14 @@ function App(): React.JSX.Element {
                 onNavigateToConnect={() => openPage('connect')}
                 onNavigateToPage={(page: string) => openPage(page as PageName)}
                 onPlayClickSound={playClickSound}
-                showExploreNotification={showExploreNotification}
                 isBurgerMenuOpen={isBurgerMenuOpen}
                 triggerInitialZoom={triggerInitialZoom}
+                showHomeButtons={
+                  activePage === null &&
+                  !isBurgerMenuOpen &&
+                  !isCreditsPopupVisible
+                }
+                homeButtonsIntroDelayMs={shouldDelayHomeButtonsOnce ? 3000 : 0}
               />
 
               <div
@@ -315,8 +318,6 @@ function App(): React.JSX.Element {
                   width: '100%',
                   height: '100%',
                   pointerEvents: 'none', // Allow clicks to pass through to 3D scene
-                  filter: showExploreNotification ? 'blur(2px)' : 'none',
-                  transition: 'filter 0.3s ease-in-out',
                 }}
               >
                 <motion.div
@@ -333,7 +334,6 @@ function App(): React.JSX.Element {
                     }}
                     isHidden={isThemeToggleHidden}
                     deviceInfo={deviceInfo}
-                    onPlayHoverSound={playHoverSound}
                   />
                 </motion.div>
 
@@ -371,7 +371,6 @@ function App(): React.JSX.Element {
                     shouldAnimate={shouldAnimateBurgerMenu}
                     deviceInfo={deviceInfo}
                     onPlayClickSound={playClickSound}
-                    onPlayHoverSound={playHoverSound}
                     slideDirection={burgerMenuSlideDirection}
                   />
                 </motion.div>
@@ -425,14 +424,6 @@ function App(): React.JSX.Element {
         </motion.div>
       )}
 
-      {/* Explore Notification - Outside main app to avoid blur effects */}
-      <MemoizedExploreNotification
-        isVisible={showExploreNotification}
-        onHide={() => setShowExploreNotification(false)}
-        isDarkMode={isDarkMode}
-        deviceInfo={deviceInfo}
-      />
-
       {/* Loading Screen - Overlaid on top */}
       <AnimatePresence>
         {isLoading && (
@@ -463,7 +454,7 @@ function App(): React.JSX.Element {
       {/* Performance monitoring */}
 
       {/* Ocean background audio - starts after loading screen */}
-      <OceanAudio isActive={showMainApp && !isLoading} volume={5.225} />
+      <OceanAudio isActive={showMainApp && !isLoading} volume={0.5} />
     </div>
   );
 }

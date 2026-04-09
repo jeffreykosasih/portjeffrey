@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
 } from 'react';
 import { Canvas, useFrame, ThreeEvent, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
@@ -19,9 +20,10 @@ interface SceneProps {
   onNavigateToConnect?: () => void;
   onNavigateToPage?: (page: string) => void;
   onPlayClickSound?: () => void;
-  showExploreNotification?: boolean;
   isBurgerMenuOpen?: boolean;
   triggerInitialZoom?: boolean;
+  showHomeButtons?: boolean;
+  homeButtonsIntroDelayMs?: number;
 }
 
 // ============================================
@@ -34,6 +36,7 @@ interface InteractiveObjectProps {
   boundingBox?: [number, number, number];
   position?: [number, number, number];
   rotation?: [number, number, number];
+  externalHovered?: boolean;
 }
 
 // Component to apply brightness effect on hover
@@ -116,6 +119,7 @@ function InteractiveObject({
   position = [0, 0, 0],
   rotation,
   isDarkMode,
+  externalHovered = false,
 }: InteractiveObjectProps & { isDarkMode?: boolean }) {
   const timeoutRef = useRef<number | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -163,6 +167,11 @@ function InteractiveObject({
       </mesh>
 
       <group ref={objectRef}>{children}</group>
+      <ObjectBrightness
+        object={objectRef.current}
+        isHovered={isHovered || externalHovered}
+        isDarkMode={isDarkMode}
+      />
     </group>
   );
 }
@@ -763,15 +772,19 @@ function SimpleTwoChairs({ isDarkMode }: { isDarkMode: boolean }) {
     );
   }
 
-  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    // Store original color if not already stored
-    if (!material.userData) material.userData = {};
-    if (isDarkMode) {
-      material.color.multiplyScalar(0.1);
-    } else {
-      material.color.multiplyScalar(2);
-    }
-  });
+  const clonedScene = useMemo(
+    () =>
+      processSceneNode(scene, isDarkMode, (node, material) => {
+        // Store original color if not already stored
+        if (!material.userData) material.userData = {};
+        if (isDarkMode) {
+          material.color.multiplyScalar(0.1);
+        } else {
+          material.color.multiplyScalar(2);
+        }
+      }),
+    [scene, isDarkMode]
+  );
 
   if (!clonedScene) {
     return (
@@ -816,40 +829,44 @@ function SimpleHouse({ isDarkMode }: { isDarkMode: boolean }) {
     );
   }
 
-  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    // Store original color if not already stored
-    if (!material.userData) material.userData = {};
-    if (!material.userData.originalColor) {
-      const brightness = material.color.r + material.color.g + material.color.b;
-      const isOverBright =
-        brightness > 2.8 ||
-        (material.color.r > 0.95 &&
-          material.color.g > 0.95 &&
-          material.color.b > 0.95);
+  const clonedScene = useMemo(
+    () =>
+      processSceneNode(scene, isDarkMode, (node, material) => {
+        // Store original color if not already stored
+        if (!material.userData) material.userData = {};
+        if (!material.userData.originalColor) {
+          const brightness = material.color.r + material.color.g + material.color.b;
+          const isOverBright =
+            brightness > 2.8 ||
+            (material.color.r > 0.95 &&
+              material.color.g > 0.95 &&
+              material.color.b > 0.95);
 
-      material.userData.originalColor = isOverBright
-        ? { r: 0.5, g: 0.3, b: 0.2 } // Fallback color for overbright materials
-        : {
-            r: material.color.r,
-            g: material.color.g,
-            b: material.color.b,
-          };
-    }
+          material.userData.originalColor = isOverBright
+            ? { r: 0.5, g: 0.3, b: 0.2 } // Fallback color for overbright materials
+            : {
+                r: material.color.r,
+                g: material.color.g,
+                b: material.color.b,
+              };
+        }
 
-    const { r, g, b } = material.userData.originalColor;
-    material.color.setRGB(r, g, b);
+        const { r, g, b } = material.userData.originalColor;
+        material.color.setRGB(r, g, b);
 
-    if (isDarkMode) {
-      material.color.multiplyScalar(0.125);
-    } else {
-      material.color.multiplyScalar(2.6);
-    }
+        if (isDarkMode) {
+          material.color.multiplyScalar(0.125);
+        } else {
+          material.color.multiplyScalar(2.6);
+        }
 
-    // Set material properties for house materials
-    if ('roughness' in material) material.roughness = 0.7;
-    if ('metalness' in material) material.metalness = 0.1;
-    material.needsUpdate = true;
-  });
+        // Set material properties for house materials
+        if ('roughness' in material) material.roughness = 0.7;
+        if ('metalness' in material) material.metalness = 0.1;
+        material.needsUpdate = true;
+      }),
+    [scene, isDarkMode]
+  );
 
   if (!clonedScene) {
     return (
@@ -895,17 +912,21 @@ function SimpleStoneHead({ isDarkMode }: { isDarkMode: boolean }) {
     );
   }
 
-  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    // Store original color if not already stored
-    if (!material.userData) material.userData = {};
+  const clonedScene = useMemo(
+    () =>
+      processSceneNode(scene, isDarkMode, (node, material) => {
+        // Store original color if not already stored
+        if (!material.userData) material.userData = {};
 
-    // Apply high contrast settings for stone head
-    if (isDarkMode) {
-      material.color.multiplyScalar(0.3);
-    } else {
-      material.color.multiplyScalar(0.75);
-    }
-  });
+        // Apply high contrast settings for stone head
+        if (isDarkMode) {
+          material.color.multiplyScalar(0.3);
+        } else {
+          material.color.multiplyScalar(0.75);
+        }
+      }),
+    [scene, isDarkMode]
+  );
 
   if (!clonedScene) {
     return (
@@ -950,15 +971,19 @@ function SimpleSurfboard({ isDarkMode }: { isDarkMode: boolean }) {
     );
   }
 
-  const clonedScene = processSceneNode(scene, isDarkMode, (node, material) => {
-    if (!material.userData) material.userData = {};
+  const clonedScene = useMemo(
+    () =>
+      processSceneNode(scene, isDarkMode, (node, material) => {
+        if (!material.userData) material.userData = {};
 
-    if (isDarkMode) {
-      material.color.multiplyScalar(0.15);
-    } else {
-      material.color.multiplyScalar(4);
-    }
-  });
+        if (isDarkMode) {
+          material.color.multiplyScalar(0.15);
+        } else {
+          material.color.multiplyScalar(4);
+        }
+      }),
+    [scene, isDarkMode]
+  );
 
   if (!clonedScene) {
     return (
@@ -1390,22 +1415,20 @@ function SceneComponent({
   onNavigateToConnect,
   onNavigateToPage,
   onPlayClickSound,
-  showExploreNotification,
   isBurgerMenuOpen,
   triggerInitialZoom,
+  showHomeButtons = true,
+  homeButtonsIntroDelayMs = 0,
 }: SceneProps) {
   const [sceneLoaded, setSceneLoaded] = useState(false);
-  const [hoveredObject, setHoveredObject] = useState<string | null>(null);
-  const [hoveredTwoChairs, setHoveredTwoChairs] = useState(false);
-  const [hoveredHouse, setHoveredHouse] = useState(false);
-  const [hoveredStoneHead, setHoveredStoneHead] = useState(false);
-  const [hoveredSurfboard, setHoveredSurfboard] = useState(false);
-  const [currentPopup, setCurrentPopup] = useState<
-    'twochairs' | 'house' | 'stonehead' | 'surfboard' | null
-  >(null);
+  const [hoveredSceneObject, setHoveredSceneObject] = useState<string | null>(null);
+  const [hoveredButtonObject, setHoveredButtonObject] = useState<string | null>(
+    null
+  );
   const [objectScreenPositions, setObjectScreenPositions] = useState<
     Record<string, [number, number]>
   >({});
+  const activeHoveredObject = hoveredButtonObject || hoveredSceneObject;
 
   useEffect(() => {
     const timer = setTimeout(() => setSceneLoaded(true), 300);
@@ -1413,10 +1436,10 @@ function SceneComponent({
   }, []);
 
   useEffect(() => {
-    if (!hoveredObject) {
+    if (!activeHoveredObject) {
       document.body.style.cursor = 'default';
     }
-  }, [hoveredObject]);
+  }, [activeHoveredObject]);
 
   const handleNavigation = useCallback(
     (page: string) => {
@@ -1432,34 +1455,16 @@ function SceneComponent({
     [onNavigateToPage, onNavigateToConnect, onPlayClickSound]
   );
 
-  const createHoverHandler = useCallback(
-    (objectName: string, setHovered: (value: boolean) => void) => {
-      return (hovered: boolean) => {
-        setHoveredObject(hovered ? objectName : null);
-        setHovered(hovered);
-        setCurrentPopup(
-          hovered
-            ? (objectName as 'twochairs' | 'house' | 'stonehead' | 'surfboard')
-            : null
-        );
-      };
-    },
-    []
-  );
+  const createHoverHandler = useCallback((objectName: string) => {
+    return (hovered: boolean) => {
+      setHoveredSceneObject(hovered ? objectName : null);
+    };
+  }, []);
 
-  const handleTwoChairsHover = createHoverHandler(
-    'twochairs',
-    setHoveredTwoChairs
-  );
-  const handleHouseHover = createHoverHandler('house', setHoveredHouse);
-  const handleStoneHeadHover = createHoverHandler(
-    'stonehead',
-    setHoveredStoneHead
-  );
-  const handleSurfboardHover = createHoverHandler(
-    'surfboard',
-    setHoveredSurfboard
-  );
+  const handleTwoChairsHover = createHoverHandler('twochairs');
+  const handleHouseHover = createHoverHandler('house');
+  const handleStoneHeadHover = createHoverHandler('stonehead');
+  const handleSurfboardHover = createHoverHandler('surfboard');
 
   // Helper function to get responsive bounding boxes for better mobile interaction
   const getBoundingBox = (
@@ -1495,12 +1500,13 @@ function SceneComponent({
 
       {/* Object Popup Menu */}
       <ObjectPopupMenu
-        objectType={currentPopup}
         isDarkMode={isDarkMode}
         deviceInfo={deviceInfo}
-        objectPosition={
-          currentPopup ? objectScreenPositions[currentPopup] : undefined
-        }
+        objectPositions={objectScreenPositions}
+        onNavigate={handleNavigation}
+        onHoverObject={setHoveredButtonObject}
+        isVisible={showHomeButtons}
+        introDelayMs={homeButtonsIntroDelayMs}
       />
 
       {/* Reduce render load while menu is open */}
@@ -1513,9 +1519,6 @@ function SceneComponent({
           height: '100%',
           zIndex: 1,
           background: 'transparent',
-          filter:
-            showExploreNotification && !isBurgerMenuOpen ? 'blur(2px)' : 'none',
-          transition: 'filter 0.3s ease-in-out',
         }}
         frameloop='always'
         dpr={(() => {
@@ -1536,12 +1539,7 @@ function SceneComponent({
         onPointerMissed={() => {
           setTimeout(() => {
             document.body.style.cursor = 'default';
-            setHoveredObject(null);
-            setHoveredTwoChairs(false);
-            setHoveredHouse(false);
-            setHoveredStoneHead(false);
-            setHoveredSurfboard(false);
-            setCurrentPopup(null);
+            setHoveredSceneObject(null);
           }, 100);
         }}
       >
@@ -1584,6 +1582,7 @@ function SceneComponent({
             boundingBox={getBoundingBox([8, 8, 8])}
             position={[-23, 5, -15]}
             isDarkMode={isDarkMode}
+            externalHovered={activeHoveredObject === 'twochairs'}
           >
             <SimpleTwoChairs
               key={`twochairs-${isDarkMode}`}
@@ -1597,6 +1596,7 @@ function SceneComponent({
             boundingBox={getBoundingBox([20, 15, 15])}
             position={[14, 8, 15]}
             isDarkMode={isDarkMode}
+            externalHovered={activeHoveredObject === 'house'}
           >
             <SimpleHouse key={`house-${isDarkMode}`} isDarkMode={isDarkMode} />
           </InteractiveObject>
@@ -1607,6 +1607,7 @@ function SceneComponent({
             boundingBox={getBoundingBox([8, 10, 15])}
             position={[20, 6, -10]}
             isDarkMode={isDarkMode}
+            externalHovered={activeHoveredObject === 'stonehead'}
           >
             <SimpleStoneHead
               key={`stonehead-${isDarkMode}`}
@@ -1621,6 +1622,7 @@ function SceneComponent({
             rotation={[0, 2, 0]}
             position={[-16, 6, 12]}
             isDarkMode={isDarkMode}
+            externalHovered={activeHoveredObject === 'surfboard'}
           >
             <SimpleSurfboard
               key={`surfboard-${isDarkMode}`}

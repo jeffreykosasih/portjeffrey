@@ -17,7 +17,6 @@ interface BurgerMenuProps {
   shouldAnimate?: boolean;
   deviceInfo?: DeviceInfo;
   onPlayClickSound?: () => void;
-  onPlayHoverSound?: () => void;
   slideDirection?: 'left' | 'right';
 }
 
@@ -104,7 +103,6 @@ export default function BurgerMenu({
   shouldAnimate = true,
   deviceInfo,
   onPlayClickSound,
-  onPlayHoverSound,
   slideDirection = 'right',
 }: BurgerMenuProps): React.JSX.Element {
   // State management
@@ -146,31 +144,25 @@ export default function BurgerMenu({
 
   const toggleMenu = () => {
     const newState = !menuIsOpen;
-    requestAnimationFrame(() => {
-      onPlayHoverSound?.();
-      onHideThemeToggle?.(newState);
-    });
+    onPlayClickSound?.();
+    onHideThemeToggle?.(newState);
     setMenuIsOpen(newState);
   };
 
   const handleNavigation = (page: PageName): void => {
     onPlayClickSound?.();
 
-    if (page !== 'home' && menuIsOpen) {
+    if (page === 'home') {
+      setMenuIsOpen(false);
+      onHideThemeToggle?.(false);
+      setWasOpenBehindPage(false);
+    } else if (menuIsOpen) {
       setWasOpenBehindPage(true);
       setMenuIsOpen(false);
       onHideThemeToggle?.(true);
     } else {
-      if (page === 'home' && wasOpenBehindPage) {
-        setMenuIsOpen(false);
-        setTimeout(() => {
-          setMenuIsOpen(true);
-          onHideThemeToggle?.(true);
-        }, 50);
-      } else {
-        setMenuIsOpen(false);
-        onHideThemeToggle?.(false);
-      }
+      setMenuIsOpen(false);
+      onHideThemeToggle?.(false);
       setWasOpenBehindPage(false);
     }
 

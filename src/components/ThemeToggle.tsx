@@ -15,7 +15,6 @@ interface ThemeToggleProps {
   onToggle: () => void;
   isHidden?: boolean;
   deviceInfo?: DeviceInfo;
-  onPlayHoverSound?: () => void;
 }
 
 export default function ThemeToggle({
@@ -23,7 +22,6 @@ export default function ThemeToggle({
   onToggle,
   isHidden = false,
   deviceInfo,
-  onPlayHoverSound,
 }: ThemeToggleProps): React.JSX.Element | null {
   const [isHovered, setIsHovered] = React.useState(false);
 
@@ -39,7 +37,7 @@ export default function ThemeToggle({
 
   const iconSize = getResponsiveIconSize(deviceInfo);
   const iconColor = getIconColor(isDarkMode, isHovered);
-  const hoverHandlers = createHoverHandlers(setIsHovered, onPlayHoverSound);
+  const hoverHandlers = createHoverHandlers(setIsHovered);
 
   return (
     <button

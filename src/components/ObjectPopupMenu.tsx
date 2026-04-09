@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -8,15 +8,21 @@ import {
   faCogs,
 } from '@fortawesome/free-solid-svg-icons';
 
+type ObjectType = 'twochairs' | 'house' | 'stonehead' | 'surfboard';
+type PageName = 'profile' | 'skillset' | 'portfolio' | 'connect';
+
 interface ObjectPopupMenuProps {
-  objectType: 'twochairs' | 'house' | 'stonehead' | 'surfboard' | null;
   isDarkMode: boolean;
   deviceInfo?: any;
-  objectPosition?: [number, number]; // 2D screen position
+  objectPositions: Partial<Record<ObjectType, [number, number]>>;
+  onNavigate?: (page: PageName) => void;
+  onHoverObject?: (objectType: ObjectType | null) => void;
+  isVisible?: boolean;
+  introDelayMs?: number;
 }
 
 // Unified positioning system for consistent popup placement
-const getPopupPosition = (objectType: string, isMobile: boolean) => {
+const getPopupPosition = (objectType: ObjectType, isMobile: boolean) => {
   // Base offset distances - consistent across all objects
   const baseOffset = {
     mobile: { x: 60, y: 70 },
@@ -43,133 +49,184 @@ const getPopupPosition = (objectType: string, isMobile: boolean) => {
 };
 
 const getObjectConfig = (
-  objectType: string,
+  objectType: ObjectType,
   isDarkMode: boolean,
   isMobile: boolean
 ) => {
-  // Use green colors - adjusts for light/dark mode
-  const greenColor = isDarkMode ? '#0d1a12' : '#2d5a3d'; // Much darker green for dark mode
-  const shadowColor = isDarkMode ? '#050a07' : '#1a3424'; // Even darker green for shadows
-
   // Get unified position for this object
   const position = getPopupPosition(objectType, isMobile);
 
   const configs = {
     twochairs: {
       title: 'Connect',
+      page: 'connect' as PageName,
       icon: faEnvelope,
-      backgroundColor: greenColor,
-      shadowColor: shadowColor,
       position: { left: -50, top: -200 },
     },
     house: {
       title: 'Portfolio',
+      page: 'portfolio' as PageName,
       icon: faBriefcase,
-      backgroundColor: greenColor,
-      shadowColor: shadowColor,
       position: { left: position.x, top: -250 },
     },
     stonehead: {
       title: 'Profile',
+      page: 'profile' as PageName,
       icon: faUser,
-      backgroundColor: greenColor,
-      shadowColor: shadowColor,
       position: { left: -75, top: -225 },
     },
     surfboard: {
       title: 'Skillset',
+      page: 'skillset' as PageName,
       icon: faCogs,
-      backgroundColor: greenColor,
-      shadowColor: shadowColor,
       position: { left: -80, top: -150 },
     },
   };
 
-  return configs[objectType as keyof typeof configs];
+  const theme = isDarkMode
+    ? {
+        baseBackground: 'rgba(28, 45, 78, 0.9)',
+        hoverBackground: '#ffffff',
+        textColor: '#f8fbff',
+        hoverTextColor: '#162542',
+        shadowColor: 'rgba(3, 10, 22, 0.45)',
+      }
+    : {
+        baseBackground: 'rgba(0, 94, 128, 0.9)',
+        hoverBackground: '#ffffff',
+        textColor: '#ffffff',
+        hoverTextColor: '#005E80',
+        shadowColor: 'rgba(0, 94, 128, 0.18)',
+      };
+
+  return {
+    ...configs[objectType],
+    ...theme,
+  };
 };
 
 const ObjectPopupMenu: React.FC<ObjectPopupMenuProps> = ({
-  objectType,
   isDarkMode,
   deviceInfo,
-  objectPosition,
+  objectPositions,
+  onNavigate,
+  onHoverObject,
+  isVisible = true,
+  introDelayMs = 0,
 }) => {
-  if (!objectType || !objectPosition) return null;
-
   const isMobile = deviceInfo?.isMobile || deviceInfo?.isLandscapeMobile;
-  const config = getObjectConfig(objectType, isDarkMode, isMobile);
-  if (!config) return null;
+  const [hoveredButton, setHoveredButton] = useState<ObjectType | null>(null);
+  const [shouldRenderButtons, setShouldRenderButtons] = useState(false);
+  const buttonOrder: ObjectType[] = ['stonehead', 'house', 'surfboard', 'twochairs'];
 
-  const popupStyle = {
-    position: 'fixed' as const,
-    left: objectPosition[0] + config.position.left,
-    top: objectPosition[1] + config.position.top,
-    transform: 'none',
-    zIndex: 9999,
-    pointerEvents: 'none' as const,
-  };
+  useEffect(() => {
+    if (!isVisible) {
+      setHoveredButton(null);
+      onHoverObject?.(null);
+      setShouldRenderButtons(false);
+      return;
+    }
+
+    if (introDelayMs <= 0) {
+      setShouldRenderButtons(true);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShouldRenderButtons(true);
+    }, introDelayMs);
+
+    return () => window.clearTimeout(timer);
+  }, [introDelayMs, isVisible, onHoverObject]);
 
   return (
-    <AnimatePresence mode='wait'>
-      <motion.div
-        key={`popup-${objectType}`}
-        style={popupStyle}
-        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 10 }}
-        transition={{
-          duration: 0.3,
-          ease: 'easeOut',
-          exit: { duration: 0.2, ease: 'easeIn' },
-        }}
-      >
-        <div
-          style={{
-            background: config.backgroundColor,
-            borderRadius: '16px',
-            padding: isMobile ? '12px 16px' : '14px 20px',
-            boxShadow: `0 8px 32px ${config.shadowColor}40, 0 4px 16px ${config.shadowColor}30`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: isMobile ? '10px' : '12px',
-            minWidth: 'fit-content',
-            border: `2px solid ${config.shadowColor}60`,
-            backdropFilter: 'blur(12px)',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <FontAwesomeIcon
-              icon={config.icon}
-              style={{
-                color: 'white',
-                fontSize: isMobile ? '18px' : '20px',
-                filter: `drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))`,
-              }}
-            />
-          </div>
+    <AnimatePresence>
+      {shouldRenderButtons &&
+        buttonOrder.map((objectType, index) => {
+          const objectPosition = objectPositions[objectType];
+          if (!objectPosition) return null;
 
-          <h3
-            style={{
-              margin: 0,
-              fontFamily: 'Lato, sans-serif',
-              fontWeight: '700',
-              fontSize: isMobile ? '16px' : '18px',
-              color: 'white',
-              lineHeight: '1.2',
-              textShadow: `0 2px 6px rgba(0, 0, 0, 0.5)`,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {config.title}
-          </h3>
-        </div>
-      </motion.div>
+          const config = getObjectConfig(objectType, isDarkMode, isMobile);
+          const isHovered = hoveredButton === objectType;
+
+          return (
+            <motion.button
+              key={objectType}
+              type='button'
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97, y: 8 }}
+              transition={{
+                duration: shouldRenderButtons ? 0.22 : 0.16,
+                delay: index * 0.03,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              whileHover={{ y: -4, scale: 1.07 }}
+              whileTap={{ scale: 0.98 }}
+              onMouseEnter={() => {
+                setHoveredButton(objectType);
+                onHoverObject?.(objectType);
+              }}
+              onMouseLeave={() => {
+                setHoveredButton(null);
+                onHoverObject?.(null);
+              }}
+              onClick={() => onNavigate?.(config.page)}
+              style={{
+                position: 'fixed',
+                left: objectPosition[0] + config.position.left,
+                top:
+                  objectPosition[1] +
+                  config.position.top +
+                  (isMobile ? 24 : 0),
+                zIndex: 9999,
+                display: 'flex',
+                alignItems: 'center',
+                gap: isMobile ? '10px' : '12px',
+                minWidth: 'fit-content',
+                padding: isMobile ? '14px 18px' : '16px 22px',
+                borderRadius: '16px',
+                border: 'none',
+                background: isHovered
+                  ? config.hoverBackground
+                  : config.baseBackground,
+                color: isHovered ? config.hoverTextColor : config.textColor,
+                boxShadow: isHovered
+                  ? `0 14px 32px ${config.shadowColor}`
+                  : `0 10px 28px ${config.shadowColor}`,
+                backdropFilter: 'blur(12px)',
+                cursor: 'pointer',
+                pointerEvents: 'auto',
+                transition:
+                  'background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease',
+              }}
+            >
+              <FontAwesomeIcon
+                icon={config.icon}
+                style={{
+                  color: isHovered ? config.hoverTextColor : config.textColor,
+                  fontSize: isMobile ? '18px' : '20px',
+                  filter: isDarkMode
+                    ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.28))'
+                    : 'none',
+                }}
+              />
+
+              <span
+                style={{
+                  margin: 0,
+                  fontFamily: 'Lato, sans-serif',
+                  fontWeight: 700,
+                  fontSize: isMobile ? '16px' : '18px',
+                  lineHeight: '1.2',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {config.title}
+              </span>
+            </motion.button>
+          );
+        })}
     </AnimatePresence>
   );
 };
