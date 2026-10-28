@@ -1723,6 +1723,6 @@ useGLTF.preload('/models/object_cloud1.glb');
 useGLTF.preload('/models/object_cloud2.glb');
 useGLTF.preload('/models/object_cloud3.glb');
 useGLTF.preload('/models/object_cloud4.glb');
-useGLTF.preload('/models/object_ocean_waves.glb');
+// object_ocean_waves.glb is not preloaded: SimpleOceanWaves only renders when showSea is on, and loads it then
 
 export default React.memo(SceneComponent);
