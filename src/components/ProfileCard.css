@@ -45,8 +45,8 @@
   border-radius: var(--radius-2xl); /* 24px using CSS var */
   overflow: hidden;
   background: var(--inner-gradient);
-  backdrop-filter: blur(1.25rem);
   -webkit-backdrop-filter: blur(1.25rem);
+  backdrop-filter: blur(1.25rem);
 }
 
 .pc-shine {

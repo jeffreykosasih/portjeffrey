@@ -18,17 +18,27 @@ export default defineConfig({
     assetsDir: 'assets',
     // PERFORMANCE FIX: Optimize build settings
     target: 'esnext',
-    minify: 'terser',
-    rollupOptions: {
+    minify: 'oxc', // Smaller first-load JS than terser here
+    // Lightning CSS rewrites CSS for these browsers. With 'esnext' it drops
+    // -webkit- fallbacks and switches media queries to range syntax.
+    cssTarget: ['chrome87', 'edge88', 'firefox78', 'safari14', 'ios14'],
+    rolldownOptions: {
       output: {
         // PERFORMANCE FIX: Manual chunking to reduce bundle size
-        manualChunks: {
-          // Separate Three.js and React Three Fiber into their own chunk
-          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-          // Separate Framer Motion into its own chunk
-          'animation-vendor': ['framer-motion', 'gsap'],
-          // Separate UI libraries
-          'ui-vendor': ['react', 'react-dom'],
+        codeSplitting: {
+          groups: [
+            // Separate Three.js and React Three Fiber into their own chunk.
+            // React rides along, as it did under Vite 4 (ui-vendor came out empty).
+            {
+              name: 'three-vendor',
+              test: /[\\/]node_modules[\\/](three|@react-three[\\/](fiber|drei)|react|react-dom)[\\/]/,
+            },
+            // Separate Framer Motion into its own chunk
+            {
+              name: 'animation-vendor',
+              test: /[\\/]node_modules[\\/](framer-motion|gsap)[\\/]/,
+            },
+          ],
         },
       },
     },
@@ -37,7 +47,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(import.meta.dirname, './src'),
     },
   },
   // PERFORMANCE FIX: Optimize dependencies
