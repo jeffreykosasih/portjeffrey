@@ -3,11 +3,15 @@ import React, { useEffect, useRef, useState } from 'react';
 interface OceanAudioProps {
   isActive: boolean; // Should start when main app is shown and loading is complete
   volume?: number;
+  // Checked when a click would start blocked audio, so the click that turns
+  // the sound off doesn't start it.
+  canPlay?: () => boolean;
 }
 
 export default function OceanAudio({
   isActive,
   volume = 0.2,
+  canPlay,
 }: OceanAudioProps): React.JSX.Element | null {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -93,13 +97,15 @@ export default function OceanAudio({
 
           // Try to play on user interaction
           const handleUserInteraction = () => {
-            audio
-              .play()
-              .then(() => {
-                setIsPlaying(true);
-                fadeIn(volume);
-              })
-              .catch(console.error);
+            if (!canPlay || canPlay()) {
+              audio
+                .play()
+                .then(() => {
+                  setIsPlaying(true);
+                  fadeIn(volume);
+                })
+                .catch(console.error);
+            }
 
             // Remove listeners after first interaction
             document.removeEventListener('click', handleUserInteraction);

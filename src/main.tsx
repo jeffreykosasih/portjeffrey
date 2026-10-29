@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css'; // Tailwind CSS
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +8,7 @@ import ThemeToggle from './components/ThemeToggle';
 import BurgerMenu from './components/BurgerMenu';
 import CreditsButton from './components/CreditsButton';
 import CreditsPopup from './components/CreditsPopup';
+import SoundToggle from './components/SoundToggle';
 import ProfilePage from './components/ProfilePage';
 import SkillsetPage from './components/SkillsetPage';
 import PortfolioPage from './components/PortfolioPage';
@@ -28,6 +29,18 @@ const MemoizedThemeToggle = React.memo(ThemeToggle);
 const MemoizedBurgerMenu = React.memo(BurgerMenu);
 const MemoizedCreditsButton = React.memo(CreditsButton);
 const MemoizedCreditsPopup = React.memo(CreditsPopup);
+const MemoizedSoundToggle = React.memo(SoundToggle);
+
+// Remembers whether a visitor turned the wave sound off.
+const WAVE_SOUND_KEY = 'portjeffrey-wave-sound';
+
+const getInitialWaveSound = (): boolean => {
+  try {
+    return localStorage.getItem(WAVE_SOUND_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+};
 
 function App(): React.JSX.Element {
   const deviceInfo = useDeviceDetection();
@@ -69,6 +82,23 @@ function App(): React.JSX.Element {
 
   const toggleCreditsPopup = (): void => {
     setIsCreditsPopupVisible((prev) => !prev);
+  };
+
+  const [isWaveSoundOn, setIsWaveSoundOn] =
+    useState<boolean>(getInitialWaveSound);
+  // Read by OceanAudio during the same click that toggles it, before React
+  // re-renders, so turning the sound off never starts it.
+  const waveSoundOnRef = useRef<boolean>(isWaveSoundOn);
+
+  const toggleWaveSound = (): void => {
+    const next = !waveSoundOnRef.current;
+    waveSoundOnRef.current = next;
+    setIsWaveSoundOn(next);
+    try {
+      localStorage.setItem(WAVE_SOUND_KEY, next ? 'on' : 'off');
+    } catch {
+      // Storage unavailable: the choice lasts for this visit only.
+    }
   };
 
   const openPage = (pageName: PageName): void => {
@@ -357,6 +387,24 @@ function App(): React.JSX.Element {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.95 }}
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  <MemoizedSoundToggle
+                    isDarkMode={isDarkMode}
+                    isSoundOn={isWaveSoundOn}
+                    onToggle={() => {
+                      playClickSound();
+                      toggleWaveSound();
+                    }}
+                    isHidden={isCreditsButtonHidden}
+                    deviceInfo={deviceInfo}
+                  />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={{ duration: 0.6, delay: 1.0 }}
                   style={{ pointerEvents: 'auto' }}
                 >
@@ -454,7 +502,11 @@ function App(): React.JSX.Element {
       {/* Performance monitoring */}
 
       {/* Ocean background audio - starts after loading screen */}
-      <OceanAudio isActive={showMainApp && !isLoading} volume={0.5} />
+      <OceanAudio
+        isActive={showMainApp && !isLoading && isWaveSoundOn}
+        canPlay={() => waveSoundOnRef.current}
+        volume={0.5}
+      />
     </div>
   );
 }
